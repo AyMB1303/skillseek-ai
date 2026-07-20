@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+.coverage
+
+# Environnement
+.env
+
+# Node (Sprint 2)
+node_modules/
+.next/
+
+# IDE / OS
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
+
+# Uploads CV (données personnelles - jamais dans Git)
+backend/uploads/
