@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;padding:0;background:#0B1220;font-family:'Inter',sans-serif;color:#E5EAF3;}
+  a{color:#3B82F6;text-decoration:none;} a:hover{color:#22D3EE;}
+  *{box-sizing:border-box;}
+  ::placeholder{color:#8B98B8;opacity:.7;}
+</style>
+</helmet>
+<div style="display:flex; min-height:100vh; background:#0B1220;" data-screen-label="Candidat — Offres">
+  <!-- SIDEBAR CANDIDAT -->
+  <aside style="width:248px; flex-shrink:0; background:#0D1526; border-right:1px solid #1E2A44; display:flex; flex-direction:column; padding:20px 14px; gap:6px; position:sticky; top:0; height:100vh;">
+    <div style="display:flex; align-items:center; gap:10px; padding:6px 10px 22px 10px;">
+      <div style="width:34px; height:34px; border-radius:10px; background:linear-gradient(135deg,#3B82F6,#22D3EE); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0B1220" stroke-width="2.4" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6"></circle><line x1="15" y1="15" x2="20" y2="20"></line></svg>
+      </div>
+      <span style="font-weight:700; font-size:16px; letter-spacing:-0.2px; white-space:nowrap;">SkillSeek <span style="color:#22D3EE;">AI</span></span>
+    </div>
+    <nav style="display:flex; flex-direction:column; gap:4px;">
+      <div style="display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:10px; background:rgba(59,130,246,0.14); color:#E5EAF3; font-weight:600; font-size:14px; border:1px solid rgba(59,130,246,0.25); cursor:pointer;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2" stroke-linecap="round"><rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+        <span>Offres d'emploi</span>
+      </div>
+      <a href="Candidat Mes Candidatures.dc.html" style="display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:10px; color:#8B98B8; font-weight:500; font-size:14px; text-decoration:none;" style-hover="background:#111A2E; color:#E5EAF3;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 3v5h5"></path><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path><line x1="9" y1="13" x2="15" y2="13"></line></svg>
+        <span>Mes candidatures</span>
+      </a>
+      <div style="display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:10px; color:#8B98B8; font-weight:500; font-size:14px; cursor:pointer;" style-hover="background:#111A2E; color:#E5EAF3;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5"></path></svg>
+        <span>Mon profil</span>
+      </div>
+    </nav>
+    <div style="margin-top:auto; border-top:1px solid #1E2A44; padding-top:14px; display:flex; align-items:center; gap:10px; padding-left:6px;">
+      <div style="width:34px; height:34px; border-radius:99px; background:#1E2A44; color:#22D3EE; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0;">AT</div>
+      <div style="min-width:0;">
+        <div style="font-size:13px; font-weight:600; white-space:nowrap;">Amine Tahiri</div>
+        <div style="font-size:11.5px; color:#8B98B8; white-space:nowrap;">Candidat</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div style="flex:1; min-width:0; display:flex; flex-direction:column;">
+    <header style="display:flex; align-items:center; gap:20px; padding:16px 32px; border-bottom:1px solid #1E2A44; background:rgba(11,18,32,0.85); backdrop-filter:blur(8px); position:sticky; top:0; z-index:10;">
+      <div>
+        <h1 style="margin:0; font-size:19px; font-weight:600; letter-spacing:-0.2px;">Offres d'emploi</h1>
+        <div style="font-size:12.5px; color:#8B98B8; margin-top:1px;">{{ nbLabel }}</div>
+      </div>
+      <div style="position:relative; width:38px; height:38px; border-radius:10px; border:1px solid #1E2A44; background:#111A2E; display:flex; align-items:center; justify-content:center; cursor:pointer; margin-left:auto;" style-hover="border-color:#3B82F6;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#E5EAF3" stroke-width="2" stroke-linecap="round"><path d="M18 9a6 6 0 1 0-12 0c0 6-2.5 7.5-2.5 7.5h17S18 15 18 9z"></path><path d="M10 20a2.2 2.2 0 0 0 4 0"></path></svg>
+      </div>
+      <a href="Mon Profil.dc.html" style="display:flex; align-items:center; gap:9px; cursor:pointer; padding:5px 8px 5px 5px; border-radius:10px; text-decoration:none;" style-hover="background:#111A2E;">
+        <div style="width:32px; height:32px; border-radius:99px; background:linear-gradient(135deg,#3B82F6,#22D3EE); color:#0B1220; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700;">AT</div>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8B98B8" stroke-width="2.2" stroke-linecap="round"><path d="M6 9l6 6 6-6"></path></svg>
+      </a>
+    </header>
+
+    <main style="padding:26px 32px 48px; display:flex; flex-direction:column; gap:22px;">
+      <!-- recherche + filtre -->
+      <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+        <div style="flex:1; min-width:260px; max-width:460px; display:flex; align-items:center; gap:10px; background:#111A2E; border:1px solid #1E2A44; border-radius:10px; padding:10px 15px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8B98B8" stroke-width="2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"></circle><line x1="15.5" y1="15.5" x2="21" y2="21"></line></svg>
+          <input type="text" value="{{ recherche }}" onInput="{{ onRecherche }}" placeholder="Rechercher un poste, une entreprise…" style="flex:1; background:transparent; border:none; outline:none; color:#E5EAF3; font-family:'Inter',sans-serif; font-size:13.5px;">
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <sc-for list="{{ filtres }}" as="f" hint-placeholder-count="4">
+            <button onClick="{{ f.set }}" style="{{ f.style }}">{{ f.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+
+      <!-- grille de cartes -->
+      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px;">
+        <sc-for list="{{ offres }}" as="o" hint-placeholder-count="6">
+          <div style="background:#111A2E; border:1px solid #1E2A44; border-radius:12px; padding:20px; display:flex; flex-direction:column; gap:14px; transition:border-color 150ms, transform 150ms;" style-hover="border-color:#3B82F6; transform:translateY(-2px);">
+            <div style="display:flex; align-items:flex-start; gap:12px;">
+              <div style="width:42px; height:42px; border-radius:10px; background:{{ o.logoBg }}; color:#0B1220; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:700; flex-shrink:0;">{{ o.logoTxt }}</div>
+              <div style="flex:1; min-width:0;">
+                <div style="font-size:15px; font-weight:600; line-height:1.3; letter-spacing:-0.2px;">{{ o.titre }}</div>
+                <div style="font-size:12.5px; color:#8B98B8; margin-top:3px;">{{ o.entreprise }} · {{ o.lieu }}</div>
+              </div>
+            </div>
+            <div style="font-size:13px; color:#8B98B8; line-height:1.55; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">{{ o.desc }}</div>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+              <sc-for list="{{ o.skills }}" as="s" hint-placeholder-count="3">
+                <span style="background:#0D1526; border:1px solid #1E2A44; color:#22D3EE; font-size:11.5px; border-radius:6px; padding:3px 9px;">{{ s }}</span>
+              </sc-for>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px; margin-top:2px;">
+              <span style="display:inline-flex; align-items:center; gap:5px; background:rgba(139,152,184,0.08); border:1px solid #1E2A44; color:#8B98B8; font-size:11.5px; border-radius:6px; padding:3px 9px;">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>{{ o.exp }}
+              </span>
+            </div>
+            <div style="margin-top:auto; padding-top:12px; border-top:1px solid #17233c; display:flex; align-items:center; justify-content:space-between;">
+              <span style="font-size:11.5px; color:#8B98B8;">{{ o.date }}</span>
+              <a href="Candidat Detail Offre.dc.html" style="display:inline-flex; align-items:center; gap:6px; background:#3B82F6; color:#fff; border-radius:9px; padding:7px 14px; font-size:12.5px; font-weight:600; text-decoration:none;" style-hover="background:#2f6fdb; color:#fff;">Voir l'offre →</a>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+      <sc-if value="{{ vide }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; flex-direction:column; align-items:center; text-align:center; gap:14px; padding:56px 24px;">
+          <div style="width:56px; height:56px; border-radius:15px; background:#111A2E; border:1px solid #1E2A44; display:flex; align-items:center; justify-content:center;">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#8B98B8" stroke-width="1.8" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"></circle><line x1="15.5" y1="15.5" x2="21" y2="21"></line></svg>
+          </div>
+          <div><div style="font-size:14.5px; font-weight:600;">Aucune offre ne correspond</div><div style="font-size:12.5px; color:#8B98B8; margin-top:5px;">Essayez d'autres mots-clés ou réinitialisez les filtres.</div></div>
+          <button onClick="{{ reinit }}" style="background:#111A2E; color:#22D3EE; border:1px solid #1E2A44; border-radius:9px; padding:9px 16px; font-family:'Inter',sans-serif; font-size:12.5px; font-weight:600; cursor:pointer;" style-hover="border-color:#22D3EE;">Réinitialiser</button>
+        </div>
+      </sc-if>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:960}}">
+class Component extends DCLogic {
+  state = { filtre: 'Toutes', recherche: '' };
+  renderVals() {
+    const filtreLabels = ['Toutes', 'Python', 'React', 'DevOps', 'Data'];
+    const btn = (a) => a
+      ? 'background:#3B82F6; color:#fff; border:1px solid #3B82F6; border-radius:9px; padding:9px 15px; font-family:Inter,sans-serif; font-size:12.5px; font-weight:600; cursor:pointer;'
+      : 'background:#111A2E; color:#8B98B8; border:1px solid #1E2A44; border-radius:9px; padding:9px 15px; font-family:Inter,sans-serif; font-size:12.5px; font-weight:500; cursor:pointer;';
+    const offres = [
+      { titre:'Développeur Full-Stack React', entreprise:'Atlas Digital', lieu:'Casablanca', logoTxt:'AD', logoBg:'#22D3EE', desc:'Rejoignez notre équipe produit pour bâtir des applications web performantes avec React, Node et TypeScript.', skills:['React','Node.js','TypeScript'], exp:'3+ ans', date:'Publiée il y a 2 j' },
+      { titre:'Développeur Python Senior', entreprise:'Yellow Tech', lieu:'Rabat', logoTxt:'YT', logoBg:'#3B82F6', desc:'Conception et maintenance de services backend robustes en Python/Django sur une plateforme à fort trafic.', skills:['Python','Django','PostgreSQL'], exp:'5+ ans', date:'Publiée il y a 3 j' },
+      { titre:'Ingénieur DevOps', entreprise:'CloudMaroc', lieu:'Casablanca', logoTxt:'CM', logoBg:'#34D399', desc:'Automatisez nos pipelines CI/CD et gérez notre infrastructure cloud multi-région sur AWS et Kubernetes.', skills:['AWS','Docker','Terraform'], exp:'4+ ans', date:'Publiée il y a 5 j' },
+      { titre:'Data Scientist', entreprise:'InsightLab', lieu:'Marrakech', logoTxt:'IL', logoBg:'#F59E0B', desc:'Développez des modèles prédictifs et des tableaux de bord analytiques à partir de données métier variées.', skills:['Python','TensorFlow','SQL'], exp:'3+ ans', date:'Publiée il y a 6 j' },
+      { titre:'Développeur Mobile Flutter', entreprise:'Atlas Digital', lieu:'Tanger', logoTxt:'AD', logoBg:'#22D3EE', desc:'Créez des applications mobiles multiplateformes fluides et performantes pour nos clients grands comptes.', skills:['Flutter','Dart','Firebase'], exp:'2+ ans', date:'Publiée il y a 1 sem.' },
+      { titre:'Ingénieur QA Automatisation', entreprise:'Yellow Tech', lieu:'Rabat', logoTxt:'YT', logoBg:'#3B82F6', desc:'Garantissez la qualité de nos produits via des suites de tests automatisés et une culture de la fiabilité.', skills:['Selenium','Cypress','CI/CD'], exp:'3+ ans', date:'Publiée il y a 1 sem.' },
+    ];
+    const q = (this.state.recherche || '').toLowerCase().trim();
+    const f = this.state.filtre;
+    const matchFiltre = (o) => {
+      if (f === 'Toutes') return true;
+      if (f === 'DevOps') return /devops/i.test(o.titre) || o.skills.some(s => /aws|docker|terraform|ci\/cd|kubernetes/i.test(s));
+      if (f === 'Data') return /data/i.test(o.titre) || o.skills.some(s => /tensorflow|sql|pandas|data/i.test(s));
+      return o.titre.toLowerCase().includes(f.toLowerCase()) || o.skills.some(s => s.toLowerCase().includes(f.toLowerCase()));
+    };
+    const visibles = offres.filter(o => matchFiltre(o) &&
+      (!q || (o.titre + ' ' + o.entreprise + ' ' + o.lieu).toLowerCase().includes(q)));
+    return {
+      filtres: filtreLabels.map(l => ({ label: l, style: btn(this.state.filtre === l), set: () => this.setState({ filtre: l }) })),
+      offres: visibles,
+      recherche: this.state.recherche,
+      onRecherche: (e) => this.setState({ recherche: e.target.value }),
+      vide: visibles.length === 0,
+      reinit: () => this.setState({ filtre: 'Toutes', recherche: '' }),
+      nbLabel: visibles.length + (visibles.length > 1 ? ' postes ouverts' : ' poste ouvert') + ' correspondant à votre profil',
+    };
+  }
+}
+</script>
+</body>
+</html>

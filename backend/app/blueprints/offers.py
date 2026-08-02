@@ -4,6 +4,7 @@ from flask import Blueprint, jsonify, request
 from ..extensions import db
 from ..middleware.permissions import current_user_required, require_permission
 from ..models.job_offer import JobOffer
+from ..services import notifications as notifs
 
 offers_bp = Blueprint("offers", __name__)
 
@@ -11,9 +12,14 @@ offers_bp = Blueprint("offers", __name__)
 @offers_bp.get("")
 @current_user_required
 def list_offers(current_user):
-    offers = JobOffer.query.filter_by(status="open").order_by(
-        JobOffer.created_at.desc()
-    ).all()
+    """Les candidats ne voient que les offres ouvertes ;
+    les recruteurs et administrateurs voient aussi les offres fermées."""
+    requete = JobOffer.query
+    role = current_user.role.name if current_user.role else None
+    if role not in ("recruiter", "admin"):
+        requete = requete.filter_by(status="open")
+
+    offers = requete.order_by(JobOffer.created_at.desc()).all()
     return jsonify(offers=[o.to_dict() for o in offers])
 
 
@@ -40,6 +46,9 @@ def create_offer(current_user):
         recruiter=current_user,
     )
     db.session.add(offer)
+    db.session.flush()
+    # Suivi d'activite : les administrateurs voient les publications.
+    notifs.offre_publiee(offer)
     db.session.commit()
     return jsonify(offer=offer.to_dict()), 201
 

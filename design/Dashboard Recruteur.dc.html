@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;padding:0;background:#0B1220;font-family:'Inter',sans-serif;color:#E5EAF3;}
+  a{color:#3B82F6;text-decoration:none;} a:hover{color:#22D3EE;}
+  *{box-sizing:border-box;}
+  ::placeholder{color:#8B98B8;opacity:.7;}
+  @keyframes menuPop{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
+</style>
+</helmet>
+<div style="display:flex; min-height:100vh; background:#0B1220;" data-screen-label="Dashboard recruteur">
+  <!-- SIDEBAR -->
+  <aside style="width:{{ largeurSidebar }}; flex-shrink:0; background:#0D1526; border-right:1px solid #1E2A44; display:flex; flex-direction:column; padding:20px 14px; gap:6px; position:sticky; top:0; height:100vh; transition:width 150ms ease;">
+    <div style="display:flex; align-items:center; gap:10px; padding:6px 10px 22px 10px;">
+      <div style="width:34px; height:34px; border-radius:10px; background:linear-gradient(135deg,#3B82F6,#22D3EE); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0B1220" stroke-width="2.4" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6"></circle><line x1="15" y1="15" x2="20" y2="20"></line><path d="M10.5 7.5l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z" fill="#0B1220" stroke="none"></path></svg>
+      </div>
+      <span style="display:{{ afficheLibelles }}; font-weight:700; font-size:16px; letter-spacing:-0.2px; white-space:nowrap;">SkillSeek <span style="color:#22D3EE;">AI</span></span>
+    </div>
+    <nav style="display:flex; flex-direction:column; gap:4px;">
+      <div style="display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:10px; background:rgba(59,130,246,0.14); color:#E5EAF3; font-weight:600; font-size:14px; border:1px solid rgba(59,130,246,0.25); cursor:pointer;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>
+        <span style="display:{{ afficheLibelles }}; white-space:nowrap;">Dashboard</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:10px; color:#8B98B8; font-weight:500; font-size:14px; cursor:pointer; transition:background 150ms,color 150ms;" style-hover="background:#111A2E; color:#E5EAF3;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+        <span style="display:{{ afficheLibelles }}; white-space:nowrap;">Mes offres</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:10px; color:#8B98B8; font-weight:500; font-size:14px; cursor:pointer; transition:background 150ms,color 150ms;" style-hover="background:#111A2E; color:#E5EAF3;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 3v5h5"></path><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path><line x1="9" y1="13" x2="15" y2="13"></line><line x1="9" y1="17" x2="13" y2="17"></line></svg>
+        <span style="display:{{ afficheLibelles }}; white-space:nowrap; flex:1;">Candidatures</span>
+        <span style="display:{{ afficheLibelles }}; background:#3B82F6; color:#fff; font-size:11px; font-weight:600; border-radius:99px; padding:1px 8px;">12</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:10px; color:#8B98B8; font-weight:500; font-size:14px; cursor:pointer; transition:background 150ms,color 150ms;" style-hover="background:#111A2E; color:#E5EAF3;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#22D3EE" stroke-width="2" stroke-linecap="round"><path d="M21 12a8 8 0 0 1-8 8H4l2-3a8 8 0 1 1 15-5z"></path><path d="M12 8l.8 1.9L14.7 11l-1.9.8-.8 1.9-.8-1.9-1.9-.8 1.9-1.1z" fill="#22D3EE" stroke="none"></path></svg>
+        <span style="display:{{ afficheLibelles }}; white-space:nowrap;">Assistant RH</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:10px; color:#8B98B8; font-weight:500; font-size:14px; cursor:pointer; transition:background 150ms,color 150ms;" style-hover="background:#111A2E; color:#E5EAF3;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5"></path></svg>
+        <span style="display:{{ afficheLibelles }}; white-space:nowrap;">Mon profil</span>
+      </div>
+    </nav>
+    <div style="margin-top:auto; border-top:1px solid #1E2A44; padding-top:14px; display:flex; align-items:center; gap:10px; padding-left:6px;">
+      <div style="width:34px; height:34px; border-radius:99px; background:#1E2A44; color:#22D3EE; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0;">SL</div>
+      <div style="display:{{ afficheLibelles }}; min-width:0;">
+        <div style="font-size:13px; font-weight:600; white-space:nowrap;">Sarah Lamrani</div>
+        <div style="font-size:11.5px; color:#8B98B8; white-space:nowrap;">Recruteuse</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div style="flex:1; min-width:0; display:flex; flex-direction:column;">
+    <!-- HEADER -->
+    <header style="display:flex; align-items:center; gap:20px; padding:16px 32px; border-bottom:1px solid #1E2A44; background:rgba(11,18,32,0.85); backdrop-filter:blur(8px); position:sticky; top:0; z-index:10;">
+      <div>
+        <h1 style="margin:0; font-size:19px; font-weight:600; letter-spacing:-0.2px;">Dashboard</h1>
+        <div style="font-size:12.5px; color:#8B98B8; margin-top:1px;">Lundi 20 juillet 2026</div>
+      </div>
+      <div style="flex:1; max-width:420px; margin-left:auto; display:flex; align-items:center; gap:10px; background:#111A2E; border:1px solid #1E2A44; border-radius:10px; padding:9px 14px;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8B98B8" stroke-width="2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"></circle><line x1="15.5" y1="15.5" x2="21" y2="21"></line></svg>
+        <input type="text" value="{{ recherche }}" onInput="{{ onRecherche }}" placeholder="Rechercher un candidat, une offre…" style="background:transparent; border:none; outline:none; color:#E5EAF3; font-family:'Inter',sans-serif; font-size:13.5px; width:100%;">
+        <span style="font-size:11px; color:#8B98B8; border:1px solid #1E2A44; border-radius:6px; padding:1px 6px;">⌘K</span>
+      </div>
+      <div style="position:relative;">
+        <div onClick="{{ toggleNotif }}" style="position:relative; width:38px; height:38px; border-radius:10px; border:1px solid {{ notifBord }}; background:#111A2E; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:border-color 150ms;" style-hover="border-color:#3B82F6;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#E5EAF3" stroke-width="2" stroke-linecap="round"><path d="M18 9a6 6 0 1 0-12 0c0 6-2.5 7.5-2.5 7.5h17S18 15 18 9z"></path><path d="M10 20a2.2 2.2 0 0 0 4 0"></path></svg>
+          <span style="position:absolute; top:7px; right:8px; width:8px; height:8px; border-radius:99px; background:#F87171; border:2px solid #111A2E;"></span>
+        </div>
+        <sc-if value="{{ notifOuvert }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute; top:48px; right:0; width:320px; background:#0D1526; border:1px solid #1E2A44; border-radius:12px; box-shadow:0 20px 50px rgba(0,0,0,0.5); z-index:30; overflow:hidden; animation:menuPop 160ms ease;">
+            <div style="padding:14px 16px; border-bottom:1px solid #1E2A44; display:flex; align-items:center; justify-content:space-between;">
+              <span style="font-size:13.5px; font-weight:600;">Notifications</span>
+              <span style="font-size:11px; color:#3B82F6; font-weight:600;">3 nouvelles</span>
+            </div>
+            <sc-for list="{{ notifications }}" as="n" hint-placeholder-count="3">
+              <div style="display:flex; gap:11px; padding:12px 16px; border-bottom:1px solid #17233c; cursor:pointer;" style-hover="background:#111A2E;">
+                <span style="width:8px; height:8px; border-radius:99px; background:{{ n.coul }}; margin-top:5px; flex-shrink:0;"></span>
+                <div style="min-width:0;"><div style="font-size:12.5px; line-height:1.45;">{{ n.texte }}</div><div style="font-size:11px; color:#8B98B8; margin-top:2px;">{{ n.temps }}</div></div>
+              </div>
+            </sc-for>
+            <div style="padding:11px 16px; text-align:center;"><a href="#" style="font-size:12.5px; font-weight:600;">Tout marquer comme lu</a></div>
+          </div>
+        </sc-if>
+      </div>
+      <div style="position:relative;">
+        <div onClick="{{ toggleMenu }}" style="display:flex; align-items:center; gap:9px; cursor:pointer; padding:5px 8px 5px 5px; border-radius:10px; transition:background 150ms; background:{{ menuBg }};" style-hover="background:#111A2E;">
+          <div style="width:32px; height:32px; border-radius:99px; background:linear-gradient(135deg,#3B82F6,#22D3EE); color:#0B1220; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700;">SL</div>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8B98B8" stroke-width="2.2" stroke-linecap="round"><path d="M6 9l6 6 6-6"></path></svg>
+        </div>
+        <sc-if value="{{ menuOuvert }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute; top:48px; right:0; width:210px; background:#0D1526; border:1px solid #1E2A44; border-radius:12px; box-shadow:0 20px 50px rgba(0,0,0,0.5); z-index:30; overflow:hidden; animation:menuPop 160ms ease;">
+            <div style="padding:14px 16px; border-bottom:1px solid #1E2A44;">
+              <div style="font-size:13px; font-weight:600;">Sarah Lamrani</div>
+              <div style="font-size:11.5px; color:#8B98B8; margin-top:1px;">s.lamrani@skillseek.ma</div>
+            </div>
+            <a href="Mon Profil.dc.html" style="display:flex; align-items:center; gap:11px; padding:11px 16px; font-size:13px; color:#E5EAF3; text-decoration:none;" style-hover="background:#111A2E;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8B98B8" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5"></path></svg>Mon profil
+            </a>
+            <a href="Mon Profil.dc.html" style="display:flex; align-items:center; gap:11px; padding:11px 16px; font-size:13px; color:#E5EAF3; text-decoration:none;" style-hover="background:#111A2E;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8B98B8" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"></circle><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4 1a7 7 0 0 0-2-1.2L14 1h-4l-.5 2.4a7 7 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6A7 7 0 0 0 5 12a7 7 0 0 0 .1 1.2l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 2 1.2L10 23h4l.5-2.4a7 7 0 0 0 2-1.2l2.4 1 2-3.4-2-1.6A7 7 0 0 0 19 12z"></path></svg>Paramètres
+            </a>
+            <div style="border-top:1px solid #1E2A44;">
+              <a href="Connexion.dc.html" style="display:flex; align-items:center; gap:11px; padding:11px 16px; font-size:13px; color:#F87171; text-decoration:none;" style-hover="background:rgba(248,113,113,0.08);">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="M16 17l5-5-5-5"></path><line x1="21" y1="12" x2="9" y2="12"></line></svg>Déconnexion
+              </a>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <main style="padding:28px 32px 40px; display:flex; flex-direction:column; gap:22px;">
+      <!-- Filtres -->
+      <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+        <div style="display:flex; background:#111A2E; border:1px solid #1E2A44; border-radius:10px; padding:3px; gap:2px;">
+          <button onClick="{{ choisir7j }}" style="{{ styleBtn7 }}">7 j</button>
+          <button onClick="{{ choisir30j }}" style="{{ styleBtn30 }}">30 j</button>
+          <button onClick="{{ choisir90j }}" style="{{ styleBtn90 }}">90 j</button>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; background:#111A2E; border:1px solid #1E2A44; border-radius:10px; padding:8px 14px; font-size:13px; color:#E5EAF3; cursor:pointer; transition:border-color 150ms;" style-hover="border-color:#3B82F6;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8B98B8" stroke-width="2" stroke-linecap="round"><path d="M3 5h18l-7 8v6l-4-2v-4z"></path></svg>
+          Toutes les offres
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8B98B8" stroke-width="2.2" stroke-linecap="round"><path d="M6 9l6 6 6-6"></path></svg>
+        </div>
+        <button style="margin-left:auto; display:flex; align-items:center; gap:8px; background:#3B82F6; color:#fff; border:none; border-radius:10px; padding:9px 16px; font-family:'Inter',sans-serif; font-size:13.5px; font-weight:600; cursor:pointer; transition:background 150ms;" style-hover="background:#2f6fdb;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          Nouvelle offre
+        </button>
+      </div>
+
+      <!-- KPI -->
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:16px;">
+        <div style="background:#111A2E; border:1px solid #1E2A44; border-radius:12px; padding:18px 20px; display:flex; flex-direction:column; gap:10px; transition:border-color 150ms;" style-hover="border-color:#2c3d63;">
+          <div style="display:flex; align-items:center; justify-content:space-between; color:#8B98B8; font-size:13px; font-weight:500;">Candidatures reçues
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2" stroke-linecap="round"><path d="M14 3v5h5"></path><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path></svg>
+          </div>
+          <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:8px;">
+            <div>
+              <div style="font-size:28px; font-weight:700; letter-spacing:-0.5px; line-height:1;">1 248</div>
+              <div style="font-size:12px; color:#34D399; font-weight:600; margin-top:7px;">▲ 12,4 % <span style="color:#8B98B8; font-weight:400;">vs mois préc.</span></div>
+            </div>
+            <svg width="84" height="34" viewBox="0 0 84 34"><polyline points="0,26 12,22 24,24 36,17 48,19 60,12 72,14 84,6" fill="none" stroke="#3B82F6" stroke-width="2" stroke-linecap="round"></polyline></svg>
+          </div>
+        </div>
+        <div style="background:#111A2E; border:1px solid #1E2A44; border-radius:12px; padding:18px 20px; display:flex; flex-direction:column; gap:10px; transition:border-color 150ms;" style-hover="border-color:#2c3d63;">
+          <div style="display:flex; align-items:center; justify-content:space-between; color:#8B98B8; font-size:13px; font-weight:500;">Présélectionnés IA
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#22D3EE" stroke-width="2" stroke-linecap="round"><path d="M12 3l1.8 4.2L18 9l-4.2 1.8L12 15l-1.8-4.2L6 9l4.2-1.8z"></path><path d="M18.5 15l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z"></path></svg>
+          </div>
+          <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:8px;">
+            <div>
+              <div style="font-size:28px; font-weight:700; letter-spacing:-0.5px; line-height:1;">342</div>
+              <div style="font-size:12px; color:#34D399; font-weight:600; margin-top:7px;">▲ 8,1 % <span style="color:#8B98B8; font-weight:400;">vs mois préc.</span></div>
+            </div>
+            <svg width="84" height="34" viewBox="0 0 84 34"><polyline points="0,28 12,25 24,26 36,20 48,22 60,15 72,10 84,8" fill="none" stroke="#22D3EE" stroke-width="2" stroke-linecap="round"></polyline></svg>
+          </div>
+        </div>
+        <div style="background:#111A2E; border:1px solid #1E2A44; border-radius:12px; padding:18px 20px; display:flex; flex-direction:column; gap:10px; transition:border-color 150ms;" style-hover="border-color:#2c3d63;">
+          <div style="display:flex; align-items:center; justify-content:space-between; color:#8B98B8; font-size:13px; font-weight:500;">Entretiens
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"></rect><line x1="3" y1="10" x2="21" y2="10"></line><line x1="8" y1="3" x2="8" y2="7"></line><line x1="16" y1="3" x2="16" y2="7"></line></svg>
+          </div>
+          <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:8px;">
+            <div>
+              <div style="font-size:28px; font-weight:700; letter-spacing:-0.5px; line-height:1;">96</div>
+              <div style="font-size:12px; color:#F59E0B; font-weight:600; margin-top:7px;">▼ 3,2 % <span style="color:#8B98B8; font-weight:400;">vs mois préc.</span></div>
+            </div>
+            <svg width="84" height="34" viewBox="0 0 84 34"><polyline points="0,14 12,10 24,16 36,13 48,20 60,17 72,22 84,19" fill="none" stroke="#3B82F6" stroke-width="2" stroke-linecap="round"></polyline></svg>
+          </div>
+        </div>
+        <div style="background:#111A2E; border:1px solid #1E2A44; border-radius:12px; padding:18px 20px; display:flex; flex-direction:column; gap:10px; transition:border-color 150ms;" style-hover="border-color:#2c3d63;">
+          <div style="display:flex; align-items:center; justify-content:space-between; color:#8B98B8; font-size:13px; font-weight:500;">Recrutés
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="2" stroke-linecap="round"><circle cx="10" cy="8" r="4"></circle><path d="M3 21c0-3.5 3-5.5 7-5.5"></path><path d="M15 18l2.5 2.5L22 16"></path></svg>
+          </div>
+          <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:8px;">
+            <div>
+              <div style="font-size:28px; font-weight:700; letter-spacing:-0.5px; line-height:1;">24</div>
+              <div style="font-size:12px; color:#34D399; font-weight:600; margin-top:7px;">▲ 18,0 % <span style="color:#8B98B8; font-weight:400;">vs mois préc.</span></div>
+            </div>
+            <svg width="84" height="34" viewBox="0 0 84 34"><polyline points="0,29 12,27 24,28 36,23 48,24 60,18 72,16 84,10" fill="none" stroke="#34D399" stroke-width="2" stroke-linecap="round"></polyline></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- FUNNEL + CHART -->
+      <div style="display:grid; grid-template-columns:5fr 7fr; gap:16px;">
+        <!-- Entonnoir -->
+        <div style="background:#111A2E; border:1px solid #1E2A44; border-radius:12px; padding:22px 24px;">
+          <div style="display:flex; align-items:baseline; justify-content:space-between; margin-bottom:20px;">
+            <h2 style="margin:0; font-size:15px; font-weight:600;">Entonnoir de recrutement</h2>
+            <span style="font-size:12px; color:#8B98B8;">{{ libellePeriode }}</span>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:4px;">
+            <div style="display:flex; align-items:center; gap:14px;">
+              <div style="width:118px; font-size:12.5px; color:#8B98B8; text-align:right; flex-shrink:0;">Candidatures</div>
+              <div style="flex:1;"><div style="width:100%; height:34px; border-radius:8px; background:linear-gradient(90deg,#3B82F6,#3593f2); display:flex; align-items:center; justify-content:flex-end; padding-right:12px; font-size:13.5px; font-weight:700; color:#fff;">1 248</div></div>
+            </div>
+            <div style="display:flex; align-items:center; gap:14px; height:26px;">
+              <div style="width:118px; flex-shrink:0;"></div>
+              <div style="flex:1; display:flex; align-items:center; gap:8px;"><span style="color:#22D3EE; font-size:11px;">▼</span><span style="font-size:11.5px; color:#8B98B8;">27 % de conversion</span></div>
+            </div>
+            <div style="display:flex; align-items:center; gap:14px;">
+              <div style="width:118px; font-size:12.5px; color:#8B98B8; text-align:right; flex-shrink:0;">Présélection IA</div>
+              <div style="flex:1;"><div style="width:64%; height:34px; border-radius:8px; background:linear-gradient(90deg,#329fee,#2cb4ec); display:flex; align-items:center; justify-content:flex-end; padding-right:12px; font-size:13.5px; font-weight:700; color:#fff;">342</div></div>
+            </div>
+            <div style="display:flex; align-items:center; gap:14px; height:26px;">
+              <div style="width:118px; flex-shrink:0;"></div>
+              <div style="flex:1; display:flex; align-items:center; gap:8px;"><span style="color:#22D3EE; font-size:11px;">▼</span><span style="font-size:11.5px; color:#8B98B8;">28 % de conversion</span></div>
+            </div>
+            <div style="display:flex; align-items:center; gap:14px;">
+              <div style="width:118px; font-size:12.5px; color:#8B98B8; text-align:right; flex-shrink:0;">Entretiens</div>
+              <div style="flex:1;"><div style="width:36%; height:34px; border-radius:8px; background:linear-gradient(90deg,#28c3ea,#24cdec); display:flex; align-items:center; justify-content:flex-end; padding-right:12px; font-size:13.5px; font-weight:700; color:#06202c;">96</div></div>
+            </div>
+            <div style="display:flex; align-items:center; gap:14px; height:26px;">
+              <div style="width:118px; flex-shrink:0;"></div>
+              <div style="flex:1; display:flex; align-items:center; gap:8px;"><span style="color:#22D3EE; font-size:11px;">▼</span><span style="font-size:11.5px; color:#8B98B8;">25 % de conversion</span></div>
+            </div>
+            <div style="display:flex; align-items:center; gap:14px;">
+              <div style="width:118px; font-size:12.5px; color:#8B98B8; text-align:right; flex-shrink:0;">Recrutés</div>
+              <div style="flex:1;"><div style="width:16%; min-width:64px; height:34px; border-radius:8px; background:#22D3EE; display:flex; align-items:center; justify-content:flex-end; padding-right:12px; font-size:13.5px; font-weight:700; color:#06202c;">24</div></div>
+            </div>
+          </div>
+          <div style="margin-top:20px; padding-top:16px; border-top:1px solid #1E2A44; display:flex; align-items:center; gap:8px; font-size:12px; color:#8B98B8;">
+            <span style="width:7px; height:7px; border-radius:99px; background:#22D3EE; display:inline-block;"></span>
+            Taux global : <strong style="color:#E5EAF3;">1,9 %</strong> des candidats sont recrutés
+          </div>
+        </div>
+
+        <!-- Courbe -->
+        <div style="background:#111A2E; border:1px solid #1E2A44; border-radius:12px; padding:22px 24px; display:flex; flex-direction:column;">
+          <div style="display:flex; align-items:baseline; justify-content:space-between; margin-bottom:14px;">
+            <h2 style="margin:0; font-size:15px; font-weight:600;">{{ titreCourbe }}</h2>
+            <div style="display:flex; align-items:center; gap:14px; font-size:12px; color:#8B98B8;">
+              <span style="display:flex; align-items:center; gap:6px;"><span style="width:10px; height:3px; border-radius:2px; background:#3B82F6; display:inline-block;"></span>Reçues</span>
+              <span style="display:flex; align-items:center; gap:6px;"><span style="width:10px; height:3px; border-radius:2px; background:#22D3EE; display:inline-block;"></span>Présélectionnées</span>
+            </div>
+          </div>
+          <svg viewBox="0 0 720 230" style="width:100%; flex:1;" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="aireBleue" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#3B82F6" stop-opacity="0.25"></stop>
+                <stop offset="100%" stop-color="#3B82F6" stop-opacity="0"></stop>
+              </linearGradient>
+            </defs>
+            <line x1="0" y1="10" x2="720" y2="10" stroke="#1E2A44" stroke-width="1" stroke-dasharray="4 5"></line>
+            <line x1="0" y1="60" x2="720" y2="60" stroke="#1E2A44" stroke-width="1" stroke-dasharray="4 5"></line>
+            <line x1="0" y1="110" x2="720" y2="110" stroke="#1E2A44" stroke-width="1" stroke-dasharray="4 5"></line>
+            <line x1="0" y1="160" x2="720" y2="160" stroke="#1E2A44" stroke-width="1" stroke-dasharray="4 5"></line>
+            <line x1="0" y1="210" x2="720" y2="210" stroke="#1E2A44" stroke-width="1"></line>
+            <path d="{{ aireRecues }}" fill="url(#aireBleue)"></path>
+            <path d="{{ courbeRecues }}" fill="none" stroke="#3B82F6" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"></path>
+            <path d="{{ courbePreselec }}" fill="none" stroke="#22D3EE" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="1 0"></path>
+          </svg>
+          <div style="display:flex; justify-content:space-between; font-size:11.5px; color:#8B98B8; margin-top:10px;">
+            <span>{{ dateDebut }}</span><span>{{ dateMilieu }}</span><span>{{ dateFin }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLE -->
+      <div style="background:#111A2E; border:1px solid #1E2A44; border-radius:12px; overflow:hidden;">
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:18px 24px 14px;">
+          <h2 style="margin:0; font-size:15px; font-weight:600;">Dernières candidatures</h2>
+          <a href="#" style="font-size:13px; font-weight:500;">Tout voir →</a>
+        </div>
+        <div style="display:grid; grid-template-columns:2.2fr 2fr 1.1fr 0.9fr 1.4fr 0.7fr; gap:12px; padding:10px 24px; font-size:11.5px; font-weight:600; color:#8B98B8; text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid #1E2A44;">
+          <span>Candidat</span><span>Poste</span><span>Date</span><span>Score IA</span><span>Statut</span><span style="text-align:right;">Action</span>
+        </div>
+        <div style="display:grid; grid-template-columns:2.2fr 2fr 1.1fr 0.9fr 1.4fr 0.7fr; gap:12px; align-items:center; padding:13px 24px; border-bottom:1px solid #17233c; transition:background 150ms;" style-hover="background:#141f38;">
+          <div style="display:flex; align-items:center; gap:11px; min-width:0;"><div style="width:32px; height:32px; border-radius:99px; background:#1E2A44; color:#3B82F6; display:flex; align-items:center; justify-content:center; font-size:11.5px; font-weight:700; flex-shrink:0;">KO</div><div style="min-width:0;"><div style="font-size:13.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Karim Ouazzani</div><div style="font-size:11.5px; color:#8B98B8;">k.ouazzani@gmail.com</div></div></div>
+          <span style="font-size:13px; color:#8B98B8;">Développeur Full-Stack React</span>
+          <span style="font-size:13px; color:#8B98B8;">19 juil.</span>
+          <span><span style="display:inline-flex; align-items:center; gap:5px; background:rgba(52,211,153,0.12); color:#34D399; border:1px solid rgba(52,211,153,0.3); border-radius:99px; padding:3px 10px; font-size:12px; font-weight:700;">91<span style="font-weight:400; opacity:.7;">/100</span></span></span>
+          <span><span style="display:inline-flex; align-items:center; gap:6px; font-size:12.5px; color:#22D3EE;"><span style="width:6px; height:6px; border-radius:99px; background:#22D3EE;"></span>Présélectionné IA</span></span>
+          <span style="text-align:right;"><a href="#" style="font-size:13px; font-weight:500;">Voir</a></span>
+        </div>
+        <div style="display:grid; grid-template-columns:2.2fr 2fr 1.1fr 0.9fr 1.4fr 0.7fr; gap:12px; align-items:center; padding:13px 24px; border-bottom:1px solid #17233c; transition:background 150ms;" style-hover="background:#141f38;">
+          <div style="display:flex; align-items:center; gap:11px; min-width:0;"><div style="width:32px; height:32px; border-radius:99px; background:#1E2A44; color:#22D3EE; display:flex; align-items:center; justify-content:center; font-size:11.5px; font-weight:700; flex-shrink:0;">YE</div><div style="min-width:0;"><div style="font-size:13.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Yasmine El Amrani</div><div style="font-size:11.5px; color:#8B98B8;">yasmine.elamrani@outlook.fr</div></div></div>
+          <span style="font-size:13px; color:#8B98B8;">Développeur Python Senior</span>
+          <span style="font-size:13px; color:#8B98B8;">19 juil.</span>
+          <span><span style="display:inline-flex; align-items:center; gap:5px; background:rgba(52,211,153,0.12); color:#34D399; border:1px solid rgba(52,211,153,0.3); border-radius:99px; padding:3px 10px; font-size:12px; font-weight:700;">87<span style="font-weight:400; opacity:.7;">/100</span></span></span>
+          <span><span style="display:inline-flex; align-items:center; gap:6px; font-size:12.5px; color:#34D399;"><span style="width:6px; height:6px; border-radius:99px; background:#34D399;"></span>Entretien planifié</span></span>
+          <span style="text-align:right;"><a href="#" style="font-size:13px; font-weight:500;">Voir</a></span>
+        </div>
+        <div style="display:grid; grid-template-columns:2.2fr 2fr 1.1fr 0.9fr 1.4fr 0.7fr; gap:12px; align-items:center; padding:13px 24px; border-bottom:1px solid #17233c; transition:background 150ms;" style-hover="background:#141f38;">
+          <div style="display:flex; align-items:center; gap:11px; min-width:0;"><div style="width:32px; height:32px; border-radius:99px; background:#1E2A44; color:#3B82F6; display:flex; align-items:center; justify-content:center; font-size:11.5px; font-weight:700; flex-shrink:0;">MB</div><div style="min-width:0;"><div style="font-size:13.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Mehdi Benali</div><div style="font-size:11.5px; color:#8B98B8;">mehdi.benali@proton.me</div></div></div>
+          <span style="font-size:13px; color:#8B98B8;">Data Scientist</span>
+          <span style="font-size:13px; color:#8B98B8;">19 juil.</span>
+          <span><span style="display:inline-flex; align-items:center; gap:5px; background:rgba(245,158,11,0.12); color:#F59E0B; border:1px solid rgba(245,158,11,0.3); border-radius:99px; padding:3px 10px; font-size:12px; font-weight:700;">74<span style="font-weight:400; opacity:.7;">/100</span></span></span>
+          <span><span style="display:inline-flex; align-items:center; gap:6px; font-size:12.5px; color:#8B98B8;"><span style="width:6px; height:6px; border-radius:99px; background:#8B98B8;"></span>En cours d'étude</span></span>
+          <span style="text-align:right;"><a href="#" style="font-size:13px; font-weight:500;">Voir</a></span>
+        </div>
+        <div style="display:grid; grid-template-columns:2.2fr 2fr 1.1fr 0.9fr 1.4fr 0.7fr; gap:12px; align-items:center; padding:13px 24px; border-bottom:1px solid #17233c; transition:background 150ms;" style-hover="background:#141f38;">
+          <div style="display:flex; align-items:center; gap:11px; min-width:0;"><div style="width:32px; height:32px; border-radius:99px; background:#1E2A44; color:#22D3EE; display:flex; align-items:center; justify-content:center; font-size:11.5px; font-weight:700; flex-shrink:0;">CD</div><div style="min-width:0;"><div style="font-size:13.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Claire Dubois</div><div style="font-size:11.5px; color:#8B98B8;">claire.dubois@yahoo.fr</div></div></div>
+          <span style="font-size:13px; color:#8B98B8;">Ingénieure DevOps</span>
+          <span style="font-size:13px; color:#8B98B8;">18 juil.</span>
+          <span><span style="display:inline-flex; align-items:center; gap:5px; background:rgba(245,158,11,0.12); color:#F59E0B; border:1px solid rgba(245,158,11,0.3); border-radius:99px; padding:3px 10px; font-size:12px; font-weight:700;">62<span style="font-weight:400; opacity:.7;">/100</span></span></span>
+          <span><span style="display:inline-flex; align-items:center; gap:6px; font-size:12.5px; color:#8B98B8;"><span style="width:6px; height:6px; border-radius:99px; background:#8B98B8;"></span>En cours d'étude</span></span>
+          <span style="text-align:right;"><a href="#" style="font-size:13px; font-weight:500;">Voir</a></span>
+        </div>
+        <div style="display:grid; grid-template-columns:2.2fr 2fr 1.1fr 0.9fr 1.4fr 0.7fr; gap:12px; align-items:center; padding:13px 24px; border-bottom:1px solid #17233c; transition:background 150ms;" style-hover="background:#141f38;">
+          <div style="display:flex; align-items:center; gap:11px; min-width:0;"><div style="width:32px; height:32px; border-radius:99px; background:#1E2A44; color:#3B82F6; display:flex; align-items:center; justify-content:center; font-size:11.5px; font-weight:700; flex-shrink:0;">YT</div><div style="min-width:0;"><div style="font-size:13.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Youssef Tazi</div><div style="font-size:11.5px; color:#8B98B8;">y.tazi@hotmail.com</div></div></div>
+          <span style="font-size:13px; color:#8B98B8;">Développeur Python Senior</span>
+          <span style="font-size:13px; color:#8B98B8;">17 juil.</span>
+          <span><span style="display:inline-flex; align-items:center; gap:5px; background:rgba(245,158,11,0.12); color:#F59E0B; border:1px solid rgba(245,158,11,0.3); border-radius:99px; padding:3px 10px; font-size:12px; font-weight:700;">68<span style="font-weight:400; opacity:.7;">/100</span></span></span>
+          <span><span style="display:inline-flex; align-items:center; gap:6px; font-size:12.5px; color:#3B82F6;"><span style="width:6px; height:6px; border-radius:99px; background:#3B82F6;"></span>Reçue</span></span>
+          <span style="text-align:right;"><a href="#" style="font-size:13px; font-weight:500;">Voir</a></span>
+        </div>
+        <div style="display:grid; grid-template-columns:2.2fr 2fr 1.1fr 0.9fr 1.4fr 0.7fr; gap:12px; align-items:center; padding:13px 24px; transition:background 150ms;" style-hover="background:#141f38;">
+          <div style="display:flex; align-items:center; gap:11px; min-width:0;"><div style="width:32px; height:32px; border-radius:99px; background:#1E2A44; color:#22D3EE; display:flex; align-items:center; justify-content:center; font-size:11.5px; font-weight:700; flex-shrink:0;">NC</div><div style="min-width:0;"><div style="font-size:13.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Nadia Chraibi</div><div style="font-size:11.5px; color:#8B98B8;">nadia.chraibi@gmail.com</div></div></div>
+          <span style="font-size:13px; color:#8B98B8;">Data Scientist</span>
+          <span style="font-size:13px; color:#8B98B8;">17 juil.</span>
+          <span><span style="display:inline-flex; align-items:center; gap:5px; background:rgba(139,152,184,0.1); color:#8B98B8; border:1px solid rgba(139,152,184,0.25); border-radius:99px; padding:3px 10px; font-size:12px; font-weight:700;">45<span style="font-weight:400; opacity:.7;">/100</span></span></span>
+          <span><span style="display:inline-flex; align-items:center; gap:6px; font-size:12.5px; color:#8B98B8;"><span style="width:6px; height:6px; border-radius:99px; background:#8B98B8;"></span>Écartée (règle)</span></span>
+          <span style="text-align:right;"><a href="#" style="font-size:13px; font-weight:500;">Voir</a></span>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:960},&quot;sidebarRepliee&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Mise en page&quot;},&quot;periodeParDefaut&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;7j&quot;,&quot;30j&quot;,&quot;90j&quot;],&quot;default&quot;:&quot;30j&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Données&quot;}}">
+class Component extends DCLogic {
+  state = { periode: null, recherche: '', notif: false, menu: false };
+  donnees(periode) {
+    // séries pseudo-aléatoires déterministes
+    const n = periode === '7j' ? 7 : periode === '90j' ? 90 : 30;
+    const recues = [], presel = [];
+    for (let i = 0; i < n; i++) {
+      const t = i / (n - 1);
+      const bruit = Math.sin(i * 2.7) * 6 + Math.sin(i * 0.9 + 2) * 9;
+      const base = 22 + t * 26 + bruit;
+      recues.push(Math.max(4, base));
+      presel.push(Math.max(1, base * (0.24 + Math.sin(i * 1.3) * 0.04)));
+    }
+    return { recues, presel };
+  }
+  chemin(vals, max) {
+    const n = vals.length;
+    return vals.map((v, i) => {
+      const x = (i / (n - 1)) * 720;
+      const y = 210 - (v / max) * 195;
+      return (i === 0 ? 'M' : 'L') + x.toFixed(1) + ' ' + y.toFixed(1);
+    }).join(' ');
+  }
+  renderVals() {
+    const periode = this.state.periode ?? this.props.periodeParDefaut ?? '30j';
+    const { recues, presel } = this.donnees(periode);
+    const max = Math.max(...recues) * 1.12;
+    const courbeRecues = this.chemin(recues, max);
+    const btn = (actif) => actif
+      ? 'background:#3B82F6; color:#fff; border:none; border-radius:8px; padding:6px 14px; font-family:Inter,sans-serif; font-size:12.5px; font-weight:600; cursor:pointer;'
+      : 'background:transparent; color:#8B98B8; border:none; border-radius:8px; padding:6px 14px; font-family:Inter,sans-serif; font-size:12.5px; font-weight:500; cursor:pointer;';
+    const dates = {
+      '7j': ['14 juil.', '17 juil.', '20 juil.'],
+      '30j': ['21 juin', '5 juil.', '20 juil.'],
+      '90j': ['22 avr.', '5 juin', '20 juil.'],
+    }[periode];
+    const libelles = { '7j': '7 derniers jours', '30j': '30 derniers jours', '90j': '90 derniers jours' };
+    const replie = this.props.sidebarRepliee ?? false;
+    return {
+      recherche: this.state.recherche,
+      onRecherche: (e) => this.setState({ recherche: e.target.value }),
+      notifOuvert: this.state.notif,
+      notifBord: this.state.notif ? '#3B82F6' : '#1E2A44',
+      toggleNotif: () => this.setState({ notif: !this.state.notif, menu: false }),
+      menuOuvert: this.state.menu,
+      menuBg: this.state.menu ? '#111A2E' : 'transparent',
+      toggleMenu: () => this.setState({ menu: !this.state.menu, notif: false }),
+      notifications: [
+        { texte: 'Karim Ouazzani a été présélectionné par l\'IA (score 91).', temps: 'il y a 8 min', coul: '#22D3EE' },
+        { texte: 'Nouvel entretien planifié avec Yasmine El Amrani.', temps: 'il y a 1 h', coul: '#34D399' },
+        { texte: '12 nouvelles candidatures sur « Développeur Python Senior ».', temps: 'il y a 3 h', coul: '#3B82F6' },
+      ],
+      largeurSidebar: replie ? '76px' : '248px',
+      afficheLibelles: replie ? 'none' : 'block',
+      choisir7j: () => this.setState({ periode: '7j' }),
+      choisir30j: () => this.setState({ periode: '30j' }),
+      choisir90j: () => this.setState({ periode: '90j' }),
+      styleBtn7: btn(periode === '7j'),
+      styleBtn30: btn(periode === '30j'),
+      styleBtn90: btn(periode === '90j'),
+      libellePeriode: libelles[periode],
+      titreCourbe: 'Candidatures sur ' + periode.replace('j', ' jours'),
+      courbeRecues,
+      aireRecues: courbeRecues + ' L720 210 L0 210 Z',
+      courbePreselec: this.chemin(presel, max),
+      dateDebut: dates[0], dateMilieu: dates[1], dateFin: dates[2],
+    };
+  }
+}
+</script>
+</body>
+</html>

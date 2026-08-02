@@ -1,0 +1,23 @@
+\contentsline {section}{\numberline {1}Objet du rapport}{2}{section.1}%
+\contentsline {section}{\numberline {2}Rappel du Sprint 1}{2}{section.2}%
+\contentsline {section}{\numberline {3}Synthèse de l'avancement}{2}{section.3}%
+\contentsline {subsection}{\numberline {3.1}État global}{2}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Tâches du Sprint 2}{2}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Indicateurs de réalisation}{3}{subsection.3.3}%
+\contentsline {section}{\numberline {4}Conception du Sprint 2}{3}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Cartographie des écrans}{3}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Diagramme de séquence : dépôt et évaluation d'une candidature}{3}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}Diagramme d'états-transitions : cycle de vie d'une candidature}{4}{subsection.4.3}%
+\contentsline {subsection}{\numberline {4.4}Diagramme des événements de notification}{4}{subsection.4.4}%
+\contentsline {section}{\numberline {5}Réalisations du Sprint 2}{5}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Interface utilisateur}{5}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}Parcours métier}{5}{subsection.5.2}%
+\contentsline {subsection}{\numberline {5.3}Évaluation des candidatures}{5}{subsection.5.3}%
+\contentsline {subsection}{\numberline {5.4}Système de notifications}{5}{subsection.5.4}%
+\contentsline {subsection}{\numberline {5.5}Ergonomie et accessibilité}{6}{subsection.5.5}%
+\contentsline {subsection}{\numberline {5.6}Vérification}{6}{subsection.5.6}%
+\contentsline {section}{\numberline {6}Difficultés rencontrées et corrections}{7}{section.6}%
+\contentsline {section}{\numberline {7}Planification}{7}{section.7}%
+\contentsline {subsection}{\numberline {7.1}Contenu du Sprint 3}{7}{subsection.7.1}%
+\contentsline {section}{\numberline {8}Risques et mesures}{8}{section.8}%
+\contentsline {section}{\numberline {9}Conclusion}{8}{section.9}%

@@ -5,9 +5,10 @@ from .permission import Permission
 from .job_offer import JobOffer
 from .application import Application
 from .ai_metric import AiMetric
+from .notification import Notification
 from .token_blocklist import TokenBlocklist
 
 __all__ = [
     "User", "Role", "Permission", "role_permissions",
-    "JobOffer", "Application", "AiMetric", "TokenBlocklist",
+    "JobOffer", "Application", "AiMetric", "Notification", "TokenBlocklist",
 ]

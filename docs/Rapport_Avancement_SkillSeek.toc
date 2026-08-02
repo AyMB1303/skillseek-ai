@@ -1,0 +1,23 @@
+\contentsline {section}{\numberline {1}Objet du rapport}{2}{section.1}%
+\contentsline {subsection}{\numberline {1.1}Rappel du projet}{2}{subsection.1.1}%
+\contentsline {section}{\numberline {2}Synthèse de l'avancement}{2}{section.2}%
+\contentsline {subsection}{\numberline {2.1}État global}{2}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Tâches du Sprint 1}{2}{subsection.2.2}%
+\contentsline {section}{\numberline {3}Conception du système (UML)}{2}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Diagramme de cas d'utilisation}{2}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Diagramme de classes}{3}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Diagramme de séquence : authentification et contrôle des droits}{3}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}Diagramme d'activité : traitement d'une candidature}{4}{subsection.3.4}%
+\contentsline {subsection}{\numberline {3.5}Diagramme de composants}{5}{subsection.3.5}%
+\contentsline {subsection}{\numberline {3.6}Diagramme de déploiement}{5}{subsection.3.6}%
+\contentsline {section}{\numberline {4}Réalisations du Sprint 1}{5}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Socle technique et industrialisation}{5}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Modèle de données}{5}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}Architecture applicative}{5}{subsection.4.3}%
+\contentsline {subsection}{\numberline {4.4}Sécurité}{6}{subsection.4.4}%
+\contentsline {subsection}{\numberline {4.5}Contrôle d'accès en temps réel}{6}{subsection.4.5}%
+\contentsline {subsection}{\numberline {4.6}Vérification par les tests}{6}{subsection.4.6}%
+\contentsline {section}{\numberline {5}Travaux en cours : Sprint 2}{6}{section.5}%
+\contentsline {section}{\numberline {6}Planification révisée}{7}{section.6}%
+\contentsline {section}{\numberline {7}Risques identifiés et mesures}{7}{section.7}%
+\contentsline {section}{\numberline {8}Conclusion}{8}{section.8}%

@@ -24,11 +24,17 @@ def create_app(env: str = "development") -> Flask:
     from .blueprints.users import users_bp
     from .blueprints.offers import offers_bp
     from .blueprints.applications import applications_bp
+    from .blueprints.dashboard import dashboard_bp
+    from .blueprints.profile import profile_bp
+    from .blueprints.notifications import notifications_bp
 
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
     app.register_blueprint(users_bp, url_prefix="/api")
     app.register_blueprint(offers_bp, url_prefix="/api/offers")
     app.register_blueprint(applications_bp, url_prefix="/api/applications")
+    app.register_blueprint(dashboard_bp, url_prefix="/api/dashboard")
+    app.register_blueprint(profile_bp, url_prefix="/api/profile")
+    app.register_blueprint(notifications_bp, url_prefix="/api/notifications")
 
     # --- Commande CLI de seed ---
     from .seeds import seed_command

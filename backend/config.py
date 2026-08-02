@@ -16,8 +16,8 @@ class BaseConfig:
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=15)
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=7)
 
-    # Uploads CV (Sprint 2+)
-    UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER", "uploads")
+    # Uploads CV : chemin ABSOLU (send_file de Flask refuse les chemins relatifs)
+    UPLOAD_FOLDER = os.path.abspath(os.getenv("UPLOAD_FOLDER", "uploads"))
     MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5 Mo max par CV
 
 

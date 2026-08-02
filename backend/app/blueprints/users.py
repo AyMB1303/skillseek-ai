@@ -6,6 +6,7 @@ from ..middleware.permissions import require_permission
 from ..models.permission import Permission
 from ..models.role import Role
 from ..models.user import User
+from ..services import notifications as notifs
 
 users_bp = Blueprint("users", __name__)
 
@@ -39,6 +40,9 @@ def create_user(current_user):
     user = User(email=email, full_name=data["full_name"].strip(), role=role)
     user.set_password(data["password"])
     db.session.add(user)
+    db.session.flush()
+    # Les autres administrateurs sont informes de la creation du compte.
+    notifs.compte_cree(user, auteur=current_user)
     db.session.commit()
     return jsonify(user=user.to_dict()), 201
 
@@ -127,5 +131,7 @@ def set_role_permissions(current_user, role_id):
         return jsonify(error=f"Permissions inconnues : {', '.join(unknown)}"), 400
 
     role.permissions = perms
+    # Les utilisateurs concernes sont informes : leurs droits changent immediatement.
+    notifs.permissions_modifiees(role, auteur=current_user)
     db.session.commit()
     return jsonify(role=role.to_dict())

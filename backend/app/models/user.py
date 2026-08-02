@@ -20,6 +20,9 @@ class User(db.Model):
 
     offers = db.relationship("JobOffer", back_populates="recruiter")
     applications = db.relationship("Application", back_populates="candidate")
+    notifications = db.relationship(
+        "Notification", back_populates="user", cascade="all, delete-orphan"
+    )
 
     # --- Mot de passe (bcrypt, jamais en clair) ---
     def set_password(self, password: str) -> None:
