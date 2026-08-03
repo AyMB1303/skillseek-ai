@@ -10,11 +10,13 @@ from ..models.ai_metric import AiMetric
 from ..models.application import STATUSES, Application
 from ..models.job_offer import JobOffer
 from ..services import notifications as notifs
+from ..services.analyse import analyser_candidature
 from ..services.scoring import calculer_score
 
 applications_bp = Blueprint("applications", __name__)
 
-EXTENSIONS_AUTORISEES = {".pdf"}
+# Formats acceptes par les systemes de suivi des candidatures
+EXTENSIONS_AUTORISEES = {".pdf", ".docx"}
 TAILLE_MAX = 5 * 1024 * 1024  # 5 Mo
 
 
@@ -70,7 +72,9 @@ def postuler(current_user):
         return jsonify(error="Aucun fichier reçu."), 400
     extension = os.path.splitext(fichier.filename)[1].lower()
     if extension not in EXTENSIONS_AUTORISEES:
-        return jsonify(error="Format non accepté : seuls les fichiers PDF sont autorisés."), 400
+        return jsonify(
+            error="Format non accepté : déposez votre CV au format PDF ou DOCX."
+        ), 400
 
     fichier.seek(0, os.SEEK_END)
     taille = fichier.tell()
@@ -90,21 +94,30 @@ def postuler(current_user):
 
     candidature = Application(cv_path=chemin, candidate=current_user, offer=offre)
 
-    # Le score reste volontairement NON calcule tant que l'extraction du CV
-    # (OCR + NLP, Sprint 3) n'est pas disponible : mieux vaut afficher
-    # "en attente d'analyse" qu'un score de 0 trompeur.
-    candidature.score = None
-    candidature.score_details = {
-        "statut": "en_attente_analyse",
-        "message": "Analyse du CV en attente du module d'extraction.",
-    }
+    # Analyse automatique immediate : extraction, profil, similarite, score.
+    # Un echec de lecture n'empeche jamais l'enregistrement de la candidature ;
+    # elle est alors signalee comme non analysable et reste traitable a la main.
+    try:
+        details = analyser_candidature(candidature, chemin_cv=chemin)
+    except Exception as exc:  # noqa: BLE001 - on ne perd jamais une candidature
+        current_app.logger.exception("Analyse du CV impossible : %s", exc)
+        candidature.score = None
+        candidature.score_details = {
+            "statut": "analyse_indisponible",
+            "message": "Le service d'analyse est momentanément indisponible.",
+        }
+        details = candidature.score_details
 
     db.session.add(candidature)
     db.session.flush()
     db.session.add(
         AiMetric(
             application_id=candidature.id,
-            payload={"evenement": "depot", "fichier": os.path.basename(chemin)},
+            payload={
+                "evenement": "depot_et_analyse",
+                "fichier": os.path.basename(chemin),
+                "resultat": details,
+            },
         )
     )
     # Le recruteur proprietaire de l'offre est informe immediatement.
@@ -117,30 +130,40 @@ def postuler(current_user):
 @applications_bp.post("/<int:app_id>/analyze")
 @require_permission("view_applications")
 def analyser(current_user, app_id):
-    """Lance le calcul du score sur un profil donné.
+    """Calcule le score d'une candidature.
 
-    Sprint 2 : le profil est transmis par l'appelant (saisie assistée).
-    Sprint 3 : il sera produit automatiquement par l'extraction OCR/NLP du CV,
-    sans modification de cet endpoint ni du moteur de score.
+    Deux modes :
+      * automatique (par défaut) : le CV est relu, le profil extrait et la
+        proximité sémantique recalculée ;
+      * manuel : le recruteur fournit lui-même le profil, ce qui reste
+        nécessaire lorsqu'un document est illisible (scan de mauvaise qualité).
     """
     candidature = Application.query.get_or_404(app_id)
     data = request.get_json(silent=True) or {}
+    profil_fourni = any(k in data for k in ("skills", "experience_years", "degree"))
 
-    profil = {
-        "skills": [s.strip().lower() for s in data.get("skills", []) if s.strip()],
-        "experience_years": int(data.get("experience_years") or 0),
-        "degree": data.get("degree") or None,
-    }
-
-    score, details = calculer_score(profil, candidature.offer)
-    details["profil_analyse"] = profil
-    candidature.score = score
-    candidature.score_details = details
+    if profil_fourni:
+        profil = {
+            "skills": [s.strip().lower() for s in data.get("skills", []) if s.strip()],
+            "experience_years": int(data.get("experience_years") or 0),
+            "degree": data.get("degree") or None,
+        }
+        score, details = calculer_score(profil, candidature.offer)
+        details["statut"] = "analysee"
+        details["profil_analyse"] = profil
+        details["saisie_manuelle"] = True
+        candidature.score = score
+        candidature.score_details = details
+    else:
+        details = analyser_candidature(candidature)
 
     db.session.add(
         AiMetric(
             application_id=candidature.id,
-            payload={"evenement": "scoring", "profil": profil, "resultat": details},
+            payload={
+                "evenement": "analyse_manuelle" if profil_fourni else "analyse_automatique",
+                "resultat": details,
+            },
         )
     )
     db.session.commit()

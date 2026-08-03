@@ -119,7 +119,9 @@ export const api = {
   mesCandidatures: () => appel("/applications/mine"),
   candidaturesOffre: (offreId) => appel(`/applications?offer_id=${offreId}`),
   changerStatut: (id, statut) => appel(`/applications/${id}/status`, { method: "PATCH", body: { status: statut } }),
-  analyser: (id, profil) => appel(`/applications/${id}/analyze`, { method: "POST", body: profil }),
+  // Sans profil : analyse automatique du CV. Avec profil : saisie manuelle.
+  analyser: (id, profil = null) =>
+    appel(`/applications/${id}/analyze`, { method: "POST", body: profil || {} }),
   postuler: (offreId, fichier) => {
     const fd = new FormData();
     fd.append("cv", fichier);

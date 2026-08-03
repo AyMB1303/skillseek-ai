@@ -51,8 +51,8 @@ export default function DetailOffre() {
   const choisirFichier = (f) => {
     setErreurFichier("");
     if (!f) return;
-    if (!f.name.toLowerCase().endsWith(".pdf")) {
-      setErreurFichier("Format non accepté : seuls les fichiers PDF sont autorisés.");
+    if (!/\.(pdf|docx)$/i.test(f.name)) {
+      setErreurFichier("Format non accepté : déposez votre CV au format PDF ou DOCX.");
       setFichier(null);
       return;
     }
@@ -106,7 +106,14 @@ export default function DetailOffre() {
 
               <div className="flex flex-wrap gap-1.5 mt-4">
                 {(offre.required_skills || []).map((s) => (
-                  <span key={s} className="chip bg-accent/10 text-accent">{s}</span>
+                  <span key={s} className="chip bg-accent/10 text-accent" title="Compétence obligatoire">
+                    {s}
+                  </span>
+                ))}
+                {(offre.preferred_skills || []).map((s) => (
+                  <span key={s} className="chip bg-bordure/50 text-txt2" title="Compétence souhaitée">
+                    {s}
+                  </span>
                 ))}
               </div>
 
@@ -173,7 +180,7 @@ export default function DetailOffre() {
                   <input
                     ref={champFichier}
                     type="file"
-                    accept="application/pdf"
+                    accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                     className="hidden"
                     onChange={(e) => choisirFichier(e.target.files[0])}
                   />
@@ -191,7 +198,7 @@ export default function DetailOffre() {
                   ) : (
                     <>
                       <p className="text-sm">Déposez votre CV ici</p>
-                      <p className="text-xs text-txt2 mt-1">PDF uniquement · 5 Mo maximum</p>
+                      <p className="text-xs text-txt2 mt-1">PDF ou DOCX · 5 Mo maximum</p>
                     </>
                   )}
                 </div>

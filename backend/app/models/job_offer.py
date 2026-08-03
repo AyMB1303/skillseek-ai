@@ -9,10 +9,11 @@ class JobOffer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(150), nullable=False)
     description = db.Column(db.Text, nullable=False)
-    # Criteres eliminatoires (systeme expert - Sprint 3)
-    required_skills = db.Column(db.JSON, default=list)   # ex: ["python", "sql"]
+    # Criteres de qualification (convention ATS : obligatoire vs souhaite)
+    required_skills = db.Column(db.JSON, default=list)    # indispensables
+    preferred_skills = db.Column(db.JSON, default=list)   # appreciees, non bloquantes
     min_experience_years = db.Column(db.Integer, default=0)
-    min_degree = db.Column(db.String(100))               # ex: "Bac+3"
+    min_degree = db.Column(db.String(100))                # ex: "Bac+3"
     status = db.Column(db.String(20), default="open", nullable=False)  # open/closed
     created_at = db.Column(
         db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False
@@ -29,6 +30,7 @@ class JobOffer(db.Model):
             "title": self.title,
             "description": self.description,
             "required_skills": self.required_skills or [],
+            "preferred_skills": self.preferred_skills or [],
             "min_experience_years": self.min_experience_years,
             "min_degree": self.min_degree,
             "status": self.status,

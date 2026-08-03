@@ -133,7 +133,9 @@ export default function GestionOffres() {
 function ModaleOffre({ ouverte, onFermer, onCree }) {
   const [f, setF] = useState({ title: "", description: "", min_experience_years: 0, min_degree: "" });
   const [competences, setCompetences] = useState([]);
+  const [souhaitees, setSouhaitees] = useState([]);
   const [saisie, setSaisie] = useState("");
+  const [saisieSouhaitee, setSaisieSouhaitee] = useState("");
   const [erreurs, setErreurs] = useState({});
   const [envoi, setEnvoi] = useState(false);
 
@@ -143,6 +145,14 @@ function ModaleOffre({ ouverte, onFermer, onCree }) {
     const v = saisie.trim().toLowerCase();
     if (!competences.includes(v)) setCompetences([...competences, v]);
     setSaisie("");
+  };
+
+  const ajouterSouhaitee = (e) => {
+    if (e.key !== "Enter" || !saisieSouhaitee.trim()) return;
+    e.preventDefault();
+    const v = saisieSouhaitee.trim().toLowerCase();
+    if (!souhaitees.includes(v)) setSouhaitees([...souhaitees, v]);
+    setSaisieSouhaitee("");
   };
 
   const soumettre = async (e) => {
@@ -155,10 +165,15 @@ function ModaleOffre({ ouverte, onFermer, onCree }) {
 
     setEnvoi(true);
     try {
-      const d = await api.creerOffre({ ...f, required_skills: competences });
+      const d = await api.creerOffre({
+        ...f,
+        required_skills: competences,
+        preferred_skills: souhaitees,
+      });
       onCree(d.offer);
       setF({ title: "", description: "", min_experience_years: 0, min_degree: "" });
       setCompetences([]);
+      setSouhaitees([]);
     } catch (er) {
       setErreurs({ general: er.message });
     } finally {
@@ -200,7 +215,9 @@ function ModaleOffre({ ouverte, onFermer, onCree }) {
         </div>
 
         <div>
-          <label htmlFor="comp" className="etiquette">Compétences requises (Entrée pour ajouter)</label>
+          <label htmlFor="comp" className="etiquette">
+            Compétences obligatoires <span className="font-normal">(Entrée pour ajouter)</span>
+          </label>
           <input id="comp" className="champ" value={saisie} onChange={(e) => setSaisie(e.target.value)}
             onKeyDown={ajouter} placeholder="python, sql, docker…" />
           {competences.length > 0 && (
@@ -213,6 +230,31 @@ function ModaleOffre({ ouverte, onFermer, onCree }) {
               ))}
             </div>
           )}
+          <p className="text-[11px] text-txt2 mt-1.5">
+            Leur absence écarte automatiquement la candidature du classement.
+          </p>
+        </div>
+
+        <div>
+          <label htmlFor="comp-souhait" className="etiquette">
+            Compétences souhaitées <span className="font-normal">(facultatif)</span>
+          </label>
+          <input id="comp-souhait" className="champ" value={saisieSouhaitee}
+            onChange={(e) => setSaisieSouhaitee(e.target.value)}
+            onKeyDown={ajouterSouhaitee} placeholder="power bi, kubernetes…" />
+          {souhaitees.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mt-2">
+              {souhaitees.map((c) => (
+                <button key={c} type="button" onClick={() => setSouhaitees(souhaitees.filter((x) => x !== c))}
+                  className="chip bg-cyan/15 text-cyan hover:bg-erreur/15 hover:text-erreur">
+                  {c} ×
+                </button>
+              ))}
+            </div>
+          )}
+          <p className="text-[11px] text-txt2 mt-1.5">
+            Elles valorisent le profil sans être bloquantes.
+          </p>
         </div>
 
         <div className="grid grid-cols-2 gap-3">

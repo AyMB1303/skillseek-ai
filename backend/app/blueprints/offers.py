@@ -41,6 +41,7 @@ def create_offer(current_user):
         title=data["title"].strip(),
         description=data["description"].strip(),
         required_skills=data.get("required_skills", []),
+        preferred_skills=data.get("preferred_skills", []),
         min_experience_years=int(data.get("min_experience_years", 0)),
         min_degree=data.get("min_degree"),
         recruiter=current_user,
@@ -64,6 +65,8 @@ def update_offer(current_user, offer_id):
             setattr(offer, field, data[field])
     if "required_skills" in data:
         offer.required_skills = data["required_skills"]
+    if "preferred_skills" in data:
+        offer.preferred_skills = data["preferred_skills"]
     if "min_experience_years" in data:
         offer.min_experience_years = int(data["min_experience_years"])
 
