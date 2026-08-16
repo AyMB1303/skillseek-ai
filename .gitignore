@@ -1,50 +1,92 @@
-# Python
+# Ce fichier répond à une seule question : ce contenu est-il RECRÉABLE, ou
+# n'a-t-il rien à faire dans un dépôt ? Tout le reste est versionné, y
+# compris les livrables — rapports, captures, fichier Power BI — qui sont la
+# preuve du travail et pèsent, à eux tous, quelques mégaoctets.
+
+# --- Python ---------------------------------------------------------------
 __pycache__/
 *.pyc
+*.pyo
 .venv/
 venv/
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
 .coverage
+htmlcov/
+*.egg-info/
 
-# Environnement
+# --- Secrets --------------------------------------------------------------
+# Seul `.env.example` est versionné : il documente les variables attendues
+# sans en livrer aucune valeur réelle.
 .env
+.env.*
+!.env.example
 
-# Node (Sprint 2)
+# --- Node / Next ----------------------------------------------------------
 node_modules/
 .next/
+out/
+.eslintcache
+*.tsbuildinfo
+npm-debug.log*
+yarn-error.log*
 
-# IDE / OS
+# --- Tests de bout en bout (à venir) --------------------------------------
+playwright-report/
+test-results/
+blob-report/
+.playwright/
+
+# --- Sorties de la chaîne d'intégration -----------------------------------
+# Rapports d'analyse et inventaires logiciels : produits à chaque exécution
+# et conservés comme artefacts par GitHub, pas dans l'historique.
+*.sarif
+sbom-*.json
+trivy-*.json
+
+# --- IDE / système --------------------------------------------------------
 .vscode/
 .idea/
+*.swp
 Thumbs.db
 .DS_Store
 
-# Uploads CV (données personnelles - jamais dans Git)
+# --- Données personnelles -------------------------------------------------
+# Les CV déposés ne doivent JAMAIS sortir de la machine qui les héberge.
 backend/uploads/
+backend/instance/
 
-# Corpus d'apprentissage : volumineux, retéléchargeable depuis sa source
+# --- Volumineux et régénérable --------------------------------------------
+# Corpus d'apprentissage : retéléchargeable depuis sa source.
 data/*.csv
-
-# Modèles entraînés : régénérables par `python entrainer_modele.py`
+# Modèles entraînés : reproduits par `python entrainer_modele.py`.
 models/*.joblib
 models/cache/
 models/*.json
+# Exports décisionnels : reproduits par `flask bi-export`, et porteurs de
+# données de candidatures.
+exports/*.csv
 
-# Maquettes HTML ayant servi à concevoir l'interface. Le frontend Next.js les
-# a remplacées : elles ne sont plus ni compilées ni servies, et n'ont plus
-# qu'une valeur d'archive.
+# --- Archives -------------------------------------------------------------
+# Maquettes HTML ayant servi à concevoir l'interface, remplacées par le
+# frontend Next.js : ni compilées, ni servies.
 design/
 
-# Fichiers intermédiaires de compilation LaTeX. Seuls le .tex et le .pdf
-# comptent ; le reste est reproduit à chaque compilation.
+# --- LaTeX ----------------------------------------------------------------
+# Seuls le .tex (source) et le .pdf (livrable, lisible sans installer LaTeX)
+# sont versionnés. Tout le reste est reproduit à chaque compilation.
 docs/*.aux
 docs/*.log
 docs/*.out
 docs/*.toc
+docs/*.lof
+docs/*.lot
+docs/*.bbl
+docs/*.blg
+docs/*.nav
+docs/*.snm
+docs/*.vrb
 docs/*.synctex.gz
 docs/*.fls
 docs/*.fdb_latexmk
-
-# Exports décisionnels : reproduits par `flask bi-export`, et porteurs de
-# données de candidatures qui n'ont rien à faire dans un dépôt.
-exports/*.csv
