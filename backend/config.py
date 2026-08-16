@@ -20,6 +20,27 @@ class BaseConfig:
     UPLOAD_FOLDER = os.path.abspath(os.getenv("UPLOAD_FOLDER", "uploads"))
     MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5 Mo max par CV
 
+    # Origines autorisees a appeler l'API depuis un navigateur.
+    #
+    # « * » convenait tant que le frontend et l'API partageaient la machine du
+    # developpeur. Deploye, il autoriserait n'importe quel site a interroger
+    # l'API avec les identifiants de la personne connectee. La liste est donc
+    # declaree, avec le poste de developpement pour valeur par defaut.
+    ORIGINES_AUTORISEES = [
+        origine.strip()
+        for origine in os.getenv(
+            "FRONTEND_ORIGIN", "http://localhost:3000,http://127.0.0.1:3000"
+        ).split(",")
+        if origine.strip()
+    ]
+
+    # Protection contre l'essai systematique de mots de passe : au-dela du
+    # seuil, le compte vise refuse les tentatives pendant une duree courte.
+    SEUIL_VERROU_CONNEXION = int(os.getenv("LOGIN_MAX_ECHECS", "5"))
+    DUREE_VERROU_CONNEXION = timedelta(
+        minutes=int(os.getenv("LOGIN_VERROU_MINUTES", "10"))
+    )
+
 
 class DevelopmentConfig(BaseConfig):
     DEBUG = True

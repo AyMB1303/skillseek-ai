@@ -1,0 +1,69 @@
+# Mise à jour automatique des dépendances.
+#
+# Dependabot ouvre une demande de fusion lorsqu'une dépendance sort une
+# nouvelle version, et la chaîne d'intégration s'exécute dessus comme sur
+# n'importe quelle autre contribution : lint, tests, audit, analyse de
+# sécurité. Une montée de version n'est donc jamais fusionnée sans preuve
+# qu'elle ne casse rien.
+#
+# Le rythme est hebdomadaire et le nombre de demandes ouvertes est plafonné.
+# Un dépôt qui reçoit quinze demandes par jour finit par les fermer sans les
+# lire — la fréquence est ce qui décide si l'outil sert ou nuit.
+
+version: 2
+
+updates:
+  - package-ecosystem: pip
+    directory: /backend
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "deps(backend)"
+    # Ces trois-là sont épinglées pour une raison documentée dans
+    # `requirements.txt` : numpy doit rester en 1.x, spaCy et thinc étant
+    # compilés contre cette version. Une montée automatique casserait le
+    # chargement du modèle linguistique.
+    ignore:
+      - dependency-name: numpy
+        versions: [">=2.0.0"]
+      - dependency-name: spacy
+        update-types: [version-update:semver-major]
+      - dependency-name: torch
+        update-types: [version-update:semver-major]
+
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "deps(frontend)"
+    groups:
+      # Les paquets de développement montent ensemble : dix demandes
+      # séparées pour des outils de compilation n'apportent rien.
+      outils-de-developpement:
+        dependency-type: development
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: "ci"
+
+  - package-ecosystem: docker
+    directory: /backend
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: "deps(docker)"
+
+  - package-ecosystem: docker
+    directory: /frontend
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: "deps(docker)"

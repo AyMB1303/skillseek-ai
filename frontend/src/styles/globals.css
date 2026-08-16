@@ -3,25 +3,164 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ---------------------------------------------------------------------------
+   Thèmes
+   Les valeurs sont exprimées en composantes RVB séparées par des espaces,
+   forme attendue par Tailwind pour appliquer les opacités.
+   Le thème sombre est celui par défaut (exigence du cahier des charges) ;
+   le thème clair répond au besoin d'accessibilité en environnement lumineux.
+--------------------------------------------------------------------------- */
+
+:root,
+[data-theme="dark"] {
+  --c-fond: 11 18 32;          /* #0B1220 */
+  --c-surface: 17 26 46;       /* #111A2E */
+  --c-surface2: 13 21 38;      /* #0D1526 */
+  --c-bordure: 30 42 68;       /* #1E2A44 */
+  --c-accent: 59 130 246;      /* #3B82F6 */
+  --c-cyan: 34 211 238;        /* #22D3EE */
+  --c-succes: 52 211 153;      /* #34D399 */
+  --c-alerte: 245 158 11;      /* #F59E0B */
+  --c-erreur: 248 113 113;     /* #F87171 */
+  --c-txt: 229 234 243;        /* #E5EAF3 */
+  --c-txt2: 139 152 184;       /* #8B98B8 */
+  --ombre-carte: 0 0 0 / 0.3;
+}
+
+[data-theme="light"] {
+  --c-fond: 247 249 252;       /* #F7F9FC */
+  --c-surface: 255 255 255;    /* #FFFFFF */
+  --c-surface2: 255 255 255;   /* #FFFFFF */
+  --c-bordure: 223 229 238;    /* #DFE5EE */
+  --c-accent: 37 99 235;       /* #2563EB - assombri pour le contraste sur blanc */
+  --c-cyan: 8 145 178;         /* #0891B2 */
+  --c-succes: 5 150 105;       /* #059669 */
+  --c-alerte: 180 83 9;        /* #B45309 */
+  --c-erreur: 220 38 38;       /* #DC2626 */
+  --c-txt: 15 27 45;           /* #0F1B2D */
+  --c-txt2: 91 106 130;        /* #5B6A82 */
+  --ombre-carte: 15 27 45 / 0.06;
+}
+
 @layer base {
   html, body, #__next { height: 100%; }
-  body { @apply bg-fond text-txt font-sans antialiased; }
+  body {
+    @apply bg-fond text-txt font-sans antialiased;
+    transition: background-color 150ms ease, color 150ms ease;
+  }
   ::placeholder { @apply text-txt2 opacity-70; }
+
   /* Focus visible partout : exigence d'accessibilite */
   *:focus-visible { @apply outline-none ring-2 ring-accent ring-offset-2 ring-offset-fond; }
+
   ::-webkit-scrollbar { width: 10px; height: 10px; }
   ::-webkit-scrollbar-thumb { @apply bg-bordure rounded-full; }
+
+  /* Champs natifs : le navigateur doit adopter le theme courant
+     (calendriers, listes deroulantes, barres de defilement). */
+  [data-theme="dark"] { color-scheme: dark; }
+  [data-theme="light"] { color-scheme: light; }
 }
 
 @layer components {
-  .carte { @apply bg-surface border border-bordure rounded-xl2; }
+  /* En mode clair, une ombre legere remplace le contraste de fond
+     qui distingue les cartes en mode sombre. */
+  .carte {
+    @apply bg-surface border border-bordure rounded-xl2;
+    box-shadow: 0 1px 2px rgb(var(--ombre-carte));
+  }
   .btn { @apply inline-flex items-center justify-center gap-2 rounded-[10px] px-4 py-2.5 text-sm font-semibold
           transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[40px]; }
-  .btn-primaire { @apply btn bg-accent text-white hover:bg-blue-500; }
+  .btn-primaire { @apply btn bg-accent text-white hover:opacity-90; }
   .btn-secondaire { @apply btn bg-surface border border-bordure text-txt hover:border-accent; }
   .btn-fantome { @apply btn text-txt2 hover:text-txt hover:bg-surface; }
   .champ { @apply w-full bg-surface2 border border-bordure rounded-[10px] px-3.5 py-2.5 text-sm
            text-txt placeholder:text-txt2 focus:border-accent transition-colors; }
   .etiquette { @apply block text-xs font-medium text-txt2 mb-1.5; }
   .chip { @apply inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium; }
+}
+
+/* En mode clair, les champs se distinguent du fond blanc des cartes. */
+[data-theme="light"] .champ { @apply bg-fond; }
+
+/* ------------------------------------------------------------------ */
+/* Mouvement                                                          */
+/*                                                                    */
+/* Le parti pris est le même partout : l'animation accompagne une      */
+/* information qui apparaît, elle ne la remplace pas et ne se répète   */
+/* jamais en boucle. Seules `transform` et `opacity` sont animées —    */
+/* le navigateur les traite sans recalculer la mise en page.           */
+/* ------------------------------------------------------------------ */
+
+@keyframes apparition {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Entrée d'un élément d'une liste. Le décalage est porté par
+   `animation-delay`, appliqué en ligne selon le rang. */
+.entree {
+  animation: apparition 380ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Barre de progression qui se remplit depuis la gauche. La largeur reste
+   fixée en CSS ; c'est l'échelle qui varie, donc aucun recalcul de mise
+   en page à chaque image. */
+.jauge-remplissage {
+  transform-origin: left center;
+  animation: remplir 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes remplir {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+/* Tracé d'une courbe : le trait se dessine dans le sens de la lecture.
+   `pathLength="1"` (posé sur l'élément SVG) normalise la longueur, donc
+   les valeurs ci-dessous ne dépendent pas de la taille du graphique. */
+.trace-courbe {
+  stroke-dasharray: 1;
+  animation: tracer 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes tracer {
+  from { stroke-dashoffset: 1; }
+  to   { stroke-dashoffset: 0; }
+}
+
+/* Survol des cartes : un relief discret, pas un rebond. */
+.carte-reactive {
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+.carte-reactive:hover {
+  transform: translateY(-2px);
+  border-color: rgb(var(--c-accent) / 0.4);
+  box-shadow: 0 6px 18px rgb(var(--ombre-carte));
+}
+
+/* Compétence mise en avant lorsqu'on survole sa correspondante. */
+.correspondance {
+  transition: transform 140ms ease, box-shadow 140ms ease, opacity 140ms ease;
+}
+.correspondance-active {
+  transform: scale(1.06);
+  box-shadow: 0 0 0 2px rgb(var(--c-accent) / 0.45);
+}
+.correspondance-effacee { opacity: 0.35; }
+
+/* Le réglage système fait autorité : tout mouvement est neutralisé, et
+   l'interface reste complète. Les états finaux sont conservés — c'est
+   pour cela que les animations sont declarées en `both`. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .carte-reactive:hover,
+  .correspondance-active { transform: none; }
 }

@@ -50,9 +50,18 @@ EN_TETES = {
 }
 
 
-def _sans_accents(texte):
+def sans_accents(texte):
+    """Retire les accents : les CV les omettent fréquemment.
+
+    Exposée publiquement car les autres modules d'analyse s'appuient sur la
+    même normalisation, condition pour que leurs comparaisons concordent.
+    """
     nfkd = unicodedata.normalize("NFKD", texte or "")
     return "".join(c for c in nfkd if not unicodedata.combining(c))
+
+
+# Conserve pour les appels internes existants
+_sans_accents = sans_accents
 
 
 def _identifier_section(ligne):

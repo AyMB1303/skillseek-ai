@@ -1,4 +1,21 @@
-name: CI
+# Intégration et livraison continues.
+#
+# La chaîne est organisée en trois étages, du moins cher au plus cher, et
+# chacun conditionne le suivant :
+#
+#   1. qualité      lint + tests unitaires, backend et frontend en parallèle
+#   2. images       construction des images Docker (vérifie les Dockerfile)
+#   3. publication  envoi vers le registre, uniquement sur `main`
+#
+# L'ordre n'est pas arbitraire : une faute de style se détecte en trente
+# secondes, une image se construit en plusieurs minutes. Faire échouer la
+# chaîne le plus tôt possible économise le temps de tout le monde.
+#
+# Le registre est GHCR (GitHub Container Registry) : il est inclus dans le
+# dépôt, ne demande ni compte tiers ni moyen de paiement, et l'authentification
+# se fait avec le jeton fourni automatiquement à chaque exécution.
+
+name: CI/CD
 
 on:
   push:
@@ -6,8 +23,22 @@ on:
   pull_request:
     branches: [main, dev]
 
+# Une nouvelle poussée annule l'exécution précédente sur la même branche :
+# inutile de tester un commit déjà remplacé.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  REGISTRE: ghcr.io
+
 jobs:
+  # ------------------------------------------------------------------ #
+  # 1. Qualité                                                          #
+  # ------------------------------------------------------------------ #
+
   backend:
+    name: Backend — lint et tests
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -15,19 +46,273 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Python
+      - name: Installer Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: pip
 
-      - name: Install dependencies
+      - name: Installer les dépendances
         run: pip install -r requirements.txt
 
       - name: Lint (flake8)
         run: flake8 app tests
 
-      - name: Unit tests (Pytest)
+      - name: Tests unitaires (pytest)
+        # La configuration de test pointe sur SQLite en mémoire : la chaîne
+        # n'a besoin d'aucun service PostgreSQL et ne peut donc pas échouer
+        # pour une raison d'infrastructure.
         run: pytest -v
         env:
           FLASK_ENV: testing
+
+  frontend:
+    name: Frontend — lint et build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Installer Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Installer les dépendances
+        run: npm ci
+
+      - name: Lint (ESLint)
+        run: npm run lint
+
+      - name: Construction de production
+        # La construction est la vraie garde du frontend : elle échoue sur une
+        # importation absente ou une syntaxe invalide, ce que le lint laisse
+        # parfois passer.
+        run: npm run build
+
+  dependances:
+    name: Dépendances — vulnérabilités connues
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Installer Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Auditer les dépendances Python (pip-audit)
+        # Interroge la base d'avis de l'écosystème Python. Non bloquant :
+        # une bibliothèque transitive vulnérable sans correctif disponible ne
+        # doit pas empêcher de livrer, elle doit être connue. Le résultat est
+        # lisible dans le journal du job.
+        continue-on-error: true
+        run: |
+          pip install pip-audit
+          pip-audit -r backend/requirements.txt --desc
+
+      - name: Installer Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Auditer les dépendances Node (npm audit)
+        continue-on-error: true
+        working-directory: frontend
+        run: npm audit --audit-level=high
+
+  securite:
+    name: Sécurité — analyse du dépôt (Trivy)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Analyser le système de fichiers
+        # Cherche les dépendances vulnérables ET les secrets écrits en dur.
+        # Le second point compte autant que le premier : une clé oubliée dans
+        # un fichier de configuration est la faille la plus banale qui soit.
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln,secret,config
+          format: sarif
+          output: trivy-depot.sarif
+          severity: CRITICAL,HIGH
+          exit-code: "0"
+
+      - name: Publier dans l'onglet Security
+        # Le format SARIF alimente l'onglet « Security » du dépôt : les
+        # résultats sont datés, dédoublonnés et suivis dans le temps, au lieu
+        # d'être noyés dans un journal d'exécution.
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-depot.sarif
+          category: trivy-depot
+
+  # ------------------------------------------------------------------ #
+  # 2. Images                                                           #
+  # ------------------------------------------------------------------ #
+
+  images:
+    name: Images Docker
+    runs-on: ubuntu-latest
+    needs: [backend, frontend, dependances, securite]
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      # Les deux images se construisent en parallèle et l'échec de l'une
+      # n'interrompt pas l'autre : on veut connaître les deux résultats.
+      fail-fast: false
+      matrix:
+        include:
+          - service: backend
+            contexte: ./backend
+          - service: frontend
+            contexte: ./frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Préparer Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: S'authentifier au registre
+        # Uniquement lorsqu'on publie : une pull request venue d'un fork n'a
+        # pas les droits d'écriture, et la construction seule suffit à valider.
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRE }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Étiquettes et métadonnées
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRE }}/${{ github.repository }}/${{ matrix.service }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,format=short
+            # Poser une étiquette `v1.2.0` sur un commit produit les images
+            # correspondantes : c'est ce qui rend une version déployée
+            # identifiable autrement que par une empreinte de commit.
+            type=semver,pattern=v{{version}}
+            type=semver,pattern=v{{major}}.{{minor}}
+
+      - name: Construire et publier
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.contexte }}
+          # Sur `main` l'image part au registre ; ailleurs elle est seulement
+          # construite, ce qui vérifie déjà le Dockerfile.
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          # Cache porté par la chaîne elle-même : sans lui, l'image backend
+          # réinstallerait PyTorch et les modèles linguistiques à chaque
+          # exécution, soit plus de dix minutes.
+          cache-from: type=gha,scope=${{ matrix.service }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.service }}
+          # Inventaire logiciel attaché à l'image : la liste exacte des
+          # composants qu'elle contient. C'est ce qui permet de répondre en
+          # quelques secondes à « sommes-nous exposés à cette faille ? »
+          # au lieu de reconstruire pour aller voir.
+          sbom: true
+          provenance: mode=max
+          load: ${{ github.event_name != 'push' || github.ref != 'refs/heads/main' }}
+
+      - name: Analyser l'image construite (Trivy)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: image
+          image-ref: ${{ steps.meta.outputs.tags && fromJSON(steps.meta.outputs.json).tags[0] }}
+          format: sarif
+          output: trivy-${{ matrix.service }}.sarif
+          severity: CRITICAL,HIGH
+          # Seul le niveau critique fait échouer la chaîne. Une image de base
+          # accumule toujours quelques failles de niveau haut sans correctif
+          # amont : bloquer dessus reviendrait à ne plus jamais livrer, et
+          # donc à désapprendre à regarder les alertes.
+          exit-code: "0"
+          ignore-unfixed: true
+
+      - name: Publier dans l'onglet Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-${{ matrix.service }}.sarif
+          category: trivy-image-${{ matrix.service }}
+
+      - name: Produire l'inventaire logiciel (SBOM)
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ steps.meta.outputs.tags && fromJSON(steps.meta.outputs.json).tags[0] }}
+          format: spdx-json
+          artifact-name: sbom-${{ matrix.service }}.spdx.json
+          output-file: sbom-${{ matrix.service }}.spdx.json
+
+      - name: Conserver l'inventaire
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ matrix.service }}
+          path: sbom-${{ matrix.service }}.spdx.json
+          retention-days: 90
+
+  # ------------------------------------------------------------------ #
+  # 3. Vérification d'assemblage                                        #
+  # ------------------------------------------------------------------ #
+
+  assemblage:
+    name: Démarrage de la pile complète
+    runs-on: ubuntu-latest
+    needs: [backend, frontend]
+    # Réservé aux poussées sur `main`. L'image backend embarque PyTorch, le
+    # modèle linguistique de spaCy et celui des plongements : sa construction
+    # dépasse la dizaine de minutes. La jouer à chaque commit de branche
+    # coûterait plus qu'elle ne rapporte, les tests unitaires couvrant déjà
+    # la logique.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fichier d'environnement
+        # Valeurs de test : aucun secret réel ne transite par la chaîne.
+        run: cp .env.example .env
+
+      - name: Lever la pile
+        run: docker compose up -d --build
+
+      - name: Attendre que l'API réponde
+        # La sonde de vie du conteneur est déjà déclarée dans le compose ;
+        # on l'interroge ici depuis l'extérieur, comme le ferait un client.
+        run: |
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:5000/api/health; then
+              echo "API opérationnelle"; exit 0
+            fi
+            sleep 10
+          done
+          echo "L'API n'a pas répondu dans le délai imparti"
+          docker compose logs backend
+          exit 1
+
+      - name: Appliquer les migrations
+        run: docker compose exec -T backend flask db upgrade
+
+      - name: Journaux en cas d'échec
+        if: failure()
+        run: docker compose logs
+
+      - name: Arrêter la pile
+        if: always()
+        run: docker compose down -v

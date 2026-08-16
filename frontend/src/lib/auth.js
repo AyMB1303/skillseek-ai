@@ -7,7 +7,7 @@ const ContexteAuth = createContext(null);
 
 // Page d'accueil selon le rôle : chacun arrive sur son écran utile.
 export const ACCUEIL_PAR_ROLE = {
-  admin: "/admin/utilisateurs",
+  admin: "/admin",
   recruiter: "/dashboard",
   candidate: "/offres",
 };

@@ -21,3 +21,30 @@ Thumbs.db
 
 # Uploads CV (données personnelles - jamais dans Git)
 backend/uploads/
+
+# Corpus d'apprentissage : volumineux, retéléchargeable depuis sa source
+data/*.csv
+
+# Modèles entraînés : régénérables par `python entrainer_modele.py`
+models/*.joblib
+models/cache/
+models/*.json
+
+# Maquettes HTML ayant servi à concevoir l'interface. Le frontend Next.js les
+# a remplacées : elles ne sont plus ni compilées ni servies, et n'ont plus
+# qu'une valeur d'archive.
+design/
+
+# Fichiers intermédiaires de compilation LaTeX. Seuls le .tex et le .pdf
+# comptent ; le reste est reproduit à chaque compilation.
+docs/*.aux
+docs/*.log
+docs/*.out
+docs/*.toc
+docs/*.synctex.gz
+docs/*.fls
+docs/*.fdb_latexmk
+
+# Exports décisionnels : reproduits par `flask bi-export`, et porteurs de
+# données de candidatures qui n'ont rien à faire dans un dépôt.
+exports/*.csv

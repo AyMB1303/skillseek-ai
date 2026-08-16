@@ -1,0 +1,79 @@
+# Pile de production : mêmes services, images déjà construites.
+#
+# La différence avec `docker-compose.yml` tient en une ligne par service :
+# `image:` remplace `build:`. En développement on compile ce qu'on vient
+# d'écrire ; en production on démarre exactement l'image qui a traversé la
+# chaîne d'intégration, sans la reconstruire. Reconstruire sur le serveur
+# reviendrait à déployer quelque chose que personne n'a testé.
+#
+# Utilisation :
+#   export IMAGE_TAG=v1.2.0        # ou l'empreinte courte d'un commit
+#   docker compose -f docker-compose.prod.yml pull
+#   docker compose -f docker-compose.prod.yml up -d
+#
+# Retour arrière : la même chose avec l'étiquette précédente. Voir
+# docs/DEVOPS.md.
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: always
+    env_file: .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    # Aucun port publié : la base n'est accessible que depuis le réseau
+    # interne. En développement l'exposer est commode, en production c'est
+    # une porte ouverte sur Internet.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    image: ghcr.io/${GITHUB_REPOSITORY:-aymen/skillseek}/backend:${IMAGE_TAG:-latest}
+    restart: always
+    env_file: .env
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      FLASK_ENV: production
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN}
+      OLLAMA_URL: ${OLLAMA_URL:-http://host.docker.internal:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:3b}
+      # Inscrit dans chaque analyse : permet de savoir quel code a produit
+      # un score donné, des mois après.
+      GIT_SHA: ${IMAGE_TAG:-inconnu}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      # Les CV déposés survivent au remplacement du conteneur.
+      - cv_uploads:/app/uploads
+      - ./models:/app/models
+    ports:
+      - "5000:5000"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/api/ready')\""]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    image: ghcr.io/${GITHUB_REPOSITORY:-aymen/skillseek}/frontend:${IMAGE_TAG:-latest}
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  cv_uploads:

@@ -8,6 +8,10 @@ psycopg2-binary==2.9.10
 python-dotenv==1.0.1
 email-validator==2.2.0
 
+# numpy doit rester en 1.x : spaCy et thinc sont compiles contre cette
+# version, et numpy 2 provoque une erreur d'incompatibilite binaire.
+numpy==1.26.4
+
 # --- Sprint 3 : analyse des CV ---
 # Extraction de la couche texte des PDF et des documents Word
 pdfplumber==0.11.4
@@ -19,6 +23,11 @@ pdf2image==1.17.0
 spacy==3.7.5
 # Plongements lexicaux pour la similarite semantique CV / offre
 sentence-transformers==3.0.1
+
+# --- Modele d'apprentissage supervise ---
+scikit-learn==1.5.1
+pandas==2.2.2
+joblib==1.4.2
 
 # --- Qualite et tests ---
 pytest==8.2.2

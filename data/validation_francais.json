@@ -1,0 +1,514 @@
+[
+  {
+    "cv": "YOUSSEF TAZI\nIngénieur logiciel backend\nyoussef.tazi@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nJanvier 2019 – Présent\nDéveloppeur Backend Senior chez OCP Digital\n  Conception et maintenance d'interfaces de programmation REST avec Flask et PostgreSQL.\n  Mise en place de pipelines d'intégration continue avec Docker et GitHub Actions.\n  Encadrement de trois développeurs et revue de code.\n\nSeptembre 2017 – Décembre 2018\nDéveloppeur Python chez Atos Maroc\n  Développement de traitements de données volumineux avec pandas.\n  Optimisation de requêtes SQL sur des bases de plusieurs millions d'enregistrements.\n\nFORMATION\n\n2017 - Master en Génie Logiciel, Université Mohammed V\n\nCERTIFICATIONS\n\nAWS Certified Developer Associate (2022)\n\nCOMPÉTENCES\n\nPython, SQL, PostgreSQL, Docker, Flask, Django, Git, CI/CD, Kubernetes, Linux\n\nLANGUES\n\nFrançais : bilingue\nAnglais : courant",
+    "offre": "Développeur Backend Python Senior — Casablanca, CDI\n\nNous recherchons un développeur backend expérimenté pour concevoir et maintenir\nnos interfaces de programmation REST. Vous interviendrez sur l'architecture des\nservices, la modélisation des données et les traitements à grande échelle.\n\nProfil recherché :\n- 5 ans d'expérience minimum en développement backend\n- Maîtrise de Python et d'un framework web (Django, Flask ou FastAPI)\n- Solide expérience des bases de données relationnelles, notamment PostgreSQL\n- Pratique de la conteneurisation avec Docker et de l'intégration continue\n- Diplôme Bac+5 en informatique ou équivalent\n\nCompétences appréciées : Kubernetes, architectures distribuées, message brokers.",
+    "label": "Good Fit",
+    "domaine": "backend",
+    "profil": "a",
+    "origine": "paire construite"
+  },
+  {
+    "cv": "ANAS KETTANI\nDéveloppeur backend\nanas.kettani@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nMars 2018 – Présent\nDéveloppeur Backend chez Inwi\n  Développement de services FastAPI adossés à PostgreSQL.\n  Conteneurisation des applications avec Docker et déploiement automatisé.\n  Écriture de tests unitaires.\n\nFORMATION\n\n2016 - Master en Informatique, Université Mohammed V\n\nCOMPÉTENCES\n\nPython, FastAPI, PostgreSQL, Docker, SQL, Git, CI/CD, Linux, Tests\n\nLANGUES\n\nFrançais : bilingue\nAnglais : courant",
+    "offre": "Développeur Backend Python Senior — Casablanca, CDI\n\nNous recherchons un développeur backend expérimenté pour concevoir et maintenir\nnos interfaces de programmation REST. Vous interviendrez sur l'architecture des\nservices, la modélisation des données et les traitements à grande échelle.\n\nProfil recherché :\n- 5 ans d'expérience minimum en développement backend\n- Maîtrise de Python et d'un framework web (Django, Flask ou FastAPI)\n- Solide expérience des bases de données relationnelles, notamment PostgreSQL\n- Pratique de la conteneurisation avec Docker et de l'intégration continue\n- Diplôme Bac+5 en informatique ou équivalent\n\nCompétences appréciées : Kubernetes, architectures distribuées, message brokers.",
+    "label": "Good Fit",
+    "domaine": "backend",
+    "profil": "b",
+    "origine": "paire construite"
+  },
+  {
+    "cv": "YASMINE EL AMRANI\nDéveloppeuse backend\nyasmine.el.amrani@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nMars 2023 – Présent\nDéveloppeuse Python chez Intelcia\n  Développement de services web avec Django et PostgreSQL.\n  Participation au déploiement conteneurisé des applications.\n\nFORMATION\n\n2022 - Licence en Informatique, Université Mohammed V\n\nCOMPÉTENCES\n\nPython, SQL, Django, PostgreSQL, Git, Docker\n\nLANGUES\n\nFrançais : courant\nAnglais : bon niveau",
+    "offre": "Développeur Backend Python Senior — Casablanca, CDI\n\nNous recherchons un développeur backend expérimenté pour concevoir et maintenir\nnos interfaces de programmation REST. Vous interviendrez sur l'architecture des\nservices, la modélisation des données et les traitements à grande échelle.\n\nProfil recherché :\n- 5 ans d'expérience minimum en développement backend\n- Maîtrise de Python et d'un framework web (Django, Flask ou FastAPI)\n- Solide expérience des bases de données relationnelles, notamment PostgreSQL\n- Pratique de la conteneurisation avec Docker et de l'intégration continue\n- Diplôme Bac+5 en informatique ou équivalent\n\nCompétences appréciées : Kubernetes, architectures distribuées, message brokers.",
+    "label": "Potential Fit",
+    "domaine": "backend",
+    "profil": "a",
+    "origine": "paire construite"
+  },
+  {
+    "cv": "ZAKARIA NAJI\nDéveloppeur Python\nzakaria.naji@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nSeptembre 2022 – Présent\nDéveloppeur Backend chez Sopra HR\n  Développement d'interfaces REST avec Flask.\n  Requêtes et optimisation PostgreSQL.\n  Déploiement des services avec Docker.\n\nFORMATION\n\n2020 - Master en Informatique, Université Mohammed V\n\nCOMPÉTENCES\n\nPython, Flask, PostgreSQL, SQL, Docker, Git\n\nLANGUES\n\nFrançais : bilingue\nAnglais : courant",
+    "offre": "Développeur Backend Python Senior — Casablanca, CDI\n\nNous recherchons un développeur backend expérimenté pour concevoir et maintenir\nnos interfaces de programmation REST. Vous interviendrez sur l'architecture des\nservices, la modélisation des données et les traitements à grande échelle.\n\nProfil recherché :\n- 5 ans d'expérience minimum en développement backend\n- Maîtrise de Python et d'un framework web (Django, Flask ou FastAPI)\n- Solide expérience des bases de données relationnelles, notamment PostgreSQL\n- Pratique de la conteneurisation avec Docker et de l'intégration continue\n- Diplôme Bac+5 en informatique ou équivalent\n\nCompétences appréciées : Kubernetes, architectures distribuées, message brokers.",
+    "label": "Potential Fit",
+    "domaine": "backend",
+    "profil": "b",
+    "origine": "paire construite"
+  },
+  {
+    "cv": "NADIA BENNIS\nChargée de communication\nnadia.bennis@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nSeptembre 2021 – Présent\nChargée de communication chez Agence Créative\n  Animation des réseaux sociaux et rédaction de contenus éditoriaux.\n  Organisation d'événements et relations avec la presse.\n\nFORMATION\n\n2021 - Licence en Communication, Université Mohammed V\n\nCOMPÉTENCES\n\nRédaction, Réseaux sociaux, Événementiel, Relations presse\n\nLANGUES\n\nFrançais : bilingue\nAnglais : intermédiaire",
+    "offre": "Développeur Backend Python Senior — Casablanca, CDI\n\nNous recherchons un développeur backend expérimenté pour concevoir et maintenir\nnos interfaces de programmation REST. Vous interviendrez sur l'architecture des\nservices, la modélisation des données et les traitements à grande échelle.\n\nProfil recherché :\n- 5 ans d'expérience minimum en développement backend\n- Maîtrise de Python et d'un framework web (Django, Flask ou FastAPI)\n- Solide expérience des bases de données relationnelles, notamment PostgreSQL\n- Pratique de la conteneurisation avec Docker et de l'intégration continue\n- Diplôme Bac+5 en informatique ou équivalent\n\nCompétences appréciées : Kubernetes, architectures distribuées, message brokers.",
+    "label": "No Fit",
+    "domaine": "backend",
+    "profil": "a",
+    "origine": "paire construite"
+  },
+  {
+    "cv": "SALMA IDRISSI\nDéveloppeuse frontend\nsalma.idrissi@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nFévrier 2020 – Présent\nDéveloppeuse Frontend Senior chez Capgemini Maroc\n  Conception d'interfaces avec React et Next.js.\n  Travail sur l'accessibilité et les performances des pages.\n  Mise en place de tests d'interface automatisés.\n\nFORMATION\n\n2019 - Master en Systèmes d'Information, Université Mohammed V\n\nCOMPÉTENCES\n\nJavaScript, TypeScript, React, Next.js, CSS, HTML, Tests, Git\n\nLANGUES\n\nFrançais : bilingue\nAnglais : courant",
+    "offre": "Développeur Frontend React — Rabat, CDI, télétravail partiel\n\nAu sein de l'équipe produit, vous concevez et réalisez les interfaces de nos\napplications web. Vous êtes attentif à l'expérience utilisateur, à\nl'accessibilité et aux performances.\n\nProfil recherché :\n- 3 ans d'expérience en développement frontend\n- Maîtrise de JavaScript, React et des feuilles de style CSS\n- Pratique des tests d'interface et de l'intégration continue\n- Diplôme Bac+3 minimum\n\nCompétences appréciées : TypeScript, Next.js, conception d'interfaces.",
+    "label": "Good Fit",
+    "domaine": "frontend",
+    "profil": "a",
+    "origine": "paire construite"
+  },
+  {
+    "cv": "ILYAS MANSOURI\nDéveloppeur web\nilyas.mansouri@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nJuillet 2021 – Présent\nDéveloppeur Frontend chez Dislog Group\n  Développement d'applications React et intégration de maquettes.\n  Écriture de feuilles de style CSS structurées.\n  Tests de composants et revue de code.\n\nFORMATION\n\n2020 - Licence en Informatique, Université Mohammed V\n\nCOMPÉTENCES\n\nJavaScript, React, CSS, HTML, Tests, Git, TypeScript\n\nLANGUES\n\nFrançais : courant",
+    "offre": "Développeur Frontend React — Rabat, CDI, télétravail partiel\n\nAu sein de l'équipe produit, vous concevez et réalisez les interfaces de nos\napplications web. Vous êtes attentif à l'expérience utilisateur, à\nl'accessibilité et aux performances.\n\nProfil recherché :\n- 3 ans d'expérience en développement frontend\n- Maîtrise de JavaScript, React et des feuilles de style CSS\n- Pratique des tests d'interface et de l'intégration continue\n- Diplôme Bac+3 minimum\n\nCompétences appréciées : TypeScript, Next.js, conception d'interfaces.",
+    "label": "Good Fit",
+    "domaine": "frontend",
+    "profil": "b",
+    "origine": "paire construite"
+  },
+  {
+    "cv": "NADA BOUZIDI\nIntégratrice web\nnada.bouzidi@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nJanvier 2024 – Présent\nIntégratrice Web chez Agence Pixel\n  Intégration de maquettes en HTML et CSS.\n  Premiers développements avec React.\n\nFORMATION\n\n2023 - DUT Informatique, Université Mohammed V\n\nCOMPÉTENCES\n\nHTML, CSS, JavaScript, React\n\nLANGUES\n\nFrançais : courant",
+    "offre": "Développeur Frontend React — Rabat, CDI, télétravail partiel\n\nAu sein de l'équipe produit, vous concevez et réalisez les interfaces de nos\napplications web. Vous êtes attentif à l'expérience utilisateur, à\nl'accessibilité et aux performances.\n\nProfil recherché :\n- 3 ans d'expérience en développement frontend\n- Maîtrise de JavaScript, React et des feuilles de style CSS\n- Pratique des tests d'interface et de l'intégration continue\n- Diplôme Bac+3 minimum\n\nCompétences appréciées : TypeScript, Next.js, conception d'interfaces.",
+    "label": "Potential Fit",
+    "domaine": "frontend",
+    "profil": "a",
+    "origine": "paire construite"
+  },
+  {
+    "cv": "SOFIA NACIRI\nDéveloppeuse junior\nsofia.naciri@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nSeptembre 2024 – Présent\nDéveloppeuse Frontend Junior chez Startup Casa\n  Développement de composants React et intégration CSS.\n  Participation aux tests d'interface.\n\nFORMATION\n\n2024 - Licence en Informatique, Université Mohammed V\n\nCOMPÉTENCES\n\nJavaScript, React, CSS, HTML, Git\n\nLANGUES\n\nFrançais : courant",
+    "offre": "Développeur Frontend React — Rabat, CDI, télétravail partiel\n\nAu sein de l'équipe produit, vous concevez et réalisez les interfaces de nos\napplications web. Vous êtes attentif à l'expérience utilisateur, à\nl'accessibilité et aux performances.\n\nProfil recherché :\n- 3 ans d'expérience en développement frontend\n- Maîtrise de JavaScript, React et des feuilles de style CSS\n- Pratique des tests d'interface et de l'intégration continue\n- Diplôme Bac+3 minimum\n\nCompétences appréciées : TypeScript, Next.js, conception d'interfaces.",
+    "label": "Potential Fit",
+    "domaine": "frontend",
+    "profil": "b",
+    "origine": "paire construite"
+  },
+  {
+    "cv": "RACHID ALAMI\nAdministrateur de bases de données\nrachid.alami@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nFévrier 2017 – Présent\nAdministrateur BDD chez CNSS\n  Exploitation et optimisation de bases PostgreSQL et Oracle.\n  Sauvegardes, réplication et sécurisation des accès.\n\nFORMATION\n\n2015 - Master en Systèmes d'Information, Université Mohammed V\n\nCOMPÉTENCES\n\nPostgreSQL, Oracle, SQL, Linux, Docker\n\nLANGUES\n\nFrançais : bilingue\nAnglais : courant",
+    "offre": "Développeur Frontend React — Rabat, CDI, télétravail partiel\n\nAu sein de l'équipe produit, vous concevez et réalisez les interfaces de nos\napplications web. Vous êtes attentif à l'expérience utilisateur, à\nl'accessibilité et aux performances.\n\nProfil recherché :\n- 3 ans d'expérience en développement frontend\n- Maîtrise de JavaScript, React et des feuilles de style CSS\n- Pratique des tests d'interface et de l'intégration continue\n- Diplôme Bac+3 minimum\n\nCompétences appréciées : TypeScript, Next.js, conception d'interfaces.",
+    "label": "No Fit",
+    "domaine": "frontend",
+    "profil": "a",
+    "origine": "paire construite"
+  },
+  {
+    "cv": "REDA ALAOUI\nData scientist\nreda.alaoui@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nJanvier 2020 – Présent\nData Scientist chez Attijariwafa Bank\n  Conception de modèles de scoring et industrialisation en production.\n  Traitement automatique du langage appliqué aux réclamations clients.\n  Tableaux de bord Power BI pour les directions métier.\n\nSeptembre 2018 – Décembre 2019\nAnalyste de données chez Deloitte\n  Analyses statistiques et restitutions décisionnelles.\n\nFORMATION\n\n2018 - Master en Data Science, Université Mohammed V\n\nCERTIFICATIONS\n\nMicrosoft Certified: Azure Data Scientist Associate (2021)\n\nCOMPÉTENCES\n\nPython, Machine Learning, SQL, Deep Learning, NLP, Power BI, pandas, scikit-learn\n\nLANGUES\n\nFrançais : bilingue\nAnglais : courant",
+    "offre": "Data Scientist — Casablanca, CDI\n\nVous rejoignez notre pôle données pour concevoir des modèles prédictifs et\nindustrialiser leur mise en production. Vous accompagnez les équipes métier\ndans l'interprétation des résultats.\n\nProfil recherché :\n- 4 ans d'expérience en science des données\n- Maîtrise de Python et des bibliothèques d'apprentissage automatique\n- Solide pratique du SQL et de la manipulation de grands volumes\n- Diplôme Bac+5, idéalement en statistiques ou en informatique\n\nCompétences appréciées : apprentissage profond, traitement du langage, Power BI.",
+    "label": "Good Fit",
+    "domaine": "data",
+    "profil": "a",
+    "origine": "paire construite"
+  },
+  {
+    "cv": "MERYEM CHRAIBI\nData scientist\nmeryem.chraibi@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nOctobre 2020 – Présent\nData Scientist chez Maroc Telecom\n  Modèles de prédiction du départ des abonnés.\n  Requêtes SQL sur entrepôt de données volumineux.\n  Restitution des résultats aux directions métier.\n\nFORMATION\n\n2019 - Master en Statistiques Appliquées, Université Mohammed V\n\nCOMPÉTENCES\n\nPython, Machine Learning, SQL, pandas, Power BI, Deep Learning\n\nLANGUES\n\nFrançais : bilingue\nAnglais : courant",
+    "offre": "Data Scientist — Casablanca, CDI\n\nVous rejoignez notre pôle données pour concevoir des modèles prédictifs et\nindustrialiser leur mise en production. Vous accompagnez les équipes métier\ndans l'interprétation des résultats.\n\nProfil recherché :\n- 4 ans d'expérience en science des données\n- Maîtrise de Python et des bibliothèques d'apprentissage automatique\n- Solide pratique du SQL et de la manipulation de grands volumes\n- Diplôme Bac+5, idéalement en statistiques ou en informatique\n\nCompétences appréciées : apprentissage profond, traitement du langage, Power BI.",
+    "label": "Good Fit",
+    "domaine": "data",
+    "profil": "b",
+    "origine": "paire construite"
+  },
+  {
+    "cv": "GHITA SEBTI\nAnalyste de données\nghita.sebti@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nMars 2023 – Présent\nAnalyste Data chez Inwi\n  Analyses prédictives et modélisation.\n  Requêtes SQL sur entrepôt de données.\n\nFORMATION\n\n2022 - Master en Statistiques, Université Mohammed V\n\nCOMPÉTENCES\n\nPython, SQL, Machine Learning, pandas\n\nLANGUES\n\nFrançais : courant\nAnglais : bon niveau",
+    "offre": "Data Scientist — Casablanca, CDI\n\nVous rejoignez notre pôle données pour concevoir des modèles prédictifs et\nindustrialiser leur mise en production. Vous accompagnez les équipes métier\ndans l'interprétation des résultats.\n\nProfil recherché :\n- 4 ans d'expérience en science des données\n- Maîtrise de Python et des bibliothèques d'apprentissage automatique\n- Solide pratique du SQL et de la manipulation de grands volumes\n- Diplôme Bac+5, idéalement en statistiques ou en informatique\n\nCompétences appréciées : apprentissage profond, traitement du langage, Power BI.",
+    "label": "Potential Fit",
+    "domaine": "data",
+    "profil": "a",
+    "origine": "paire construite"
+  },
+  {
+    "cv": "IMANE CHERKAOUI\nAnalyste décisionnel\nimane.cherkaoui@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nNovembre 2022 – Présent\nAnalyste BI chez Label Vie\n  Construction de tableaux de bord Power BI.\n  Requêtes SQL et premiers modèles d'apprentissage automatique en Python.\n\nFORMATION\n\n2021 - Licence en Mathématiques, Université Mohammed V\n\nCOMPÉTENCES\n\nSQL, Python, Power BI, Machine Learning\n\nLANGUES\n\nFrançais : courant",
+    "offre": "Data Scientist — Casablanca, CDI\n\nVous rejoignez notre pôle données pour concevoir des modèles prédictifs et\nindustrialiser leur mise en production. Vous accompagnez les équipes métier\ndans l'interprétation des résultats.\n\nProfil recherché :\n- 4 ans d'expérience en science des données\n- Maîtrise de Python et des bibliothèques d'apprentissage automatique\n- Solide pratique du SQL et de la manipulation de grands volumes\n- Diplôme Bac+5, idéalement en statistiques ou en informatique\n\nCompétences appréciées : apprentissage profond, traitement du langage, Power BI.",
+    "label": "Potential Fit",
+    "domaine": "data",
+    "profil": "b",
+    "origine": "paire construite"
+  },
+  {
+    "cv": "HAMZA BERRADA\nTechnicien de maintenance\nhamza.berrada@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nOctobre 2019 – Présent\nTechnicien de maintenance chez Groupe Industriel\n  Maintenance préventive et corrective des équipements de production.\n\nFORMATION\n\n2019 - Baccalauréat technique, Université Mohammed V\n\nCOMPÉTENCES\n\nMaintenance, Électromécanique, Hydraulique\n\nLANGUES\n\nFrançais : courant",
+    "offre": "Data Scientist — Casablanca, CDI\n\nVous rejoignez notre pôle données pour concevoir des modèles prédictifs et\nindustrialiser leur mise en production. Vous accompagnez les équipes métier\ndans l'interprétation des résultats.\n\nProfil recherché :\n- 4 ans d'expérience en science des données\n- Maîtrise de Python et des bibliothèques d'apprentissage automatique\n- Solide pratique du SQL et de la manipulation de grands volumes\n- Diplôme Bac+5, idéalement en statistiques ou en informatique\n\nCompétences appréciées : apprentissage profond, traitement du langage, Power BI.",
+    "label": "No Fit",
+    "domaine": "data",
+    "profil": "a",
+    "origine": "paire construite"
+  },
+  {
+    "cv": "KHADIJA RAMI\nComptable générale\nkhadija.rami@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nSeptembre 2019 – Présent\nComptable Générale chez Marsa Maroc\n  Tenue de la comptabilité générale et déclarations fiscales mensuelles.\n  Préparation des états financiers annuels et relation avec le commissaire aux comptes.\n  Utilisation avancée d'Excel et du logiciel Sage.\n\nFORMATION\n\n2018 - Licence en Comptabilité et Finance, Université Mohammed V\n\nCOMPÉTENCES\n\nComptabilité, Fiscalité, Excel, Sage, Analyse financière\n\nLANGUES\n\nFrançais : bilingue\nArabe : langue maternelle",
+    "offre": "Comptable Général — Marrakech, CDI\n\nVous assurez la tenue de la comptabilité générale, les déclarations fiscales et\nla préparation des états financiers. Vous êtes l'interlocuteur privilégié du\ncommissaire aux comptes.\n\nProfil recherché :\n- 4 ans d'expérience en comptabilité générale\n- Maîtrise des normes comptables marocaines et des déclarations fiscales\n- Pratique d'un logiciel de comptabilité et d'Excel à un niveau avancé\n- Diplôme Bac+3 minimum en comptabilité, finance ou gestion\n\nCompétences appréciées : logiciel Sage, missions d'audit.",
+    "label": "Good Fit",
+    "domaine": "comptable",
+    "profil": "a",
+    "origine": "paire construite"
+  },
+  {
+    "cv": "HICHAM SABRI\nComptable\nhicham.sabri@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nFévrier 2019 – Présent\nComptable Général chez Cabinet Fiduciaire Atlas\n  Écritures comptables et liasse fiscale pour un portefeuille de clients.\n  Déclarations de TVA et suivi des impôts.\n  Travaux d'audit légal.\n\nFORMATION\n\n2017 - Master en Finance et Comptabilité, Université Mohammed V\n\nCOMPÉTENCES\n\nComptabilité générale, Fiscalité, Excel, Sage, Audit\n\nLANGUES\n\nFrançais : bilingue\nArabe : langue maternelle",
+    "offre": "Comptable Général — Marrakech, CDI\n\nVous assurez la tenue de la comptabilité générale, les déclarations fiscales et\nla préparation des états financiers. Vous êtes l'interlocuteur privilégié du\ncommissaire aux comptes.\n\nProfil recherché :\n- 4 ans d'expérience en comptabilité générale\n- Maîtrise des normes comptables marocaines et des déclarations fiscales\n- Pratique d'un logiciel de comptabilité et d'Excel à un niveau avancé\n- Diplôme Bac+3 minimum en comptabilité, finance ou gestion\n\nCompétences appréciées : logiciel Sage, missions d'audit.",
+    "label": "Good Fit",
+    "domaine": "comptable",
+    "profil": "b",
+    "origine": "paire construite"
+  },
+  {
+    "cv": "OMAR FASSI\nAssistant comptable\nomar.fassi@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nJuillet 2023 – Présent\nAssistant Comptable chez Cabinet Conseil\n  Saisie des écritures comptables et rapprochements bancaires.\n\nFORMATION\n\n2023 - Licence en Gestion, Université Mohammed V\n\nCOMPÉTENCES\n\nComptabilité, Excel\n\nLANGUES\n\nFrançais : courant",
+    "offre": "Comptable Général — Marrakech, CDI\n\nVous assurez la tenue de la comptabilité générale, les déclarations fiscales et\nla préparation des états financiers. Vous êtes l'interlocuteur privilégié du\ncommissaire aux comptes.\n\nProfil recherché :\n- 4 ans d'expérience en comptabilité générale\n- Maîtrise des normes comptables marocaines et des déclarations fiscales\n- Pratique d'un logiciel de comptabilité et d'Excel à un niveau avancé\n- Diplôme Bac+3 minimum en comptabilité, finance ou gestion\n\nCompétences appréciées : logiciel Sage, missions d'audit.",
+    "label": "Potential Fit",
+    "domaine": "comptable",
+    "profil": "a",
+    "origine": "paire construite"
+  },
+  {
+    "cv": "FATIMA ZAHRA ALAOUI\nComptable junior\nfatima.zahra.alaoui@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nOctobre 2023 – Présent\nComptable Junior chez PME Distribution\n  Tenue des écritures comptables courantes et préparation des déclarations fiscales sous la supervision du chef comptable.\n  Travaux sur Excel et Sage.\n\nFORMATION\n\n2022 - Licence en Comptabilité, Université Mohammed V\n\nCOMPÉTENCES\n\nComptabilité générale, Fiscalité, Excel, Sage\n\nLANGUES\n\nFrançais : bilingue\nArabe : langue maternelle",
+    "offre": "Comptable Général — Marrakech, CDI\n\nVous assurez la tenue de la comptabilité générale, les déclarations fiscales et\nla préparation des états financiers. Vous êtes l'interlocuteur privilégié du\ncommissaire aux comptes.\n\nProfil recherché :\n- 4 ans d'expérience en comptabilité générale\n- Maîtrise des normes comptables marocaines et des déclarations fiscales\n- Pratique d'un logiciel de comptabilité et d'Excel à un niveau avancé\n- Diplôme Bac+3 minimum en comptabilité, finance ou gestion\n\nCompétences appréciées : logiciel Sage, missions d'audit.",
+    "label": "Potential Fit",
+    "domaine": "comptable",
+    "profil": "b",
+    "origine": "paire construite"
+  },
+  {
+    "cv": "MOHAMMED BENJELLOUN\nIngénieur DevOps\nmohammed.benjelloun@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nJanvier 2018 – Présent\nIngénieur DevOps chez Maroc Telecom\n  Orchestration Kubernetes et automatisation des déploiements.\n  Migration d'infrastructures vers le cloud.\n\nFORMATION\n\n2016 - Master en Réseaux et Systèmes, Université Mohammed V\n\nCERTIFICATIONS\n\nCertified Kubernetes Administrator (2021)\n\nCOMPÉTENCES\n\nDocker, Kubernetes, CI/CD, Linux, AWS, Python\n\nLANGUES\n\nFrançais : bilingue\nAnglais : courant",
+    "offre": "Comptable Général — Marrakech, CDI\n\nVous assurez la tenue de la comptabilité générale, les déclarations fiscales et\nla préparation des états financiers. Vous êtes l'interlocuteur privilégié du\ncommissaire aux comptes.\n\nProfil recherché :\n- 4 ans d'expérience en comptabilité générale\n- Maîtrise des normes comptables marocaines et des déclarations fiscales\n- Pratique d'un logiciel de comptabilité et d'Excel à un niveau avancé\n- Diplôme Bac+3 minimum en comptabilité, finance ou gestion\n\nCompétences appréciées : logiciel Sage, missions d'audit.",
+    "label": "No Fit",
+    "domaine": "comptable",
+    "profil": "a",
+    "origine": "paire construite"
+  },
+  {
+    "cv": "KARIM OUAZZANI\nIngénieur DevOps\nkarim.ouazzani@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nMars 2019 – Présent\nIngénieur DevOps chez OCP Group\n  Exploitation de clusters Kubernetes en production.\n  Automatisation des déploiements et des sauvegardes sur Linux.\n  Chaînes de livraison continue et supervision des environnements.\n\nFORMATION\n\n2017 - Master en Réseaux et Systèmes, Université Mohammed V\n\nCERTIFICATIONS\n\nCertified Kubernetes Administrator (2022)\n\nCOMPÉTENCES\n\nDocker, Kubernetes, Linux, CI/CD, AWS, Python, Git\n\nLANGUES\n\nFrançais : bilingue\nAnglais : courant",
+    "offre": "Ingénieur DevOps — Casablanca, CDI\n\nVous industrialisez le déploiement de nos applications et garantissez la\ndisponibilité des environnements de production.\n\nProfil recherché :\n- 4 ans d'expérience en exploitation ou en ingénierie de production\n- Maîtrise de Docker, de Kubernetes et des systèmes Linux\n- Automatisation des chaînes de livraison continue\n- Diplôme Bac+5 en informatique ou équivalent\n\nCompétences appréciées : cloud AWS, supervision, scripts Python.",
+    "label": "Good Fit",
+    "domaine": "devops",
+    "profil": "a",
+    "origine": "paire construite"
+  },
+  {
+    "cv": "YASSINE BOUKHRIS\nIngénieur de production\nyassine.boukhris@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nJanvier 2019 – Présent\nIngénieur Production chez Banque Populaire\n  Conteneurisation des applications avec Docker et orchestration Kubernetes.\n  Administration de serveurs Linux et automatisation par scripts.\n\nFORMATION\n\n2016 - Master en Informatique, Université Mohammed V\n\nCOMPÉTENCES\n\nDocker, Kubernetes, Linux, CI/CD, Python, AWS\n\nLANGUES\n\nFrançais : bilingue\nAnglais : courant",
+    "offre": "Ingénieur DevOps — Casablanca, CDI\n\nVous industrialisez le déploiement de nos applications et garantissez la\ndisponibilité des environnements de production.\n\nProfil recherché :\n- 4 ans d'expérience en exploitation ou en ingénierie de production\n- Maîtrise de Docker, de Kubernetes et des systèmes Linux\n- Automatisation des chaînes de livraison continue\n- Diplôme Bac+5 en informatique ou équivalent\n\nCompétences appréciées : cloud AWS, supervision, scripts Python.",
+    "label": "Good Fit",
+    "domaine": "devops",
+    "profil": "b",
+    "origine": "paire construite"
+  },
+  {
+    "cv": "AMINE ROCHDI\nAdministrateur systèmes\namine.rochdi@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nSeptembre 2023 – Présent\nAdministrateur Systèmes chez Hôpital Cheikh Zaid\n  Administration de serveurs Linux et conteneurisation avec Docker.\n  Découverte de Kubernetes sur les environnements de test.\n\nFORMATION\n\n2022 - Licence en Réseaux, Université Mohammed V\n\nCOMPÉTENCES\n\nLinux, Docker, Kubernetes, Git\n\nLANGUES\n\nFrançais : courant",
+    "offre": "Ingénieur DevOps — Casablanca, CDI\n\nVous industrialisez le déploiement de nos applications et garantissez la\ndisponibilité des environnements de production.\n\nProfil recherché :\n- 4 ans d'expérience en exploitation ou en ingénierie de production\n- Maîtrise de Docker, de Kubernetes et des systèmes Linux\n- Automatisation des chaînes de livraison continue\n- Diplôme Bac+5 en informatique ou équivalent\n\nCompétences appréciées : cloud AWS, supervision, scripts Python.",
+    "label": "Potential Fit",
+    "domaine": "devops",
+    "profil": "a",
+    "origine": "paire construite"
+  },
+  {
+    "cv": "SOUKAINA BERRADA\nIngénieure systèmes\nsoukaina.berrada@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nFévrier 2023 – Présent\nIngénieure Systèmes chez Wafa Assurance\n  Déploiement conteneurisé avec Docker et Kubernetes.\n  Administration Linux et automatisation des chaînes de livraison.\n\nFORMATION\n\n2021 - Master en Systèmes et Réseaux, Université Mohammed V\n\nCOMPÉTENCES\n\nDocker, Kubernetes, Linux, CI/CD\n\nLANGUES\n\nFrançais : bilingue\nAnglais : courant",
+    "offre": "Ingénieur DevOps — Casablanca, CDI\n\nVous industrialisez le déploiement de nos applications et garantissez la\ndisponibilité des environnements de production.\n\nProfil recherché :\n- 4 ans d'expérience en exploitation ou en ingénierie de production\n- Maîtrise de Docker, de Kubernetes et des systèmes Linux\n- Automatisation des chaînes de livraison continue\n- Diplôme Bac+5 en informatique ou équivalent\n\nCompétences appréciées : cloud AWS, supervision, scripts Python.",
+    "label": "Potential Fit",
+    "domaine": "devops",
+    "profil": "b",
+    "origine": "paire construite"
+  },
+  {
+    "cv": "LEILA SQUALLI\nComptable\nleila.squalli@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nMars 2020 – Présent\nComptable chez Cabinet Comptable Rabat\n  Tenue de la comptabilité générale et déclarations fiscales.\n\nFORMATION\n\n2019 - Licence en Comptabilité, Université Mohammed V\n\nCOMPÉTENCES\n\nComptabilité générale, Fiscalité, Excel, Sage\n\nLANGUES\n\nFrançais : bilingue\nArabe : langue maternelle",
+    "offre": "Ingénieur DevOps — Casablanca, CDI\n\nVous industrialisez le déploiement de nos applications et garantissez la\ndisponibilité des environnements de production.\n\nProfil recherché :\n- 4 ans d'expérience en exploitation ou en ingénierie de production\n- Maîtrise de Docker, de Kubernetes et des systèmes Linux\n- Automatisation des chaînes de livraison continue\n- Diplôme Bac+5 en informatique ou équivalent\n\nCompétences appréciées : cloud AWS, supervision, scripts Python.",
+    "label": "No Fit",
+    "domaine": "devops",
+    "profil": "a",
+    "origine": "paire construite"
+  },
+  {
+    "cv": "MEHDI OUAZZANI\nDéveloppeur Java\nmehdi.ouazzani@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nJanvier 2019 – Présent\nDéveloppeur Java Senior chez Sopra Steria Maroc\n  Développement d'applications Spring Boot adossées à Oracle.\n  Migration vers une architecture de services.\n  Tests automatisés et intégration continue.\n\nFORMATION\n\n2017 - Master en Génie Logiciel, Université Mohammed V\n\nCOMPÉTENCES\n\nJava, Spring, SQL, Oracle, Docker, Tests, CI/CD, Git, Agile\n\nLANGUES\n\nFrançais : bilingue\nAnglais : courant",
+    "offre": "Développeur Java Spring — Rabat, CDI\n\nVous participez à la refonte de nos applications de gestion et à leur\nmigration vers une architecture de services.\n\nProfil recherché :\n- 4 ans d'expérience en développement Java\n- Maîtrise du framework Spring et des bases de données relationnelles\n- Bonne pratique du SQL et des tests automatisés\n- Diplôme Bac+5 en informatique\n\nCompétences appréciées : Docker, méthodes agiles, intégration continue.",
+    "label": "Good Fit",
+    "domaine": "java",
+    "profil": "a",
+    "origine": "paire construite"
+  },
+  {
+    "cv": "TARIK BENSLIMANE\nIngénieur études et développement\ntarik.benslimane@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nSeptembre 2019 – Présent\nDéveloppeur Java chez CIH Bank\n  Applications de gestion en Java et Spring.\n  Requêtes SQL complexes sur PostgreSQL.\n  Écriture de tests unitaires et revue de code.\n\nFORMATION\n\n2018 - Master en Informatique, Université Mohammed V\n\nCOMPÉTENCES\n\nJava, Spring, SQL, PostgreSQL, Tests, Git, Agile\n\nLANGUES\n\nFrançais : bilingue\nAnglais : courant",
+    "offre": "Développeur Java Spring — Rabat, CDI\n\nVous participez à la refonte de nos applications de gestion et à leur\nmigration vers une architecture de services.\n\nProfil recherché :\n- 4 ans d'expérience en développement Java\n- Maîtrise du framework Spring et des bases de données relationnelles\n- Bonne pratique du SQL et des tests automatisés\n- Diplôme Bac+5 en informatique\n\nCompétences appréciées : Docker, méthodes agiles, intégration continue.",
+    "label": "Good Fit",
+    "domaine": "java",
+    "profil": "b",
+    "origine": "paire construite"
+  },
+  {
+    "cv": "OUSSAMA IDRISSI\nDéveloppeur Java junior\noussama.idrissi@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nNovembre 2023 – Présent\nDéveloppeur Java chez ESI Consulting\n  Développement de modules Spring et requêtes SQL.\n  Participation aux tests.\n\nFORMATION\n\n2022 - Licence en Informatique, Université Mohammed V\n\nCOMPÉTENCES\n\nJava, Spring, SQL, Git\n\nLANGUES\n\nFrançais : courant",
+    "offre": "Développeur Java Spring — Rabat, CDI\n\nVous participez à la refonte de nos applications de gestion et à leur\nmigration vers une architecture de services.\n\nProfil recherché :\n- 4 ans d'expérience en développement Java\n- Maîtrise du framework Spring et des bases de données relationnelles\n- Bonne pratique du SQL et des tests automatisés\n- Diplôme Bac+5 en informatique\n\nCompétences appréciées : Docker, méthodes agiles, intégration continue.",
+    "label": "Potential Fit",
+    "domaine": "java",
+    "profil": "a",
+    "origine": "paire construite"
+  },
+  {
+    "cv": "HIND BELKADI\nDéveloppeuse Java\nhind.belkadi@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nMars 2024 – Présent\nDéveloppeuse Java chez Atos Maroc\n  Développement d'applications Spring Boot et requêtes SQL.\n  Tests unitaires.\n\nFORMATION\n\n2023 - Master en Informatique, Université Mohammed V\n\nCOMPÉTENCES\n\nJava, Spring, SQL, Tests, Git\n\nLANGUES\n\nFrançais : bilingue\nAnglais : courant",
+    "offre": "Développeur Java Spring — Rabat, CDI\n\nVous participez à la refonte de nos applications de gestion et à leur\nmigration vers une architecture de services.\n\nProfil recherché :\n- 4 ans d'expérience en développement Java\n- Maîtrise du framework Spring et des bases de données relationnelles\n- Bonne pratique du SQL et des tests automatisés\n- Diplôme Bac+5 en informatique\n\nCompétences appréciées : Docker, méthodes agiles, intégration continue.",
+    "label": "Potential Fit",
+    "domaine": "java",
+    "profil": "b",
+    "origine": "paire construite"
+  },
+  {
+    "cv": "SAMIRA OUALI\nChargée de recrutement\nsamira.ouali@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nJuin 2020 – Présent\nChargée de recrutement chez Cabinet RH Casablanca\n  Sourcing de candidats et conduite des entretiens.\n  Suivi des intégrations.\n\nFORMATION\n\n2020 - Licence en Ressources Humaines, Université Mohammed V\n\nCOMPÉTENCES\n\nRecrutement, Entretien, Sourcing\n\nLANGUES\n\nFrançais : courant",
+    "offre": "Développeur Java Spring — Rabat, CDI\n\nVous participez à la refonte de nos applications de gestion et à leur\nmigration vers une architecture de services.\n\nProfil recherché :\n- 4 ans d'expérience en développement Java\n- Maîtrise du framework Spring et des bases de données relationnelles\n- Bonne pratique du SQL et des tests automatisés\n- Diplôme Bac+5 en informatique\n\nCompétences appréciées : Docker, méthodes agiles, intégration continue.",
+    "label": "No Fit",
+    "domaine": "java",
+    "profil": "a",
+    "origine": "paire construite"
+  },
+  {
+    "cv": "RACHID ALAMI\nAdministrateur de bases de données\nrachid.alami@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nFévrier 2017 – Présent\nAdministrateur BDD chez CNSS\n  Exploitation et optimisation de bases PostgreSQL et Oracle.\n  Sauvegardes, réplication et sécurisation des accès.\n  Optimisation de requêtes SQL sur des volumes importants.\n\nFORMATION\n\n2015 - Master en Systèmes d'Information, Université Mohammed V\n\nCOMPÉTENCES\n\nPostgreSQL, Oracle, SQL, Linux, Docker\n\nLANGUES\n\nFrançais : bilingue\nAnglais : courant",
+    "offre": "Administrateur de Bases de Données — Casablanca, CDI\n\nVous exploitez, sécurisez et optimisez les bases de données de l'entreprise.\n\nProfil recherché :\n- 3 ans d'expérience en administration de bases de données\n- Maîtrise de PostgreSQL et d'Oracle\n- Solide pratique du SQL et de l'optimisation de requêtes\n- Diplôme Bac+3 minimum\n\nCompétences appréciées : systèmes Linux, conteneurisation, supervision.",
+    "label": "Good Fit",
+    "domaine": "bdd",
+    "profil": "a",
+    "origine": "paire construite"
+  },
+  {
+    "cv": "NABIL CHRAIBI\nAdministrateur de données\nnabil.chraibi@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nMai 2019 – Présent\nAdministrateur BDD chez Royal Air Maroc\n  Administration PostgreSQL et Oracle en production.\n  Optimisation des requêtes SQL et supervision des performances.\n  Sauvegardes et plans de reprise.\n\nFORMATION\n\n2018 - Licence en Informatique, Université Mohammed V\n\nCOMPÉTENCES\n\nPostgreSQL, Oracle, SQL, Linux\n\nLANGUES\n\nFrançais : bilingue\nArabe : langue maternelle",
+    "offre": "Administrateur de Bases de Données — Casablanca, CDI\n\nVous exploitez, sécurisez et optimisez les bases de données de l'entreprise.\n\nProfil recherché :\n- 3 ans d'expérience en administration de bases de données\n- Maîtrise de PostgreSQL et d'Oracle\n- Solide pratique du SQL et de l'optimisation de requêtes\n- Diplôme Bac+3 minimum\n\nCompétences appréciées : systèmes Linux, conteneurisation, supervision.",
+    "label": "Good Fit",
+    "domaine": "bdd",
+    "profil": "b",
+    "origine": "paire construite"
+  },
+  {
+    "cv": "YOUSSRA LAHLOU\nTechnicienne base de données\nyoussra.lahlou@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nFévrier 2024 – Présent\nTechnicienne BDD chez Groupe Ynna\n  Exploitation de bases PostgreSQL et écriture de requêtes SQL.\n  Découverte d'Oracle sur les environnements de test.\n\nFORMATION\n\n2023 - DUT Informatique, Université Mohammed V\n\nCOMPÉTENCES\n\nPostgreSQL, SQL, Oracle, Linux\n\nLANGUES\n\nFrançais : courant",
+    "offre": "Administrateur de Bases de Données — Casablanca, CDI\n\nVous exploitez, sécurisez et optimisez les bases de données de l'entreprise.\n\nProfil recherché :\n- 3 ans d'expérience en administration de bases de données\n- Maîtrise de PostgreSQL et d'Oracle\n- Solide pratique du SQL et de l'optimisation de requêtes\n- Diplôme Bac+3 minimum\n\nCompétences appréciées : systèmes Linux, conteneurisation, supervision.",
+    "label": "Potential Fit",
+    "domaine": "bdd",
+    "profil": "a",
+    "origine": "paire construite"
+  },
+  {
+    "cv": "ADIL MERNISSI\nDéveloppeur base de données\nadil.mernissi@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nSeptembre 2024 – Présent\nDéveloppeur BDD chez Cabinet Data Conseil\n  Écriture de requêtes SQL et procédures stockées PostgreSQL.\n  Premiers travaux d'administration Oracle.\n\nFORMATION\n\n2023 - Licence en Informatique, Université Mohammed V\n\nCOMPÉTENCES\n\nSQL, PostgreSQL, Oracle\n\nLANGUES\n\nFrançais : courant",
+    "offre": "Administrateur de Bases de Données — Casablanca, CDI\n\nVous exploitez, sécurisez et optimisez les bases de données de l'entreprise.\n\nProfil recherché :\n- 3 ans d'expérience en administration de bases de données\n- Maîtrise de PostgreSQL et d'Oracle\n- Solide pratique du SQL et de l'optimisation de requêtes\n- Diplôme Bac+3 minimum\n\nCompétences appréciées : systèmes Linux, conteneurisation, supervision.",
+    "label": "Potential Fit",
+    "domaine": "bdd",
+    "profil": "b",
+    "origine": "paire construite"
+  },
+  {
+    "cv": "MERIEM TAHIRI\nGraphiste\nmeriem.tahiri@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nOctobre 2021 – Présent\nGraphiste chez Studio Créatif\n  Création d'identités visuelles et de supports de communication.\n\nFORMATION\n\n2021 - Licence en Arts Graphiques, Université Mohammed V\n\nCOMPÉTENCES\n\nIllustration, Identité visuelle, Mise en page\n\nLANGUES\n\nFrançais : courant",
+    "offre": "Administrateur de Bases de Données — Casablanca, CDI\n\nVous exploitez, sécurisez et optimisez les bases de données de l'entreprise.\n\nProfil recherché :\n- 3 ans d'expérience en administration de bases de données\n- Maîtrise de PostgreSQL et d'Oracle\n- Solide pratique du SQL et de l'optimisation de requêtes\n- Diplôme Bac+3 minimum\n\nCompétences appréciées : systèmes Linux, conteneurisation, supervision.",
+    "label": "No Fit",
+    "domaine": "bdd",
+    "profil": "a",
+    "origine": "paire construite"
+  },
+  {
+    "cv": "SANAA BENNANI\nContrôleuse de gestion\nsanaa.bennani@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nJanvier 2019 – Présent\nContrôleuse de Gestion chez Managem\n  Élaboration du budget annuel et analyse des écarts.\n  Production des tableaux de bord de pilotage sous Power BI et Excel.\n  Exploitation du progiciel SAP.\n\nFORMATION\n\n2017 - Master en Finance d'Entreprise, Université Mohammed V\n\nCOMPÉTENCES\n\nContrôle de gestion, Excel, ERP, Power BI, Analyse des coûts, Reporting financier\n\nLANGUES\n\nFrançais : bilingue\nAnglais : courant",
+    "offre": "Contrôleur de Gestion — Tanger, CDI\n\nRattaché à la direction financière, vous produisez les analyses de coûts, le\nbudget et les tableaux de bord de pilotage.\n\nProfil recherché :\n- 4 ans d'expérience en contrôle de gestion\n- Maîtrise d'Excel à un niveau avancé et d'un progiciel de gestion\n- Pratique du reporting financier et de l'analyse des écarts\n- Diplôme Bac+5 en finance, gestion ou école de commerce\n\nCompétences appréciées : Power BI, comptabilité analytique.",
+    "label": "Good Fit",
+    "domaine": "controle",
+    "profil": "a",
+    "origine": "paire construite"
+  },
+  {
+    "cv": "DRISS LAMRANI\nContrôleur de gestion\ndriss.lamrani@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nMars 2018 – Présent\nContrôleur de Gestion chez Cosumar\n  Reporting financier mensuel et contrôle budgétaire.\n  Analyse des coûts de production.\n  Utilisation avancée d'Excel et du progiciel de gestion.\n\nFORMATION\n\n2016 - Master en Gestion, Université Mohammed V\n\nCOMPÉTENCES\n\nContrôle de gestion, Excel, ERP, Reporting financier, Comptabilité générale\n\nLANGUES\n\nFrançais : bilingue\nArabe : langue maternelle",
+    "offre": "Contrôleur de Gestion — Tanger, CDI\n\nRattaché à la direction financière, vous produisez les analyses de coûts, le\nbudget et les tableaux de bord de pilotage.\n\nProfil recherché :\n- 4 ans d'expérience en contrôle de gestion\n- Maîtrise d'Excel à un niveau avancé et d'un progiciel de gestion\n- Pratique du reporting financier et de l'analyse des écarts\n- Diplôme Bac+5 en finance, gestion ou école de commerce\n\nCompétences appréciées : Power BI, comptabilité analytique.",
+    "label": "Good Fit",
+    "domaine": "controle",
+    "profil": "b",
+    "origine": "paire construite"
+  },
+  {
+    "cv": "KENZA FILALI\nAnalyste de gestion\nkenza.filali@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nSeptembre 2023 – Présent\nAnalyste de Gestion chez Groupe Akwa\n  Suivi budgétaire et production de tableaux de bord sous Excel.\n  Utilisation du progiciel de gestion pour les extractions.\n\nFORMATION\n\n2023 - Master en Contrôle de Gestion, Université Mohammed V\n\nCOMPÉTENCES\n\nContrôle de gestion, Excel, ERP\n\nLANGUES\n\nFrançais : bilingue\nAnglais : courant",
+    "offre": "Contrôleur de Gestion — Tanger, CDI\n\nRattaché à la direction financière, vous produisez les analyses de coûts, le\nbudget et les tableaux de bord de pilotage.\n\nProfil recherché :\n- 4 ans d'expérience en contrôle de gestion\n- Maîtrise d'Excel à un niveau avancé et d'un progiciel de gestion\n- Pratique du reporting financier et de l'analyse des écarts\n- Diplôme Bac+5 en finance, gestion ou école de commerce\n\nCompétences appréciées : Power BI, comptabilité analytique.",
+    "label": "Potential Fit",
+    "domaine": "controle",
+    "profil": "a",
+    "origine": "paire construite"
+  },
+  {
+    "cv": "YOUNES SKALLI\nAssistant contrôle de gestion\nyounes.skalli@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nJanvier 2023 – Présent\nAssistant Contrôle de Gestion chez Lesieur Cristal\n  Contribution au reporting financier mensuel et au contrôle budgétaire.\n  Travaux d'analyse des coûts sur Excel et extractions du progiciel.\n\nFORMATION\n\n2022 - Licence en Gestion, Université Mohammed V\n\nCOMPÉTENCES\n\nContrôle de gestion, Excel, ERP, Reporting financier\n\nLANGUES\n\nFrançais : courant",
+    "offre": "Contrôleur de Gestion — Tanger, CDI\n\nRattaché à la direction financière, vous produisez les analyses de coûts, le\nbudget et les tableaux de bord de pilotage.\n\nProfil recherché :\n- 4 ans d'expérience en contrôle de gestion\n- Maîtrise d'Excel à un niveau avancé et d'un progiciel de gestion\n- Pratique du reporting financier et de l'analyse des écarts\n- Diplôme Bac+5 en finance, gestion ou école de commerce\n\nCompétences appréciées : Power BI, comptabilité analytique.",
+    "label": "Potential Fit",
+    "domaine": "controle",
+    "profil": "b",
+    "origine": "paire construite"
+  },
+  {
+    "cv": "WALID FADILI\nDéveloppeur frontend\nwalid.fadili@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nOctobre 2021 – Présent\nDéveloppeur Frontend chez Agence Web Rabat\n  Développement d'interfaces React et intégration CSS.\n\nFORMATION\n\n2021 - Licence en Informatique, Université Mohammed V\n\nCOMPÉTENCES\n\nJavaScript, React, CSS, HTML, Git\n\nLANGUES\n\nFrançais : courant",
+    "offre": "Contrôleur de Gestion — Tanger, CDI\n\nRattaché à la direction financière, vous produisez les analyses de coûts, le\nbudget et les tableaux de bord de pilotage.\n\nProfil recherché :\n- 4 ans d'expérience en contrôle de gestion\n- Maîtrise d'Excel à un niveau avancé et d'un progiciel de gestion\n- Pratique du reporting financier et de l'analyse des écarts\n- Diplôme Bac+5 en finance, gestion ou école de commerce\n\nCompétences appréciées : Power BI, comptabilité analytique.",
+    "label": "No Fit",
+    "domaine": "controle",
+    "profil": "a",
+    "origine": "paire construite"
+  },
+  {
+    "cv": "YOUSSEF TAZI\nIngénieur logiciel backend\nyoussef.tazi@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nJanvier 2019 – Présent\nDéveloppeur Backend Senior chez OCP Digital\n  Conception et maintenance d'interfaces de programmation REST avec Flask et PostgreSQL.\n  Mise en place de pipelines d'intégration continue avec Docker et GitHub Actions.\n  Encadrement de trois développeurs et revue de code.\n\nSeptembre 2017 – Décembre 2018\nDéveloppeur Python chez Atos Maroc\n  Développement de traitements de données volumineux avec pandas.\n  Optimisation de requêtes SQL sur des bases de plusieurs millions d'enregistrements.\n\nFORMATION\n\n2017 - Master en Génie Logiciel, Université Mohammed V\n\nCERTIFICATIONS\n\nAWS Certified Developer Associate (2022)\n\nCOMPÉTENCES\n\nPython, SQL, PostgreSQL, Docker, Flask, Django, Git, CI/CD, Kubernetes, Linux\n\nLANGUES\n\nFrançais : bilingue\nAnglais : courant",
+    "offre": "Développeur Frontend React — Rabat, CDI, télétravail partiel\n\nAu sein de l'équipe produit, vous concevez et réalisez les interfaces de nos\napplications web. Vous êtes attentif à l'expérience utilisateur, à\nl'accessibilité et aux performances.\n\nProfil recherché :\n- 3 ans d'expérience en développement frontend\n- Maîtrise de JavaScript, React et des feuilles de style CSS\n- Pratique des tests d'interface et de l'intégration continue\n- Diplôme Bac+3 minimum\n\nCompétences appréciées : TypeScript, Next.js, conception d'interfaces.",
+    "label": "No Fit",
+    "domaine": "backend vs frontend",
+    "profil": "a",
+    "origine": "croisement de domaines"
+  },
+  {
+    "cv": "YOUSSEF TAZI\nIngénieur logiciel backend\nyoussef.tazi@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nJanvier 2019 – Présent\nDéveloppeur Backend Senior chez OCP Digital\n  Conception et maintenance d'interfaces de programmation REST avec Flask et PostgreSQL.\n  Mise en place de pipelines d'intégration continue avec Docker et GitHub Actions.\n  Encadrement de trois développeurs et revue de code.\n\nSeptembre 2017 – Décembre 2018\nDéveloppeur Python chez Atos Maroc\n  Développement de traitements de données volumineux avec pandas.\n  Optimisation de requêtes SQL sur des bases de plusieurs millions d'enregistrements.\n\nFORMATION\n\n2017 - Master en Génie Logiciel, Université Mohammed V\n\nCERTIFICATIONS\n\nAWS Certified Developer Associate (2022)\n\nCOMPÉTENCES\n\nPython, SQL, PostgreSQL, Docker, Flask, Django, Git, CI/CD, Kubernetes, Linux\n\nLANGUES\n\nFrançais : bilingue\nAnglais : courant",
+    "offre": "Data Scientist — Casablanca, CDI\n\nVous rejoignez notre pôle données pour concevoir des modèles prédictifs et\nindustrialiser leur mise en production. Vous accompagnez les équipes métier\ndans l'interprétation des résultats.\n\nProfil recherché :\n- 4 ans d'expérience en science des données\n- Maîtrise de Python et des bibliothèques d'apprentissage automatique\n- Solide pratique du SQL et de la manipulation de grands volumes\n- Diplôme Bac+5, idéalement en statistiques ou en informatique\n\nCompétences appréciées : apprentissage profond, traitement du langage, Power BI.",
+    "label": "No Fit",
+    "domaine": "backend vs data",
+    "profil": "a",
+    "origine": "croisement de domaines"
+  },
+  {
+    "cv": "YOUSSEF TAZI\nIngénieur logiciel backend\nyoussef.tazi@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nJanvier 2019 – Présent\nDéveloppeur Backend Senior chez OCP Digital\n  Conception et maintenance d'interfaces de programmation REST avec Flask et PostgreSQL.\n  Mise en place de pipelines d'intégration continue avec Docker et GitHub Actions.\n  Encadrement de trois développeurs et revue de code.\n\nSeptembre 2017 – Décembre 2018\nDéveloppeur Python chez Atos Maroc\n  Développement de traitements de données volumineux avec pandas.\n  Optimisation de requêtes SQL sur des bases de plusieurs millions d'enregistrements.\n\nFORMATION\n\n2017 - Master en Génie Logiciel, Université Mohammed V\n\nCERTIFICATIONS\n\nAWS Certified Developer Associate (2022)\n\nCOMPÉTENCES\n\nPython, SQL, PostgreSQL, Docker, Flask, Django, Git, CI/CD, Kubernetes, Linux\n\nLANGUES\n\nFrançais : bilingue\nAnglais : courant",
+    "offre": "Comptable Général — Marrakech, CDI\n\nVous assurez la tenue de la comptabilité générale, les déclarations fiscales et\nla préparation des états financiers. Vous êtes l'interlocuteur privilégié du\ncommissaire aux comptes.\n\nProfil recherché :\n- 4 ans d'expérience en comptabilité générale\n- Maîtrise des normes comptables marocaines et des déclarations fiscales\n- Pratique d'un logiciel de comptabilité et d'Excel à un niveau avancé\n- Diplôme Bac+3 minimum en comptabilité, finance ou gestion\n\nCompétences appréciées : logiciel Sage, missions d'audit.",
+    "label": "No Fit",
+    "domaine": "backend vs comptable",
+    "profil": "a",
+    "origine": "croisement de domaines"
+  },
+  {
+    "cv": "SALMA IDRISSI\nDéveloppeuse frontend\nsalma.idrissi@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nFévrier 2020 – Présent\nDéveloppeuse Frontend Senior chez Capgemini Maroc\n  Conception d'interfaces avec React et Next.js.\n  Travail sur l'accessibilité et les performances des pages.\n  Mise en place de tests d'interface automatisés.\n\nFORMATION\n\n2019 - Master en Systèmes d'Information, Université Mohammed V\n\nCOMPÉTENCES\n\nJavaScript, TypeScript, React, Next.js, CSS, HTML, Tests, Git\n\nLANGUES\n\nFrançais : bilingue\nAnglais : courant",
+    "offre": "Développeur Backend Python Senior — Casablanca, CDI\n\nNous recherchons un développeur backend expérimenté pour concevoir et maintenir\nnos interfaces de programmation REST. Vous interviendrez sur l'architecture des\nservices, la modélisation des données et les traitements à grande échelle.\n\nProfil recherché :\n- 5 ans d'expérience minimum en développement backend\n- Maîtrise de Python et d'un framework web (Django, Flask ou FastAPI)\n- Solide expérience des bases de données relationnelles, notamment PostgreSQL\n- Pratique de la conteneurisation avec Docker et de l'intégration continue\n- Diplôme Bac+5 en informatique ou équivalent\n\nCompétences appréciées : Kubernetes, architectures distribuées, message brokers.",
+    "label": "No Fit",
+    "domaine": "frontend vs backend",
+    "profil": "a",
+    "origine": "croisement de domaines"
+  },
+  {
+    "cv": "SALMA IDRISSI\nDéveloppeuse frontend\nsalma.idrissi@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nFévrier 2020 – Présent\nDéveloppeuse Frontend Senior chez Capgemini Maroc\n  Conception d'interfaces avec React et Next.js.\n  Travail sur l'accessibilité et les performances des pages.\n  Mise en place de tests d'interface automatisés.\n\nFORMATION\n\n2019 - Master en Systèmes d'Information, Université Mohammed V\n\nCOMPÉTENCES\n\nJavaScript, TypeScript, React, Next.js, CSS, HTML, Tests, Git\n\nLANGUES\n\nFrançais : bilingue\nAnglais : courant",
+    "offre": "Data Scientist — Casablanca, CDI\n\nVous rejoignez notre pôle données pour concevoir des modèles prédictifs et\nindustrialiser leur mise en production. Vous accompagnez les équipes métier\ndans l'interprétation des résultats.\n\nProfil recherché :\n- 4 ans d'expérience en science des données\n- Maîtrise de Python et des bibliothèques d'apprentissage automatique\n- Solide pratique du SQL et de la manipulation de grands volumes\n- Diplôme Bac+5, idéalement en statistiques ou en informatique\n\nCompétences appréciées : apprentissage profond, traitement du langage, Power BI.",
+    "label": "No Fit",
+    "domaine": "frontend vs data",
+    "profil": "a",
+    "origine": "croisement de domaines"
+  },
+  {
+    "cv": "SALMA IDRISSI\nDéveloppeuse frontend\nsalma.idrissi@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nFévrier 2020 – Présent\nDéveloppeuse Frontend Senior chez Capgemini Maroc\n  Conception d'interfaces avec React et Next.js.\n  Travail sur l'accessibilité et les performances des pages.\n  Mise en place de tests d'interface automatisés.\n\nFORMATION\n\n2019 - Master en Systèmes d'Information, Université Mohammed V\n\nCOMPÉTENCES\n\nJavaScript, TypeScript, React, Next.js, CSS, HTML, Tests, Git\n\nLANGUES\n\nFrançais : bilingue\nAnglais : courant",
+    "offre": "Comptable Général — Marrakech, CDI\n\nVous assurez la tenue de la comptabilité générale, les déclarations fiscales et\nla préparation des états financiers. Vous êtes l'interlocuteur privilégié du\ncommissaire aux comptes.\n\nProfil recherché :\n- 4 ans d'expérience en comptabilité générale\n- Maîtrise des normes comptables marocaines et des déclarations fiscales\n- Pratique d'un logiciel de comptabilité et d'Excel à un niveau avancé\n- Diplôme Bac+3 minimum en comptabilité, finance ou gestion\n\nCompétences appréciées : logiciel Sage, missions d'audit.",
+    "label": "No Fit",
+    "domaine": "frontend vs comptable",
+    "profil": "a",
+    "origine": "croisement de domaines"
+  },
+  {
+    "cv": "REDA ALAOUI\nData scientist\nreda.alaoui@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nJanvier 2020 – Présent\nData Scientist chez Attijariwafa Bank\n  Conception de modèles de scoring et industrialisation en production.\n  Traitement automatique du langage appliqué aux réclamations clients.\n  Tableaux de bord Power BI pour les directions métier.\n\nSeptembre 2018 – Décembre 2019\nAnalyste de données chez Deloitte\n  Analyses statistiques et restitutions décisionnelles.\n\nFORMATION\n\n2018 - Master en Data Science, Université Mohammed V\n\nCERTIFICATIONS\n\nMicrosoft Certified: Azure Data Scientist Associate (2021)\n\nCOMPÉTENCES\n\nPython, Machine Learning, SQL, Deep Learning, NLP, Power BI, pandas, scikit-learn\n\nLANGUES\n\nFrançais : bilingue\nAnglais : courant",
+    "offre": "Développeur Backend Python Senior — Casablanca, CDI\n\nNous recherchons un développeur backend expérimenté pour concevoir et maintenir\nnos interfaces de programmation REST. Vous interviendrez sur l'architecture des\nservices, la modélisation des données et les traitements à grande échelle.\n\nProfil recherché :\n- 5 ans d'expérience minimum en développement backend\n- Maîtrise de Python et d'un framework web (Django, Flask ou FastAPI)\n- Solide expérience des bases de données relationnelles, notamment PostgreSQL\n- Pratique de la conteneurisation avec Docker et de l'intégration continue\n- Diplôme Bac+5 en informatique ou équivalent\n\nCompétences appréciées : Kubernetes, architectures distribuées, message brokers.",
+    "label": "No Fit",
+    "domaine": "data vs backend",
+    "profil": "a",
+    "origine": "croisement de domaines"
+  },
+  {
+    "cv": "REDA ALAOUI\nData scientist\nreda.alaoui@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nJanvier 2020 – Présent\nData Scientist chez Attijariwafa Bank\n  Conception de modèles de scoring et industrialisation en production.\n  Traitement automatique du langage appliqué aux réclamations clients.\n  Tableaux de bord Power BI pour les directions métier.\n\nSeptembre 2018 – Décembre 2019\nAnalyste de données chez Deloitte\n  Analyses statistiques et restitutions décisionnelles.\n\nFORMATION\n\n2018 - Master en Data Science, Université Mohammed V\n\nCERTIFICATIONS\n\nMicrosoft Certified: Azure Data Scientist Associate (2021)\n\nCOMPÉTENCES\n\nPython, Machine Learning, SQL, Deep Learning, NLP, Power BI, pandas, scikit-learn\n\nLANGUES\n\nFrançais : bilingue\nAnglais : courant",
+    "offre": "Développeur Frontend React — Rabat, CDI, télétravail partiel\n\nAu sein de l'équipe produit, vous concevez et réalisez les interfaces de nos\napplications web. Vous êtes attentif à l'expérience utilisateur, à\nl'accessibilité et aux performances.\n\nProfil recherché :\n- 3 ans d'expérience en développement frontend\n- Maîtrise de JavaScript, React et des feuilles de style CSS\n- Pratique des tests d'interface et de l'intégration continue\n- Diplôme Bac+3 minimum\n\nCompétences appréciées : TypeScript, Next.js, conception d'interfaces.",
+    "label": "No Fit",
+    "domaine": "data vs frontend",
+    "profil": "a",
+    "origine": "croisement de domaines"
+  },
+  {
+    "cv": "REDA ALAOUI\nData scientist\nreda.alaoui@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nJanvier 2020 – Présent\nData Scientist chez Attijariwafa Bank\n  Conception de modèles de scoring et industrialisation en production.\n  Traitement automatique du langage appliqué aux réclamations clients.\n  Tableaux de bord Power BI pour les directions métier.\n\nSeptembre 2018 – Décembre 2019\nAnalyste de données chez Deloitte\n  Analyses statistiques et restitutions décisionnelles.\n\nFORMATION\n\n2018 - Master en Data Science, Université Mohammed V\n\nCERTIFICATIONS\n\nMicrosoft Certified: Azure Data Scientist Associate (2021)\n\nCOMPÉTENCES\n\nPython, Machine Learning, SQL, Deep Learning, NLP, Power BI, pandas, scikit-learn\n\nLANGUES\n\nFrançais : bilingue\nAnglais : courant",
+    "offre": "Comptable Général — Marrakech, CDI\n\nVous assurez la tenue de la comptabilité générale, les déclarations fiscales et\nla préparation des états financiers. Vous êtes l'interlocuteur privilégié du\ncommissaire aux comptes.\n\nProfil recherché :\n- 4 ans d'expérience en comptabilité générale\n- Maîtrise des normes comptables marocaines et des déclarations fiscales\n- Pratique d'un logiciel de comptabilité et d'Excel à un niveau avancé\n- Diplôme Bac+3 minimum en comptabilité, finance ou gestion\n\nCompétences appréciées : logiciel Sage, missions d'audit.",
+    "label": "No Fit",
+    "domaine": "data vs comptable",
+    "profil": "a",
+    "origine": "croisement de domaines"
+  },
+  {
+    "cv": "KHADIJA RAMI\nComptable générale\nkhadija.rami@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nSeptembre 2019 – Présent\nComptable Générale chez Marsa Maroc\n  Tenue de la comptabilité générale et déclarations fiscales mensuelles.\n  Préparation des états financiers annuels et relation avec le commissaire aux comptes.\n  Utilisation avancée d'Excel et du logiciel Sage.\n\nFORMATION\n\n2018 - Licence en Comptabilité et Finance, Université Mohammed V\n\nCOMPÉTENCES\n\nComptabilité, Fiscalité, Excel, Sage, Analyse financière\n\nLANGUES\n\nFrançais : bilingue\nArabe : langue maternelle",
+    "offre": "Développeur Backend Python Senior — Casablanca, CDI\n\nNous recherchons un développeur backend expérimenté pour concevoir et maintenir\nnos interfaces de programmation REST. Vous interviendrez sur l'architecture des\nservices, la modélisation des données et les traitements à grande échelle.\n\nProfil recherché :\n- 5 ans d'expérience minimum en développement backend\n- Maîtrise de Python et d'un framework web (Django, Flask ou FastAPI)\n- Solide expérience des bases de données relationnelles, notamment PostgreSQL\n- Pratique de la conteneurisation avec Docker et de l'intégration continue\n- Diplôme Bac+5 en informatique ou équivalent\n\nCompétences appréciées : Kubernetes, architectures distribuées, message brokers.",
+    "label": "No Fit",
+    "domaine": "comptable vs backend",
+    "profil": "a",
+    "origine": "croisement de domaines"
+  },
+  {
+    "cv": "KHADIJA RAMI\nComptable générale\nkhadija.rami@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nSeptembre 2019 – Présent\nComptable Générale chez Marsa Maroc\n  Tenue de la comptabilité générale et déclarations fiscales mensuelles.\n  Préparation des états financiers annuels et relation avec le commissaire aux comptes.\n  Utilisation avancée d'Excel et du logiciel Sage.\n\nFORMATION\n\n2018 - Licence en Comptabilité et Finance, Université Mohammed V\n\nCOMPÉTENCES\n\nComptabilité, Fiscalité, Excel, Sage, Analyse financière\n\nLANGUES\n\nFrançais : bilingue\nArabe : langue maternelle",
+    "offre": "Développeur Frontend React — Rabat, CDI, télétravail partiel\n\nAu sein de l'équipe produit, vous concevez et réalisez les interfaces de nos\napplications web. Vous êtes attentif à l'expérience utilisateur, à\nl'accessibilité et aux performances.\n\nProfil recherché :\n- 3 ans d'expérience en développement frontend\n- Maîtrise de JavaScript, React et des feuilles de style CSS\n- Pratique des tests d'interface et de l'intégration continue\n- Diplôme Bac+3 minimum\n\nCompétences appréciées : TypeScript, Next.js, conception d'interfaces.",
+    "label": "No Fit",
+    "domaine": "comptable vs frontend",
+    "profil": "a",
+    "origine": "croisement de domaines"
+  },
+  {
+    "cv": "KHADIJA RAMI\nComptable générale\nkhadija.rami@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nSeptembre 2019 – Présent\nComptable Générale chez Marsa Maroc\n  Tenue de la comptabilité générale et déclarations fiscales mensuelles.\n  Préparation des états financiers annuels et relation avec le commissaire aux comptes.\n  Utilisation avancée d'Excel et du logiciel Sage.\n\nFORMATION\n\n2018 - Licence en Comptabilité et Finance, Université Mohammed V\n\nCOMPÉTENCES\n\nComptabilité, Fiscalité, Excel, Sage, Analyse financière\n\nLANGUES\n\nFrançais : bilingue\nArabe : langue maternelle",
+    "offre": "Data Scientist — Casablanca, CDI\n\nVous rejoignez notre pôle données pour concevoir des modèles prédictifs et\nindustrialiser leur mise en production. Vous accompagnez les équipes métier\ndans l'interprétation des résultats.\n\nProfil recherché :\n- 4 ans d'expérience en science des données\n- Maîtrise de Python et des bibliothèques d'apprentissage automatique\n- Solide pratique du SQL et de la manipulation de grands volumes\n- Diplôme Bac+5, idéalement en statistiques ou en informatique\n\nCompétences appréciées : apprentissage profond, traitement du langage, Power BI.",
+    "label": "No Fit",
+    "domaine": "comptable vs data",
+    "profil": "a",
+    "origine": "croisement de domaines"
+  },
+  {
+    "cv": "KARIM OUAZZANI\nIngénieur DevOps\nkarim.ouazzani@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nMars 2019 – Présent\nIngénieur DevOps chez OCP Group\n  Exploitation de clusters Kubernetes en production.\n  Automatisation des déploiements et des sauvegardes sur Linux.\n  Chaînes de livraison continue et supervision des environnements.\n\nFORMATION\n\n2017 - Master en Réseaux et Systèmes, Université Mohammed V\n\nCERTIFICATIONS\n\nCertified Kubernetes Administrator (2022)\n\nCOMPÉTENCES\n\nDocker, Kubernetes, Linux, CI/CD, AWS, Python, Git\n\nLANGUES\n\nFrançais : bilingue\nAnglais : courant",
+    "offre": "Développeur Backend Python Senior — Casablanca, CDI\n\nNous recherchons un développeur backend expérimenté pour concevoir et maintenir\nnos interfaces de programmation REST. Vous interviendrez sur l'architecture des\nservices, la modélisation des données et les traitements à grande échelle.\n\nProfil recherché :\n- 5 ans d'expérience minimum en développement backend\n- Maîtrise de Python et d'un framework web (Django, Flask ou FastAPI)\n- Solide expérience des bases de données relationnelles, notamment PostgreSQL\n- Pratique de la conteneurisation avec Docker et de l'intégration continue\n- Diplôme Bac+5 en informatique ou équivalent\n\nCompétences appréciées : Kubernetes, architectures distribuées, message brokers.",
+    "label": "No Fit",
+    "domaine": "devops vs backend",
+    "profil": "a",
+    "origine": "croisement de domaines"
+  },
+  {
+    "cv": "KARIM OUAZZANI\nIngénieur DevOps\nkarim.ouazzani@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nMars 2019 – Présent\nIngénieur DevOps chez OCP Group\n  Exploitation de clusters Kubernetes en production.\n  Automatisation des déploiements et des sauvegardes sur Linux.\n  Chaînes de livraison continue et supervision des environnements.\n\nFORMATION\n\n2017 - Master en Réseaux et Systèmes, Université Mohammed V\n\nCERTIFICATIONS\n\nCertified Kubernetes Administrator (2022)\n\nCOMPÉTENCES\n\nDocker, Kubernetes, Linux, CI/CD, AWS, Python, Git\n\nLANGUES\n\nFrançais : bilingue\nAnglais : courant",
+    "offre": "Développeur Frontend React — Rabat, CDI, télétravail partiel\n\nAu sein de l'équipe produit, vous concevez et réalisez les interfaces de nos\napplications web. Vous êtes attentif à l'expérience utilisateur, à\nl'accessibilité et aux performances.\n\nProfil recherché :\n- 3 ans d'expérience en développement frontend\n- Maîtrise de JavaScript, React et des feuilles de style CSS\n- Pratique des tests d'interface et de l'intégration continue\n- Diplôme Bac+3 minimum\n\nCompétences appréciées : TypeScript, Next.js, conception d'interfaces.",
+    "label": "No Fit",
+    "domaine": "devops vs frontend",
+    "profil": "a",
+    "origine": "croisement de domaines"
+  },
+  {
+    "cv": "KARIM OUAZZANI\nIngénieur DevOps\nkarim.ouazzani@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nMars 2019 – Présent\nIngénieur DevOps chez OCP Group\n  Exploitation de clusters Kubernetes en production.\n  Automatisation des déploiements et des sauvegardes sur Linux.\n  Chaînes de livraison continue et supervision des environnements.\n\nFORMATION\n\n2017 - Master en Réseaux et Systèmes, Université Mohammed V\n\nCERTIFICATIONS\n\nCertified Kubernetes Administrator (2022)\n\nCOMPÉTENCES\n\nDocker, Kubernetes, Linux, CI/CD, AWS, Python, Git\n\nLANGUES\n\nFrançais : bilingue\nAnglais : courant",
+    "offre": "Data Scientist — Casablanca, CDI\n\nVous rejoignez notre pôle données pour concevoir des modèles prédictifs et\nindustrialiser leur mise en production. Vous accompagnez les équipes métier\ndans l'interprétation des résultats.\n\nProfil recherché :\n- 4 ans d'expérience en science des données\n- Maîtrise de Python et des bibliothèques d'apprentissage automatique\n- Solide pratique du SQL et de la manipulation de grands volumes\n- Diplôme Bac+5, idéalement en statistiques ou en informatique\n\nCompétences appréciées : apprentissage profond, traitement du langage, Power BI.",
+    "label": "No Fit",
+    "domaine": "devops vs data",
+    "profil": "a",
+    "origine": "croisement de domaines"
+  },
+  {
+    "cv": "MEHDI OUAZZANI\nDéveloppeur Java\nmehdi.ouazzani@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nJanvier 2019 – Présent\nDéveloppeur Java Senior chez Sopra Steria Maroc\n  Développement d'applications Spring Boot adossées à Oracle.\n  Migration vers une architecture de services.\n  Tests automatisés et intégration continue.\n\nFORMATION\n\n2017 - Master en Génie Logiciel, Université Mohammed V\n\nCOMPÉTENCES\n\nJava, Spring, SQL, Oracle, Docker, Tests, CI/CD, Git, Agile\n\nLANGUES\n\nFrançais : bilingue\nAnglais : courant",
+    "offre": "Développeur Backend Python Senior — Casablanca, CDI\n\nNous recherchons un développeur backend expérimenté pour concevoir et maintenir\nnos interfaces de programmation REST. Vous interviendrez sur l'architecture des\nservices, la modélisation des données et les traitements à grande échelle.\n\nProfil recherché :\n- 5 ans d'expérience minimum en développement backend\n- Maîtrise de Python et d'un framework web (Django, Flask ou FastAPI)\n- Solide expérience des bases de données relationnelles, notamment PostgreSQL\n- Pratique de la conteneurisation avec Docker et de l'intégration continue\n- Diplôme Bac+5 en informatique ou équivalent\n\nCompétences appréciées : Kubernetes, architectures distribuées, message brokers.",
+    "label": "No Fit",
+    "domaine": "java vs backend",
+    "profil": "a",
+    "origine": "croisement de domaines"
+  },
+  {
+    "cv": "MEHDI OUAZZANI\nDéveloppeur Java\nmehdi.ouazzani@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nJanvier 2019 – Présent\nDéveloppeur Java Senior chez Sopra Steria Maroc\n  Développement d'applications Spring Boot adossées à Oracle.\n  Migration vers une architecture de services.\n  Tests automatisés et intégration continue.\n\nFORMATION\n\n2017 - Master en Génie Logiciel, Université Mohammed V\n\nCOMPÉTENCES\n\nJava, Spring, SQL, Oracle, Docker, Tests, CI/CD, Git, Agile\n\nLANGUES\n\nFrançais : bilingue\nAnglais : courant",
+    "offre": "Développeur Frontend React — Rabat, CDI, télétravail partiel\n\nAu sein de l'équipe produit, vous concevez et réalisez les interfaces de nos\napplications web. Vous êtes attentif à l'expérience utilisateur, à\nl'accessibilité et aux performances.\n\nProfil recherché :\n- 3 ans d'expérience en développement frontend\n- Maîtrise de JavaScript, React et des feuilles de style CSS\n- Pratique des tests d'interface et de l'intégration continue\n- Diplôme Bac+3 minimum\n\nCompétences appréciées : TypeScript, Next.js, conception d'interfaces.",
+    "label": "No Fit",
+    "domaine": "java vs frontend",
+    "profil": "a",
+    "origine": "croisement de domaines"
+  },
+  {
+    "cv": "MEHDI OUAZZANI\nDéveloppeur Java\nmehdi.ouazzani@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nJanvier 2019 – Présent\nDéveloppeur Java Senior chez Sopra Steria Maroc\n  Développement d'applications Spring Boot adossées à Oracle.\n  Migration vers une architecture de services.\n  Tests automatisés et intégration continue.\n\nFORMATION\n\n2017 - Master en Génie Logiciel, Université Mohammed V\n\nCOMPÉTENCES\n\nJava, Spring, SQL, Oracle, Docker, Tests, CI/CD, Git, Agile\n\nLANGUES\n\nFrançais : bilingue\nAnglais : courant",
+    "offre": "Data Scientist — Casablanca, CDI\n\nVous rejoignez notre pôle données pour concevoir des modèles prédictifs et\nindustrialiser leur mise en production. Vous accompagnez les équipes métier\ndans l'interprétation des résultats.\n\nProfil recherché :\n- 4 ans d'expérience en science des données\n- Maîtrise de Python et des bibliothèques d'apprentissage automatique\n- Solide pratique du SQL et de la manipulation de grands volumes\n- Diplôme Bac+5, idéalement en statistiques ou en informatique\n\nCompétences appréciées : apprentissage profond, traitement du langage, Power BI.",
+    "label": "No Fit",
+    "domaine": "java vs data",
+    "profil": "a",
+    "origine": "croisement de domaines"
+  },
+  {
+    "cv": "RACHID ALAMI\nAdministrateur de bases de données\nrachid.alami@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nFévrier 2017 – Présent\nAdministrateur BDD chez CNSS\n  Exploitation et optimisation de bases PostgreSQL et Oracle.\n  Sauvegardes, réplication et sécurisation des accès.\n  Optimisation de requêtes SQL sur des volumes importants.\n\nFORMATION\n\n2015 - Master en Systèmes d'Information, Université Mohammed V\n\nCOMPÉTENCES\n\nPostgreSQL, Oracle, SQL, Linux, Docker\n\nLANGUES\n\nFrançais : bilingue\nAnglais : courant",
+    "offre": "Développeur Backend Python Senior — Casablanca, CDI\n\nNous recherchons un développeur backend expérimenté pour concevoir et maintenir\nnos interfaces de programmation REST. Vous interviendrez sur l'architecture des\nservices, la modélisation des données et les traitements à grande échelle.\n\nProfil recherché :\n- 5 ans d'expérience minimum en développement backend\n- Maîtrise de Python et d'un framework web (Django, Flask ou FastAPI)\n- Solide expérience des bases de données relationnelles, notamment PostgreSQL\n- Pratique de la conteneurisation avec Docker et de l'intégration continue\n- Diplôme Bac+5 en informatique ou équivalent\n\nCompétences appréciées : Kubernetes, architectures distribuées, message brokers.",
+    "label": "No Fit",
+    "domaine": "bdd vs backend",
+    "profil": "a",
+    "origine": "croisement de domaines"
+  },
+  {
+    "cv": "RACHID ALAMI\nAdministrateur de bases de données\nrachid.alami@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nFévrier 2017 – Présent\nAdministrateur BDD chez CNSS\n  Exploitation et optimisation de bases PostgreSQL et Oracle.\n  Sauvegardes, réplication et sécurisation des accès.\n  Optimisation de requêtes SQL sur des volumes importants.\n\nFORMATION\n\n2015 - Master en Systèmes d'Information, Université Mohammed V\n\nCOMPÉTENCES\n\nPostgreSQL, Oracle, SQL, Linux, Docker\n\nLANGUES\n\nFrançais : bilingue\nAnglais : courant",
+    "offre": "Développeur Frontend React — Rabat, CDI, télétravail partiel\n\nAu sein de l'équipe produit, vous concevez et réalisez les interfaces de nos\napplications web. Vous êtes attentif à l'expérience utilisateur, à\nl'accessibilité et aux performances.\n\nProfil recherché :\n- 3 ans d'expérience en développement frontend\n- Maîtrise de JavaScript, React et des feuilles de style CSS\n- Pratique des tests d'interface et de l'intégration continue\n- Diplôme Bac+3 minimum\n\nCompétences appréciées : TypeScript, Next.js, conception d'interfaces.",
+    "label": "No Fit",
+    "domaine": "bdd vs frontend",
+    "profil": "a",
+    "origine": "croisement de domaines"
+  },
+  {
+    "cv": "RACHID ALAMI\nAdministrateur de bases de données\nrachid.alami@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nFévrier 2017 – Présent\nAdministrateur BDD chez CNSS\n  Exploitation et optimisation de bases PostgreSQL et Oracle.\n  Sauvegardes, réplication et sécurisation des accès.\n  Optimisation de requêtes SQL sur des volumes importants.\n\nFORMATION\n\n2015 - Master en Systèmes d'Information, Université Mohammed V\n\nCOMPÉTENCES\n\nPostgreSQL, Oracle, SQL, Linux, Docker\n\nLANGUES\n\nFrançais : bilingue\nAnglais : courant",
+    "offre": "Data Scientist — Casablanca, CDI\n\nVous rejoignez notre pôle données pour concevoir des modèles prédictifs et\nindustrialiser leur mise en production. Vous accompagnez les équipes métier\ndans l'interprétation des résultats.\n\nProfil recherché :\n- 4 ans d'expérience en science des données\n- Maîtrise de Python et des bibliothèques d'apprentissage automatique\n- Solide pratique du SQL et de la manipulation de grands volumes\n- Diplôme Bac+5, idéalement en statistiques ou en informatique\n\nCompétences appréciées : apprentissage profond, traitement du langage, Power BI.",
+    "label": "No Fit",
+    "domaine": "bdd vs data",
+    "profil": "a",
+    "origine": "croisement de domaines"
+  },
+  {
+    "cv": "SANAA BENNANI\nContrôleuse de gestion\nsanaa.bennani@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nJanvier 2019 – Présent\nContrôleuse de Gestion chez Managem\n  Élaboration du budget annuel et analyse des écarts.\n  Production des tableaux de bord de pilotage sous Power BI et Excel.\n  Exploitation du progiciel SAP.\n\nFORMATION\n\n2017 - Master en Finance d'Entreprise, Université Mohammed V\n\nCOMPÉTENCES\n\nContrôle de gestion, Excel, ERP, Power BI, Analyse des coûts, Reporting financier\n\nLANGUES\n\nFrançais : bilingue\nAnglais : courant",
+    "offre": "Développeur Backend Python Senior — Casablanca, CDI\n\nNous recherchons un développeur backend expérimenté pour concevoir et maintenir\nnos interfaces de programmation REST. Vous interviendrez sur l'architecture des\nservices, la modélisation des données et les traitements à grande échelle.\n\nProfil recherché :\n- 5 ans d'expérience minimum en développement backend\n- Maîtrise de Python et d'un framework web (Django, Flask ou FastAPI)\n- Solide expérience des bases de données relationnelles, notamment PostgreSQL\n- Pratique de la conteneurisation avec Docker et de l'intégration continue\n- Diplôme Bac+5 en informatique ou équivalent\n\nCompétences appréciées : Kubernetes, architectures distribuées, message brokers.",
+    "label": "No Fit",
+    "domaine": "controle vs backend",
+    "profil": "a",
+    "origine": "croisement de domaines"
+  },
+  {
+    "cv": "SANAA BENNANI\nContrôleuse de gestion\nsanaa.bennani@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nJanvier 2019 – Présent\nContrôleuse de Gestion chez Managem\n  Élaboration du budget annuel et analyse des écarts.\n  Production des tableaux de bord de pilotage sous Power BI et Excel.\n  Exploitation du progiciel SAP.\n\nFORMATION\n\n2017 - Master en Finance d'Entreprise, Université Mohammed V\n\nCOMPÉTENCES\n\nContrôle de gestion, Excel, ERP, Power BI, Analyse des coûts, Reporting financier\n\nLANGUES\n\nFrançais : bilingue\nAnglais : courant",
+    "offre": "Développeur Frontend React — Rabat, CDI, télétravail partiel\n\nAu sein de l'équipe produit, vous concevez et réalisez les interfaces de nos\napplications web. Vous êtes attentif à l'expérience utilisateur, à\nl'accessibilité et aux performances.\n\nProfil recherché :\n- 3 ans d'expérience en développement frontend\n- Maîtrise de JavaScript, React et des feuilles de style CSS\n- Pratique des tests d'interface et de l'intégration continue\n- Diplôme Bac+3 minimum\n\nCompétences appréciées : TypeScript, Next.js, conception d'interfaces.",
+    "label": "No Fit",
+    "domaine": "controle vs frontend",
+    "profil": "a",
+    "origine": "croisement de domaines"
+  },
+  {
+    "cv": "SANAA BENNANI\nContrôleuse de gestion\nsanaa.bennani@example.ma | +212 6 12 34 56 78\n\nEXPÉRIENCE PROFESSIONNELLE\n\nJanvier 2019 – Présent\nContrôleuse de Gestion chez Managem\n  Élaboration du budget annuel et analyse des écarts.\n  Production des tableaux de bord de pilotage sous Power BI et Excel.\n  Exploitation du progiciel SAP.\n\nFORMATION\n\n2017 - Master en Finance d'Entreprise, Université Mohammed V\n\nCOMPÉTENCES\n\nContrôle de gestion, Excel, ERP, Power BI, Analyse des coûts, Reporting financier\n\nLANGUES\n\nFrançais : bilingue\nAnglais : courant",
+    "offre": "Data Scientist — Casablanca, CDI\n\nVous rejoignez notre pôle données pour concevoir des modèles prédictifs et\nindustrialiser leur mise en production. Vous accompagnez les équipes métier\ndans l'interprétation des résultats.\n\nProfil recherché :\n- 4 ans d'expérience en science des données\n- Maîtrise de Python et des bibliothèques d'apprentissage automatique\n- Solide pratique du SQL et de la manipulation de grands volumes\n- Diplôme Bac+5, idéalement en statistiques ou en informatique\n\nCompétences appréciées : apprentissage profond, traitement du langage, Power BI.",
+    "label": "No Fit",
+    "domaine": "controle vs data",
+    "profil": "a",
+    "origine": "croisement de domaines"
+  }
+]

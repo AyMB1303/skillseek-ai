@@ -6,6 +6,7 @@ import { Chargement, EtatErreur, EtatVide, BadgeStatut } from "@/components/ui";
 import { useGarde } from "@/lib/auth";
 import { api } from "@/lib/api";
 import { couleurScore } from "@/lib/scoring";
+import { useCompteur, useEntreeEnVue, retard } from "@/lib/mouvement";
 
 const PERIODES = [
   { valeur: 7, libelle: "7 jours" },
@@ -70,10 +71,10 @@ export default function Dashboard() {
         <div className="space-y-5">
           {/* ---------- Cartes KPI ---------- */}
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-            <CarteKpi libelle="Candidatures reçues" valeur={stats.kpi.recues.valeur} variation={stats.kpi.recues.variation} />
-            <CarteKpi libelle="Présélectionnés IA" valeur={stats.kpi.preselectionnees.valeur} accent="cyan" />
-            <CarteKpi libelle="Entretiens" valeur={stats.kpi.entretiens.valeur} accent="alerte" />
-            <CarteKpi libelle="Recrutés" valeur={stats.kpi.recrutes.valeur} accent="succes" />
+            <CarteKpi libelle="Candidatures reçues" valeur={stats.kpi.recues.valeur} variation={stats.kpi.recues.variation} rang={0} />
+            <CarteKpi libelle="Présélectionnés IA" valeur={stats.kpi.preselectionnees.valeur} accent="cyan" rang={1} />
+            <CarteKpi libelle="Entretiens" valeur={stats.kpi.entretiens.valeur} accent="alerte" rang={2} />
+            <CarteKpi libelle="Recrutés" valeur={stats.kpi.recrutes.valeur} accent="succes" rang={3} />
           </div>
 
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
@@ -133,13 +134,27 @@ export default function Dashboard() {
 
 /* ---------------------------- Sous-composants ---------------------------- */
 
-function CarteKpi({ libelle, valeur, variation, accent = "accent" }) {
+/**
+ * Carte d'indicateur.
+ *
+ * Le décompte n'est pas décoratif : il attire l'œil sur les chiffres qui ont
+ * changé depuis la dernière consultation, et il distingue un tableau de bord
+ * qui vient de se charger d'un tableau de bord figé sur des données périmées.
+ * La valeur exacte est portée par `aria-label` dès le premier rendu.
+ */
+function CarteKpi({ libelle, valeur, variation, accent = "accent", rang = 0 }) {
   const couleurs = { accent: "text-accent", cyan: "text-cyan", alerte: "text-alerte", succes: "text-succes" };
+  const affiche = useCompteur(valeur, { duree: 800 });
   return (
-    <div className="carte p-4">
+    <div className="carte carte-reactive p-4 entree" style={{ animationDelay: retard(rang, 70) }}>
       <p className="text-xs text-txt2 font-medium">{libelle}</p>
       <div className="flex items-end gap-2 mt-2">
-        <span className={`text-3xl font-bold ${couleurs[accent]}`}>{valeur}</span>
+        <span
+          className={`text-3xl font-bold tabular-nums ${couleurs[accent]}`}
+          aria-label={`${libelle} : ${valeur}`}
+        >
+          {affiche}
+        </span>
         {variation != null && (
           <span className={`text-xs font-semibold mb-1.5 ${variation >= 0 ? "text-succes" : "text-erreur"}`}>
             {variation >= 0 ? "▲" : "▼"} {Math.abs(variation)}%
@@ -150,11 +165,20 @@ function CarteKpi({ libelle, valeur, variation, accent = "accent" }) {
   );
 }
 
+/**
+ * Entonnoir de recrutement.
+ *
+ * Les barres se construisent de haut en bas, dans l'ordre où un candidat
+ * traverse les étapes. La lecture suit alors le parcours réel plutôt qu'un
+ * empilement de barres apparues ensemble. L'animation attend que la section
+ * soit visible : sinon elle serait terminée avant qu'on y arrive.
+ */
 function Entonnoir({ etapes }) {
+  const [ancre, visible] = useEntreeEnVue();
   const max = Math.max(...etapes.map((e) => e.valeur), 1);
   const couleurs = ["bg-accent", "bg-cyan", "bg-alerte", "bg-succes"];
   return (
-    <section className="carte p-5">
+    <section className="carte p-5" ref={ancre}>
       <h2 className="font-semibold text-sm mb-4">Entonnoir de recrutement</h2>
       <div className="space-y-2.5">
         {etapes.map((e, i) => (
@@ -168,8 +192,11 @@ function Entonnoir({ etapes }) {
             </div>
             <div className="h-7 bg-fond rounded-md overflow-hidden">
               <div
-                className={`h-full ${couleurs[i]} transition-all duration-500 rounded-md`}
-                style={{ width: `${Math.max((e.valeur / max) * 100, e.valeur ? 4 : 0)}%` }}
+                className={`h-full ${couleurs[i]} rounded-md ${visible ? "jauge-remplissage" : ""}`}
+                style={{
+                  width: `${Math.max((e.valeur / max) * 100, e.valeur ? 4 : 0)}%`,
+                  animationDelay: retard(i, 110),
+                }}
               />
             </div>
           </div>
@@ -196,12 +223,18 @@ function Courbe({ serie, periode }) {
     <section className="carte p-5">
       <h2 className="font-semibold text-sm mb-4">Candidatures sur {periode} jours</h2>
       <svg viewBox="0 0 100 40" preserveAspectRatio="none" className="w-full h-32" role="img" aria-label="Évolution des candidatures">
-        <polyline points={points} fill="none" stroke="#3B82F6" strokeWidth="1" vectorEffect="non-scaling-stroke" />
+        {/* Le tracé se dessine de gauche à droite : le même geste que la
+            lecture d'un axe temporel. `pathLength` normalise la longueur du
+            trait, ce qui évite de la mesurer en JavaScript. */}
+        <polyline
+          points={points} fill="none" className="stroke-accent trace-courbe"
+          strokeWidth="1" vectorEffect="non-scaling-stroke" pathLength="1"
+        />
         <polygon points={`0,40 ${points} 100,40`} fill="url(#deg)" opacity="0.25" />
         <defs>
           <linearGradient id="deg" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#3B82F6" />
-            <stop offset="100%" stopColor="#3B82F6" stopOpacity="0" />
+            <stop offset="0%" style={{ stopColor: "rgb(var(--c-accent))" }} />
+            <stop offset="100%" style={{ stopColor: "rgb(var(--c-accent))", stopOpacity: 0 }} />
           </linearGradient>
         </defs>
       </svg>

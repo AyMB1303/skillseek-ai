@@ -161,13 +161,7 @@ def extraire_experience(texte):
     return min(total, 45)
 
 
-# ----------------------- Profil complet -----------------------
-
-def extraire_profil(texte):
-    """Produit le profil structuré attendu par le moteur de score."""
-    return {
-        "skills": extraire_competences(texte),
-        "experience_years": extraire_experience(texte),
-        "degree": extraire_diplome(texte),
-        "longueur_texte": len(texte or ""),
-    }
+# Le profil complet n'est plus assemble ici : `services/ats.py` produit un
+# profil structure bien plus riche (experiences datees, langues, sections) a
+# partir du meme texte. Les fonctions ci-dessus restent utilisees comme briques
+# de repli lorsque l'analyse structurelle echoue.

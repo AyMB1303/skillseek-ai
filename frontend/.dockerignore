@@ -1,0 +1,12 @@
+# Le contexte de construction est envoye au demon Docker : tout ce qui est
+# regenere dans l'image n'a rien a y faire. Sans ce fichier, `node_modules`
+# (plusieurs centaines de Mo) serait transfere a chaque construction.
+node_modules
+.next
+out
+npm-debug.log*
+.env*
+.git
+.DS_Store
+Dockerfile
+.dockerignore

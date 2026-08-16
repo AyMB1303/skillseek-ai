@@ -101,8 +101,24 @@ export default function DetailOffre() {
             <section className="carte p-6">
               <h1 className="text-xl font-bold">{offre.title}</h1>
               <p className="text-xs text-txt2 mt-1.5">
+                {offre.company && <>{offre.company} · </>}
                 Publiée le {new Date(offre.created_at).toLocaleDateString("fr-FR")}
               </p>
+
+              <div className="flex flex-wrap gap-2 mt-3">
+                {offre.location && (
+                  <span className="chip bg-bordure/40 text-txt2">{offre.location}</span>
+                )}
+                {offre.contract_type && (
+                  <span className="chip bg-accent/10 text-accent">{offre.contract_type}</span>
+                )}
+                {offre.remote_policy && (
+                  <span className="chip bg-bordure/40 text-txt2">{offre.remote_policy}</span>
+                )}
+                {offre.salary_display && (
+                  <span className="chip bg-succes/10 text-succes">{offre.salary_display}</span>
+                )}
+              </div>
 
               <div className="flex flex-wrap gap-1.5 mt-4">
                 {(offre.required_skills || []).map((s) => (

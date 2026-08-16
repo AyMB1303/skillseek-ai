@@ -1,20 +1,29 @@
-/** Design system SkillSeek AI — thème sombre. */
+/** Design system SkillSeek AI.
+ *
+ *  Les couleurs sont définies par des variables CSS (globals.css), ce qui
+ *  permet aux thèmes sombre et clair de partager exactement le même code de
+ *  composants. La syntaxe `rgb(var(--x) / <alpha-value>)` conserve le support
+ *  des opacités Tailwind (bg-accent/15, text-succes/50, etc.).
+ */
+const couleur = (variable) => `rgb(var(${variable}) / <alpha-value>)`;
+
 module.exports = {
   content: ["./src/**/*.{js,jsx}"],
+  darkMode: ["class", '[data-theme="dark"]'],
   theme: {
     extend: {
       colors: {
-        fond: "#0B1220",        // fond principal
-        surface: "#111A2E",     // cartes
-        surface2: "#0D1526",    // sidebar / header
-        bordure: "#1E2A44",
-        accent: "#3B82F6",      // bleu primaire
-        cyan: "#22D3EE",        // accent IA
-        succes: "#34D399",
-        alerte: "#F59E0B",
-        erreur: "#F87171",
-        txt: "#E5EAF3",
-        txt2: "#8B98B8",
+        fond: couleur("--c-fond"),           // fond principal
+        surface: couleur("--c-surface"),     // cartes
+        surface2: couleur("--c-surface2"),   // sidebar, header
+        bordure: couleur("--c-bordure"),
+        accent: couleur("--c-accent"),       // bleu primaire
+        cyan: couleur("--c-cyan"),           // accent analyse
+        succes: couleur("--c-succes"),
+        alerte: couleur("--c-alerte"),
+        erreur: couleur("--c-erreur"),
+        txt: couleur("--c-txt"),             // texte principal
+        txt2: couleur("--c-txt2"),           // texte secondaire
       },
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"],

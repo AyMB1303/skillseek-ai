@@ -15,16 +15,31 @@ PERMISSIONS = {
     "manage_applications": "Changer le statut des candidatures",
     "view_dashboard": "Accéder au tableau de bord décisionnel",
     "use_chatbot": "Utiliser l'assistant RH",
+    # Controle des candidatures : partage entre recruteurs et administrateurs.
+    # Une permission dediee plutot qu'une reutilisation de `view_applications` :
+    # un administrateur doit pouvoir traiter une alerte de securite sans se
+    # voir ouvrir pour autant l'ensemble des dossiers de candidature.
+    "view_signalements": "Consulter les signalements sur les candidatures",
+    "manage_signalements": "Traiter et clore les signalements",
 }
 
 ROLES = {
-    "admin": ["manage_users", "manage_roles"],
+    # L'assistant est ouvert a l'administrateur, mais sur un domaine distinct :
+    # comptes, droits, signalements, journal. Il ne lui donne pas acces au
+    # contenu des candidatures, faute de `view_applications` — la conversation
+    # ne doit pas contourner le modele de droits.
+    "admin": [
+        "manage_users", "manage_roles", "use_chatbot",
+        "view_signalements", "manage_signalements",
+    ],
     "recruiter": [
         "manage_offers",
         "view_applications",
         "manage_applications",
         "view_dashboard",
         "use_chatbot",
+        "view_signalements",
+        "manage_signalements",
     ],
     "candidate": [],
 }
@@ -59,7 +74,10 @@ def seed_command():
     # Admin
     if User.query.filter_by(email=ADMIN_EMAIL).first() is None:
         admin = User(
-            email=ADMIN_EMAIL, full_name="Administrateur", role=roles["admin"]
+            email=ADMIN_EMAIL,
+            full_name="Administrateur",
+            role=roles["admin"],
+            status="active",
         )
         admin.set_password(ADMIN_PASSWORD)
         db.session.add(admin)

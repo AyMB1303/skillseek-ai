@@ -3,13 +3,15 @@ import os
 import uuid
 
 from flask import Blueprint, current_app, jsonify, request, send_file
+from sqlalchemy.orm import joinedload, selectinload
+from werkzeug.utils import secure_filename
 
 from ..extensions import db
 from ..middleware.permissions import current_user_required, require_permission
 from ..models.ai_metric import AiMetric
 from ..models.application import STATUSES, Application
 from ..models.job_offer import JobOffer
-from ..services import notifications as notifs
+from ..services import acces, journal, notifications as notifs
 from ..services.analyse import analyser_candidature
 from ..services.scoring import calculer_score
 
@@ -19,18 +21,42 @@ applications_bp = Blueprint("applications", __name__)
 EXTENSIONS_AUTORISEES = {".pdf", ".docx"}
 TAILLE_MAX = 5 * 1024 * 1024  # 5 Mo
 
+# Type declare au telechargement, selon le format reellement stocke.
+TYPES_MIME = {
+    ".pdf": "application/pdf",
+    ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+}
+
 
 @applications_bp.get("")
 @require_permission("view_applications")
 def list_applications(current_user):
-    """Liste des candidatures, filtrable par offre et par statut."""
-    requete = Application.query
+    """Liste des candidatures, filtrable par offre et par statut.
+
+    La restriction au périmètre précède les filtres : un `offer_id` fourni
+    dans l'URL ne doit pas pouvoir désigner l'offre d'un autre recruteur.
+    """
+    # Chargement anticipe des relations lues par `_serialiser`. Sans lui,
+    # afficher cent candidatures declenchait plus de trois cents requetes :
+    # une par candidat, une par offre, une par lot de signalements.
+    requete = acces.restreindre_candidatures(
+        Application.query.options(
+            joinedload(Application.candidate),
+            joinedload(Application.offer),
+            selectinload(Application.signalements),
+        ),
+        current_user,
+    )
     offre_id = request.args.get("offer_id", type=int)
     statut = request.args.get("status")
+    # Filtres explicitement rattaches a `Application` : la restriction de
+    # perimetre joint `JobOffer`, et un `filter_by` se resoudrait alors sur
+    # cette derniere. `status` existe sur les deux tables — le filtre aurait
+    # silencieusement porte sur l'etat de l'offre au lieu de celui du dossier.
     if offre_id:
-        requete = requete.filter_by(offer_id=offre_id)
+        requete = requete.filter(Application.offer_id == offre_id)
     if statut:
-        requete = requete.filter_by(status=statut)
+        requete = requete.filter(Application.status == statut)
 
     candidatures = requete.order_by(Application.score.desc().nullslast()).all()
     return jsonify(
@@ -47,7 +73,13 @@ def my_applications(current_user):
         .order_by(Application.created_at.desc())
         .all()
     )
-    # Le candidat ne voit pas son score (choix produit du cahier des charges).
+    # Le candidat ne voit pas son score (choix produit du cahier des charges),
+    # mais un refus muet serait indefendable : une decision prise avec l'aide
+    # d'un traitement automatise doit pouvoir s'expliquer a la personne
+    # concernee. Le retour restitue donc les faits — competences attendues,
+    # experience requise — sans jamais livrer la note ni le classement.
+    from ..services import retour_candidat
+
     return jsonify(
         applications=[
             {
@@ -55,6 +87,7 @@ def my_applications(current_user):
                 "status": c.status,
                 "offer": {"id": c.offer.id, "title": c.offer.title} if c.offer else None,
                 "created_at": c.created_at.isoformat(),
+                "retour": retour_candidat.construire(c),
             }
             for c in candidatures
         ]
@@ -122,6 +155,22 @@ def postuler(current_user):
     )
     # Le recruteur proprietaire de l'offre est informe immediatement.
     notifs.candidature_recue(candidature)
+    # Une note remarquable merite une alerte distincte : elle sort du flux
+    # ordinaire et appelle une reaction rapide.
+    notifs.score_eleve(candidature)
+
+    # Anomalies relevees par les controles : le recruteur est averti, et le
+    # candidat aussi lorsque l'ecart porte sur son identite — il peut alors
+    # corriger son profil avant que le doute ne lui nuise.
+    anomalies = (details or {}).get("controles", {})
+    if anomalies.get("nombre"):
+        signalements = [
+            s.to_dict() for s in candidature.signalements if s.statut == "nouveau"
+        ]
+        notifs.signalements_ouverts(candidature, signalements)
+        if "identite_divergente" in (anomalies.get("types") or []):
+            notifs.identite_a_verifier(candidature)
+
     db.session.commit()
 
     return jsonify(application=_serialiser(candidature)), 201
@@ -138,7 +187,9 @@ def analyser(current_user, app_id):
       * manuel : le recruteur fournit lui-même le profil, ce qui reste
         nécessaire lorsqu'un document est illisible (scan de mauvaise qualité).
     """
-    candidature = Application.query.get_or_404(app_id)
+    candidature, refus = acces.candidature(current_user, app_id)
+    if refus:
+        return refus
     data = request.get_json(silent=True) or {}
     profil_fourni = any(k in data for k in ("skills", "experience_years", "degree"))
 
@@ -156,6 +207,15 @@ def analyser(current_user, app_id):
         candidature.score_details = details
     else:
         details = analyser_candidature(candidature)
+        db.session.flush()
+        # A la reanalyse, seules les anomalies nouvelles sont signalees : les
+        # rappeler toutes ferait sonner l'alerte a chaque relecture d'un dossier
+        # deja examine.
+        nouvelles = [
+            s.to_dict() for s in candidature.signalements if s.statut == "nouveau"
+        ]
+        if nouvelles:
+            notifs.signalements_ouverts(candidature, nouvelles)
 
     db.session.add(
         AiMetric(
@@ -173,7 +233,9 @@ def analyser(current_user, app_id):
 @applications_bp.patch("/<int:app_id>/status")
 @require_permission("manage_applications")
 def changer_statut(current_user, app_id):
-    candidature = Application.query.get_or_404(app_id)
+    candidature, refus = acces.candidature(current_user, app_id)
+    if refus:
+        return refus
     statut = (request.get_json(silent=True) or {}).get("status")
     if statut not in STATUSES:
         return jsonify(error=f"Statut invalide. Valeurs possibles : {', '.join(STATUSES)}"), 400
@@ -182,6 +244,13 @@ def changer_statut(current_user, app_id):
     candidature.status = statut
     # Le candidat est informe de l'evolution de SA candidature.
     notifs.statut_change(candidature, ancien)
+    journal.tracer(
+        "candidature_statut", auteur=current_user,
+        objet_type="candidature", objet_id=candidature.id,
+        objet_libelle=candidature.candidate.full_name if candidature.candidate else None,
+        avant=ancien, apres=candidature.status,
+        offre=candidature.offer.title if candidature.offer else None,
+    )
     db.session.commit()
     return jsonify(application=_serialiser(candidature))
 
@@ -189,10 +258,14 @@ def changer_statut(current_user, app_id):
 @applications_bp.get("/<int:app_id>/cv")
 @require_permission("view_applications")
 def telecharger_cv(current_user, app_id):
-    candidature = Application.query.get_or_404(app_id)
+    candidature, refus = acces.candidature(current_user, app_id)
+    if refus:
+        return refus
 
     # Les CV deposes avant la correction du chemin peuvent etre en relatif :
-    # on resout dans les deux cas pour rester compatible.
+    # on resout dans les deux cas pour rester compatible. `basename` est
+    # indispensable — un chemin relatif remontant (« ../ ») sortirait sinon du
+    # dossier de depot.
     chemin = candidature.cv_path
     if not os.path.isabs(chemin):
         chemin = os.path.join(current_app.config["UPLOAD_FOLDER"], os.path.basename(chemin))
@@ -200,10 +273,16 @@ def telecharger_cv(current_user, app_id):
     if not os.path.exists(chemin):
         return jsonify(error="Le fichier du CV est introuvable sur le serveur."), 404
 
+    # Le type et l'extension suivent le fichier reellement stocke. Annoncer un
+    # PDF pour un DOCX faisait echouer l'ouverture chez le recruteur, et le nom
+    # est assaini : il provient d'une saisie utilisateur et se retrouve dans un
+    # en-tete HTTP puis sur un systeme de fichiers.
+    extension = os.path.splitext(chemin)[1].lower()
+    nom = secure_filename(candidature.candidate.full_name if candidature.candidate else "")
     return send_file(
         chemin,
-        mimetype="application/pdf",
-        download_name=f"CV-{candidature.candidate.full_name}.pdf",
+        mimetype=TYPES_MIME.get(extension, "application/octet-stream"),
+        download_name=f"CV-{nom or f'candidature-{candidature.id}'}{extension}",
     )
 
 
@@ -222,4 +301,10 @@ def _serialiser(c):
         if c.candidate
         else None,
         "offer": {"id": c.offer.id, "title": c.offer.title} if c.offer else None,
+        # Les anomalies accompagnent la candidature partout ou elle s'affiche.
+        # Les signalements ecartes sont exclus : un recruteur a deja tranche,
+        # le rappeler indefiniment reviendrait a ignorer sa decision.
+        "signalements": [
+            s.to_dict() for s in c.signalements if s.statut != "ecarte"
+        ],
     }

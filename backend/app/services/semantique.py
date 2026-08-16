@@ -64,11 +64,63 @@ def encoder(texte):
         return _cache_plongements[cle]
 
     vecteur = modele.encode(texte[:5000], normalize_embeddings=True)
+    _memoriser(cle, vecteur)
+    return vecteur
+
+
+def _memoriser(cle, vecteur):
     # Le cache est borne pour ne pas croitre indefiniment en production
     if len(_cache_plongements) > 500:
         _cache_plongements.clear()
     _cache_plongements[cle] = vecteur
-    return vecteur
+
+
+def encoder_lot(textes):
+    """Encode plusieurs textes en une passe.
+
+    Un modèle de plongements traite un lot en une seule propagation avant :
+    encoder cinquante documents d'un coup coûte nettement moins que cinquante
+    appels successifs, où le temps se perd en préparation et en surcoût
+    d'appel plutôt qu'en calcul. C'est ce qui rend la reconstruction de
+    l'index de l'assistant supportable quand la base grandit.
+
+    Les textes déjà connus sont repris du cache et ne sont pas réencodés.
+    """
+    modele = _charger_modele()
+    if modele is None:
+        return [None] * len(textes)
+
+    resultats = [None] * len(textes)
+    a_calculer, positions = [], []
+
+    for i, texte in enumerate(textes):
+        if not texte:
+            continue
+        cle = _cle(texte)
+        if cle in _cache_plongements:
+            resultats[i] = _cache_plongements[cle]
+        else:
+            a_calculer.append(texte[:5000])
+            positions.append((i, cle))
+
+    if a_calculer:
+        try:
+            vecteurs = modele.encode(
+                a_calculer, normalize_embeddings=True, batch_size=32
+            )
+        except Exception as exc:
+            # Un modele exotique pourrait ne pas accepter les lots : le repli
+            # unitaire garantit que la fonctionnalite ne disparait pas.
+            logger.warning("Encodage par lot indisponible (%s) : repli unitaire.", exc)
+            for (i, _), texte in zip(positions, a_calculer):
+                resultats[i] = encoder(texte)
+            return resultats
+
+        for (i, cle), vecteur in zip(positions, vecteurs):
+            resultats[i] = vecteur
+            _memoriser(cle, vecteur)
+
+    return resultats
 
 
 # ----------------------- Repli TF-IDF -----------------------

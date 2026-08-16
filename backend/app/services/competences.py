@@ -68,6 +68,30 @@ REFERENTIEL = {
     "tests": ["tests unitaires", "pytest", "junit", "tdd", "qualite logicielle"],
     "cybersecurite": ["cybersecurite", "securite informatique", "pentest"],
 
+    # Gestion, finance et bureautique
+    #
+    # La plateforme n'est pas reservee aux metiers informatiques : sans ces
+    # entrees, une offre de comptable n'aurait aucune competence obligatoire
+    # reconnue, et le moteur reporterait tout son poids sur les criteres
+    # d'experience et de diplome.
+    "comptabilite generale": [
+        "comptabilite generale", "comptabilite", "tenue comptable",
+        "ecritures comptables", "etats financiers", "bilan comptable",
+    ],
+    "fiscalite": [
+        "fiscalite", "declarations fiscales", "declaration fiscale",
+        "tva", "liasse fiscale", "impots",
+    ],
+    "controle de gestion": [
+        "controle de gestion", "controle budgetaire", "reporting financier",
+        "analyse des couts",
+    ],
+    "audit": ["audit", "audit financier", "audit interne", "commissariat aux comptes"],
+    "paie": ["paie", "gestion de la paie", "bulletins de paie", "declarations sociales"],
+    "excel": ["excel", "microsoft excel", "tableur", "tableaux croises dynamiques"],
+    "erp": ["erp", "sap", "odoo", "progiciel de gestion"],
+    "sage": ["sage", "sage comptabilite", "sage paie"],
+
     # Langues
     "anglais": ["anglais", "english"],
     "francais": ["francais", "french"],

@@ -183,7 +183,7 @@ export default function Profil() {
         actions={
           <>
             <button onClick={() => setModaleSuppr(false)} className="btn-fantome">Annuler</button>
-            <button onClick={supprimerCompte} className="btn bg-erreur text-white hover:bg-red-500">
+            <button onClick={supprimerCompte} className="btn bg-erreur text-white hover:opacity-90">
               Supprimer mon compte
             </button>
           </>

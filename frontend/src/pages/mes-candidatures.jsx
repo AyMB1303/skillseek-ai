@@ -100,6 +100,30 @@ export default function MesCandidatures() {
                       );
                     })}
                   </ol>
+
+                  {/* Retour factuel en cas de refus : la note reste interne,
+                      mais un refus muet serait indéfendable — une décision
+                      prise avec l'aide d'un traitement automatisé doit pouvoir
+                      s'expliquer à la personne concernée. */}
+                  {c.retour && (
+                    <div className="mt-5 rounded-[10px] border border-bordure bg-surface2/50 p-3.5 space-y-2">
+                      <p className="text-[13px] leading-relaxed">{c.retour.message}</p>
+
+                      {c.retour.points.length > 0 && (
+                        <ul className="space-y-1">
+                          {c.retour.points.map((p) => (
+                            <li key={p} className="text-[12.5px] text-txt2">• {p}</li>
+                          ))}
+                        </ul>
+                      )}
+
+                      {c.retour.avertissement && (
+                        <p className="text-[11px] text-txt2 border-t border-bordure pt-2 leading-snug">
+                          {c.retour.avertissement}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </article>
               );
             })}

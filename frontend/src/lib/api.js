@@ -132,6 +132,50 @@ export const api = {
   // Tableau de bord
   statistiques: (periode = 30) => appel(`/dashboard/stats?days=${periode}`),
 
+  // Assistant conversationnel
+  // L'historique accompagne la question : sans lui, chaque message repartirait
+  // de zero et l'assistant ne comprendrait aucune reprise implicite.
+  demanderAssistant: (question, historique = []) =>
+    appel("/assistant/ask", { method: "POST", body: { question, historique } }),
+  etatAssistant: () => appel("/assistant/status"),
+
+  // Référentiel des compétences reconnues par le moteur d'analyse
+  referentielCompetences: () => appel("/offers/referentiel-competences"),
+  vivier: (offreId) => appel(`/offers/${offreId}/vivier`),
+  detecterCompetences: (description) =>
+    appel("/offers/detecter-competences", { method: "POST", body: { description } }),
+
+  // Contrôle des candidatures
+  signalements: (filtres = {}) => {
+    const params = new URLSearchParams(
+      Object.entries(filtres).filter(([, v]) => v)
+    ).toString();
+    return appel(`/signalements${params ? `?${params}` : ""}`);
+  },
+  signalementsCandidature: (id) => appel(`/signalements/candidature/${id}`),
+  ouvrirSignalement: (applicationId, type, message, severite = "attention") =>
+    appel("/signalements", {
+      method: "POST",
+      body: { application_id: applicationId, type, message, severite },
+    }),
+  traiterSignalement: (id, statut, commentaire = "") =>
+    appel(`/signalements/${id}`, {
+      method: "PATCH",
+      body: { statut, commentaire },
+    }),
+  syntheseControles: () => appel("/signalements/synthese"),
+
+  // Évaluations d'entretien
+  grilleEvaluation: () => appel("/evaluations/grille"),
+  evaluation: (appId) => appel(`/evaluations/candidature/${appId}`),
+  enregistrerEvaluation: (appId, donnees) =>
+    appel(`/evaluations/candidature/${appId}`, { method: "PUT", body: donnees }),
+  comparaisonEvaluations: () => appel("/evaluations/comparaison"),
+
+  // Journal d'audit
+  journal: (action = "") =>
+    appel(`/journal${action ? `?action=${encodeURIComponent(action)}` : ""}`),
+
   // Notifications
   notifications: () => appel("/notifications"),
   marquerLue: (id) => appel(`/notifications/${id}/read`, { method: "POST" }),
@@ -149,6 +193,23 @@ export const api = {
   creerUtilisateur: (d) => appel("/users", { method: "POST", body: d }),
   modifierUtilisateur: (id, d) => appel(`/users/${id}`, { method: "PATCH", body: d }),
   supprimerUtilisateur: (id) => appel(`/users/${id}`, { method: "DELETE" }),
+
+  // Validation des comptes recruteurs
+  demandesEnAttente: () => appel("/users/pending"),
+  approuverCompte: (id) => appel(`/users/${id}/approve`, { method: "POST" }),
+  refuserCompte: (id, motif) =>
+    appel(`/users/${id}/reject`, { method: "POST", body: { reason: motif } }),
+
+  // Corbeille
+  corbeille: () => appel("/trash"),
+  restaurerUtilisateur: (id) => appel(`/users/${id}/restore`, { method: "POST" }),
+  purgerUtilisateur: (id) => appel(`/users/${id}/purge`, { method: "DELETE" }),
+  supprimerOffre: (id) => appel(`/offers/${id}`, { method: "DELETE" }),
+  restaurerOffre: (id) => appel(`/offers/${id}/restore`, { method: "POST" }),
+  purgerOffre: (id) => appel(`/offers/${id}/purge`, { method: "DELETE" }),
+
+  // Tableau de bord administrateur
+  statistiquesAdmin: () => appel("/dashboard/admin"),
   roles: () => appel("/roles"),
   permissions: () => appel("/permissions"),
   definirPermissions: (roleId, codes) =>

@@ -23,14 +23,54 @@ services:
     env_file: .env
     environment:
       DATABASE_URL: ${DATABASE_URL}
+      # Modele de langue local, facultatif. S'il ne repond pas, l'assistant
+      # bascule sur la redaction deterministe sans interruption de service.
+      OLLAMA_URL: ${OLLAMA_URL:-http://host.docker.internal:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:3b}
+      # Origines autorisees a appeler l'API depuis un navigateur. La valeur par
+      # defaut couvre le poste de developpement ; un deploiement doit la fixer.
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:3000,http://127.0.0.1:3000}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - ./backend:/app
       - cv_uploads:/app/uploads
+      # Corpus d'apprentissage et modeles entraines, conserves hors de l'image
+      - ./data:/app/data
+      - ./models:/app/models
+      # Vues decisionnelles et fichiers destines a Power BI
+      - ./bi:/app/bi
+      - ./exports:/app/exports
     ports:
       - "5000:5000"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/api/health')\""]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
     depends_on:
       db:
         condition: service_healthy
+
+  # Le frontend est conteneurise au meme titre que le reste : `docker compose
+  # up` suffit alors a lever la plateforme entiere, sans installation de Node
+  # sur la machine hote. C'est aussi ce qui rend l'environnement reproductible
+  # d'un poste a l'autre.
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # L'adresse est inscrite dans le bundle navigateur a la construction.
+        # Le navigateur appelle l'API depuis la machine hote, pas depuis le
+        # reseau interne de Docker : d'ou `localhost` et non `backend`.
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:5000/api}
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_started
 
 volumes:
   pgdata:

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
+import BasculeTheme from "@/components/BasculeTheme";
 
 export default function Connexion() {
   const { connexion } = useAuth();
@@ -24,7 +25,10 @@ export default function Connexion() {
   };
 
   return (
-    <div className="min-h-screen grid place-items-center p-4 bg-gradient-to-br from-fond to-surface2">
+    <div className="min-h-screen grid place-items-center p-4 bg-gradient-to-br from-fond to-surface2 relative">
+      <div className="absolute top-4 right-4">
+        <BasculeTheme compact />
+      </div>
       <div className="w-full max-w-[400px]">
         <div className="flex items-center justify-center gap-2.5 mb-7">
           <div className="w-10 h-10 rounded-xl2 bg-gradient-to-br from-accent to-cyan grid place-items-center">

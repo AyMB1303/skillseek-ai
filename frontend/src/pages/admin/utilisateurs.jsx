@@ -213,7 +213,9 @@ export default function AdminUtilisateurs() {
         actions={
           <>
             <button onClick={() => setASupprimer(null)} className="btn-fantome">Annuler</button>
-            <button onClick={supprimer} className="btn bg-erreur text-white hover:bg-red-500">Supprimer définitivement</button>
+            <button onClick={supprimer} className="btn bg-erreur text-white hover:opacity-90">
+              Supprimer définitivement
+            </button>
           </>
         }
       >

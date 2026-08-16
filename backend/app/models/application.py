@@ -29,6 +29,22 @@ class Application(db.Model):
     offer_id = db.Column(db.Integer, db.ForeignKey("job_offers.id"), nullable=False)
     offer = db.relationship("JobOffer", back_populates="applications")
 
+    # Empreinte du texte du CV : sert a reperer un meme document depose sous
+    # deux identites. Comparer des empreintes est immediat, la ou comparer les
+    # textes deux a deux couterait un temps quadratique.
+    cv_empreinte = db.Column(db.String(64), index=True)
+
+    signalements = db.relationship(
+        "Signalement", back_populates="application",
+        cascade="all, delete-orphan", passive_deletes=True,
+    )
+
+    # Compte rendu d'entretien : au plus un par candidature.
+    evaluation = db.relationship(
+        "Evaluation", back_populates="application", uselist=False,
+        cascade="all, delete-orphan", passive_deletes=True,
+    )
+
     def to_dict(self) -> dict:
         return {
             "id": self.id,
@@ -38,4 +54,5 @@ class Application(db.Model):
             "candidate_id": self.candidate_id,
             "offer_id": self.offer_id,
             "created_at": self.created_at.isoformat(),
+            "signalements": [s.to_dict() for s in self.signalements],
         }

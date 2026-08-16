@@ -1,0 +1,13 @@
+# Exclut du contexte ce que l'image reconstruit ou ne doit jamais contenir :
+# environnements virtuels, caches, et surtout les CV deposes.
+__pycache__
+*.pyc
+.pytest_cache
+.venv
+venv
+uploads
+instance
+.env*
+.git
+Dockerfile
+.dockerignore

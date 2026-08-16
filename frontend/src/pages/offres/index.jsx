@@ -5,6 +5,7 @@ import Layout from "@/components/Layout";
 import { Chargement, EtatErreur, EtatVide } from "@/components/ui";
 import { useGarde } from "@/lib/auth";
 import { api } from "@/lib/api";
+import { retard } from "@/lib/mouvement";
 
 export default function Offres() {
   const { chargement: garde } = useGarde(["candidate", "recruiter", "admin"]);
@@ -106,11 +107,12 @@ export default function Offres() {
           />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {filtrees.map((o) => (
+            {filtrees.map((o, rang) => (
               <Link
                 key={o.id}
                 href={`/offres/${o.id}`}
-                className="carte p-5 hover:border-accent transition-colors flex flex-col gap-3"
+                className="carte carte-reactive p-5 flex flex-col gap-3 entree"
+                style={{ animationDelay: retard(rang, 45) }}
               >
                 <div>
                   <h2 className="font-semibold leading-snug">{o.title}</h2>
@@ -123,11 +125,19 @@ export default function Offres() {
                   ))}
                 </div>
 
-                <div className="flex items-center gap-3 mt-auto pt-2 text-xs text-txt2 border-t border-bordure">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-auto pt-2 text-xs text-txt2 border-t border-bordure">
+                  {o.location && <span>{o.location}</span>}
+                  {o.contract_type && (
+                    <span className="chip bg-bordure/40 text-txt2 text-[10px]">{o.contract_type}</span>
+                  )}
+                  {o.remote_policy && <span>{o.remote_policy}</span>}
                   {o.min_experience_years > 0 && <span>{o.min_experience_years}+ ans</span>}
-                  {o.min_degree && <span>{o.min_degree}</span>}
                   <span className="ml-auto">{new Date(o.created_at).toLocaleDateString("fr-FR")}</span>
                 </div>
+
+                {o.salary_display && (
+                  <p className="text-xs font-medium text-succes">{o.salary_display}</p>
+                )}
               </Link>
             ))}
           </div>

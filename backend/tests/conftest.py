@@ -13,12 +13,16 @@ def app():
     with app.app_context():
         _db.create_all()
 
-        # Donnees minimales : permissions + roles + un admin
+        # Donnees minimales, calquees sur une base initialisee par `flask seed` :
+        # les trois roles doivent exister pour que l'inscription fonctionne.
         p_users = Permission(code="manage_users", description="")
         p_roles = Permission(code="manage_roles", description="")
         admin_role = Role(name="admin", permissions=[p_users, p_roles])
+        recruiter_role = Role(name="recruiter", permissions=[])
         candidate_role = Role(name="candidate", permissions=[])
-        _db.session.add_all([p_users, p_roles, admin_role, candidate_role])
+        _db.session.add_all(
+            [p_users, p_roles, admin_role, recruiter_role, candidate_role]
+        )
 
         admin = User(email="admin@test.local", full_name="Admin Test", role=admin_role)
         admin.set_password("Admin@1234")

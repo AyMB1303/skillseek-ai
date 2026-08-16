@@ -4,11 +4,26 @@ from ..extensions import db
 
 # Types d'evenements notifiables (sert au choix de l'icone cote interface)
 TYPES = (
-    "candidature_recue",      # -> recruteur
-    "statut_change",          # -> candidat
+    "candidature_recue",      # -> recruteur proprietaire de l'offre
+    "statut_change",          # -> candidat concerne
     "compte_cree",            # -> administrateurs
     "permissions_modifiees",  # -> utilisateurs du role concerne
     "offre_publiee",          # -> administrateurs
+    "recruteur_en_attente",   # -> administrateurs
+    "compte_approuve",        # -> recruteur valide + administrateurs
+    "compte_refuse",          # -> demandeur
+    "compte_supprime",        # -> administrateurs
+    "bienvenue",              # -> nouvel inscrit
+    "score_eleve",            # -> recruteur proprietaire de l'offre
+    "compte_desactive",       # -> utilisateur concerne + administrateurs
+    "compte_reactive",        # -> utilisateur concerne
+    "compte_restaure",        # -> utilisateur concerne + administrateurs
+    "connexions_echouees",    # -> titulaire du compte (securite)
+    # --- Contrôle des candidatures (S4-06) ---
+    "signalement_ouvert",     # -> recruteur proprietaire de l'offre
+    "signalement_critique",   # -> administrateurs (alerte de securite)
+    "signalement_traite",     # -> administrateurs, apres decision du recruteur
+    "identite_a_verifier",    # -> candidat concerne, pour qu'il puisse corriger
 )
 
 
