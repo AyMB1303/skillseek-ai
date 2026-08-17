@@ -6,6 +6,7 @@ import Layout from "@/components/Layout";
 import { Chargement, EtatErreur, BadgeStatut, useToast } from "@/components/ui";
 import { useGarde } from "@/lib/auth";
 import { api } from "@/lib/api";
+import { retard } from "@/lib/mouvement";
 
 const TAILLE_MAX = 5 * 1024 * 1024;
 
@@ -98,7 +99,7 @@ export default function DetailOffre() {
       {etat === "ok" && offre && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
           <div className="lg:col-span-2 space-y-5">
-            <section className="carte p-6">
+            <section className="carte p-6 entree">
               <h1 className="text-xl font-bold">{offre.title}</h1>
               <p className="text-xs text-txt2 mt-1.5">
                 {offre.company && <>{offre.company} · </>}
@@ -136,7 +137,7 @@ export default function DetailOffre() {
               <p className="text-sm leading-relaxed text-txt2 mt-5 whitespace-pre-line">{offre.description}</p>
             </section>
 
-            <section className="carte p-6">
+            <section className="carte p-6 entree">
               <h2 className="font-semibold text-sm mb-3">Critères requis</h2>
               <ul className="space-y-2">
                 <Critere
@@ -161,7 +162,7 @@ export default function DetailOffre() {
           {/* ---------- Zone de candidature ---------- */}
           <aside className="lg:sticky lg:top-24 h-fit">
             {utilisateur?.role !== "candidate" ? (
-              <div className="carte p-5">
+              <div className="carte p-5 entree" style={{ animationDelay: retard(1, 80) }}>
                 <p className="text-sm text-txt2">
                   Seuls les comptes candidats peuvent postuler.
                 </p>

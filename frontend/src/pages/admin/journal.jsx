@@ -13,6 +13,7 @@ import { useCallback, useEffect, useState } from "react";
 import Layout from "@/components/Layout";
 import { useGarde } from "@/lib/auth";
 import { api } from "@/lib/api";
+import { retard } from "@/lib/mouvement";
 
 const COULEUR_ACTION = {
   candidature_statut: "text-accent",
@@ -95,10 +96,11 @@ export default function Journal() {
             </p>
           ) : (
             <ol className="space-y-1.5">
-              {entrees.map((e) => (
+              {entrees.map((e, rang) => (
                 <li
                   key={e.id}
-                  className="rounded-[10px] border border-bordure bg-surface px-3.5 py-2.5"
+                  className="rounded-[10px] border border-bordure bg-surface px-3.5 py-2.5 entree"
+                  style={{ animationDelay: retard(rang, 35) }}
                 >
                   <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
                     <span

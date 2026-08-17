@@ -4,6 +4,7 @@ import Layout from "@/components/Layout";
 import { Chargement, EtatErreur, useToast } from "@/components/ui";
 import { useGarde } from "@/lib/auth";
 import { api } from "@/lib/api";
+import { retard } from "@/lib/mouvement";
 
 const LIBELLE_ROLE = { admin: "Administrateur", recruiter: "Recruteur", candidate: "Candidat" };
 
@@ -90,11 +91,12 @@ export default function AdminRoles() {
             <h2 className="px-4 py-3 text-xs font-semibold text-txt2 uppercase tracking-wide border-b border-bordure">
               Rôles
             </h2>
-            {roles.map((r) => (
+            {roles.map((r, rang) => (
               <button
                 key={r.id}
+                style={{ animationDelay: retard(rang, 70) }}
                 onClick={() => choisirRole(r)}
-                className={`w-full text-left px-4 py-3 border-b border-bordure last:border-0 transition-colors ${
+                className={`w-full text-left px-4 py-3 border-b border-bordure last:border-0 transition-colors entree ${
                   selection?.id === r.id ? "bg-accent/10 border-l-2 border-l-accent" : "hover:bg-surface2/60"
                 }`}
                 aria-current={selection?.id === r.id}

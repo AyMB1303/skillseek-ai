@@ -5,6 +5,7 @@ import Layout from "@/components/Layout";
 import { Chargement, EtatErreur, EtatVide } from "@/components/ui";
 import { useGarde } from "@/lib/auth";
 import { api } from "@/lib/api";
+import { retard } from "@/lib/mouvement";
 
 // Parcours visible par le candidat (le score IA reste interne au recruteur).
 const ETAPES = ["Reçue", "En cours d'étude", "Entretien", "Décision"];
@@ -56,13 +57,17 @@ export default function MesCandidatures() {
           />
         ) : (
           <div className="space-y-4">
-            {candidatures.map((c) => {
+            {candidatures.map((c, rang) => {
               const index = INDEX_ETAPE[c.status] ?? 0;
               const refusee = c.status === "rejected";
               const recrutee = c.status === "hired";
 
               return (
-                <article key={c.id} className="carte p-5">
+                <article
+                  key={c.id}
+                  className="carte carte-reactive p-5 entree"
+                  style={{ animationDelay: retard(rang, 70) }}
+                >
                   <div className="flex items-start justify-between gap-4 mb-5">
                     <div>
                       <h2 className="font-semibold">{c.offer?.title}</h2>

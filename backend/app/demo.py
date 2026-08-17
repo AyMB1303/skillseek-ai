@@ -26,8 +26,10 @@ from .extensions import db
 from .models.ai_metric import AiMetric
 from .models.application import Application
 from .models.job_offer import JobOffer
+from .models.journal import EntreeJournal
 from .models.notification import Notification
 from .models.role import Role
+from .models.signalement import Signalement
 from .models.user import User
 from .services import notifications as notifs
 from .services.analyse import analyser_candidature
@@ -47,6 +49,30 @@ PROGRESSION = {
 
 def _horodatage(jours_avant):
     return datetime.now(timezone.utc) - timedelta(days=jours_avant)
+
+
+def _tracer(action, quand, auteur=None, objet_type=None, objet_id=None,
+            objet_libelle=None, **detail):
+    """Écrit une entrée de journal à une date choisie.
+
+    `services.journal.tracer` horodate au moment de l'appel, ce qui est le
+    comportement voulu en production. Pour un jeu de démonstration il faut
+    au contraire répartir les traces sur les semaines écoulées : un journal
+    dont les cent entrées portent la même minute ne ressemble à rien et ne
+    permet de démontrer ni le filtrage ni la lecture chronologique.
+    """
+    db.session.add(
+        EntreeJournal(
+            action=action,
+            objet_type=objet_type,
+            objet_id=objet_id,
+            objet_libelle=(objet_libelle or "")[:200] or None,
+            detail=detail or None,
+            auteur_id=getattr(auteur, "id", None),
+            auteur_nom=getattr(auteur, "full_name", None),
+            created_at=quand,
+        )
+    )
 
 
 def _dernier_identifiant_notification():
@@ -166,6 +192,7 @@ def demo_command(reset):
     nouveaux_candidats = 0
     nouvelles_candidatures = 0
     echecs = []
+    deposees = []            # candidatures creees, reprises par le journal
 
     # Les seize candidats redigees a la main couvrent les cas remarquables ;
     # les profils composes donnent a la plateforme le volume qui rend les
@@ -241,7 +268,17 @@ def demo_command(reset):
         )
 
         nouvelles_candidatures += 1
+        deposees.append(candidature)
 
+    db.session.commit()
+
+    # ------------------------------------------------ Journal d'audit
+    entrees = _peupler_journal(
+        aleatoire,
+        recruteurs=list(recruteurs.values()),
+        offres=list(offres.values()),
+        candidatures=deposees,
+    )
     db.session.commit()
 
     # ------------------------------------------------ Restitution
@@ -252,6 +289,7 @@ def demo_command(reset):
     click.echo(f"  Candidats créés      : {nouveaux_candidats}")
     click.echo(f"  Offres publiées      : {nouvelles_offres}")
     click.echo(f"  Candidatures déposées: {nouvelles_candidatures}")
+    click.echo(f"  Traces d'audit       : {entrees}")
 
     if echecs:
         click.echo("")
@@ -260,6 +298,139 @@ def demo_command(reset):
             click.echo(f"    - {message}")
 
     _afficher_resume()
+
+
+def _peupler_journal(aleatoire, recruteurs, offres, candidatures):
+    """Reconstitue l'historique des décisions humaines.
+
+    Le journal se remplit normalement au fil des actions réelles : valider un
+    compte, changer un statut, trancher un signalement. Sur une base fraîche
+    il reste donc vide, et l'écran d'audit — qui est l'une des garanties du
+    projet — paraît décoratif.
+
+    Les traces produites ici ne sont pas décoratives pour autant : chacune
+    correspond à une action que les données de démonstration rendent
+    plausible, et porte l'auteur qui l'aurait réellement accomplie. Une offre
+    est publiée par son recruteur ; un compte est validé par l'administrateur ;
+    un changement de statut est daté après le dépôt de la candidature.
+    """
+    from .seeds import ADMIN_EMAIL
+
+    admin = User.query.filter_by(email=ADMIN_EMAIL).first()
+    total = 0
+
+    # 1. Publication des offres, par leur propre recruteur.
+    for offre in offres:
+        _tracer(
+            "offre_publiee", offre.created_at, auteur=offre.recruiter,
+            objet_type="offre", objet_id=offre.id, objet_libelle=offre.title,
+            competences=len(offre.required_skills or []),
+        )
+        total += 1
+
+    # 2. Validation des comptes recruteurs, par l'administrateur.
+    for recruteur in recruteurs:
+        if recruteur.status != "active" or admin is None:
+            continue
+        _tracer(
+            "compte_valide", recruteur.created_at + timedelta(hours=6), auteur=admin,
+            objet_type="compte", objet_id=recruteur.id,
+            objet_libelle=recruteur.full_name,
+            entreprise=recruteur.company,
+        )
+        total += 1
+
+    # 3. Parcours des candidatures : chaque statut atteint suppose une
+    #    décision, et cette décision revient au recruteur qui porte l'offre.
+    etapes = {
+        "under_review": ["received"],
+        "shortlisted": ["received", "under_review"],
+        "interview": ["received", "under_review", "shortlisted"],
+        "hired": ["received", "under_review", "shortlisted", "interview"],
+        "rejected": ["received"],
+    }
+    for candidature in candidatures:
+        offre = candidature.offer
+        auteur = offre.recruiter if offre else None
+        nom = candidature.candidate.full_name if candidature.candidate else None
+        chemin = etapes.get(candidature.status)
+        if not chemin or auteur is None:
+            continue
+
+        # Les étapes sont réparties entre le dépôt et aujourd'hui : une
+        # candidature reçue hier ne peut pas avoir été traitée le mois dernier.
+        depot = candidature.created_at
+        ecoule = max((datetime.now(timezone.utc) - _aware(depot)).days, 1)
+        precedent = "received"
+        for rang, _ in enumerate(chemin, start=1):
+            suivant = (chemin + [candidature.status])[rang]
+            quand = depot + timedelta(days=min(rang * 2, ecoule), hours=rang)
+            _tracer(
+                "candidature_statut", quand, auteur=auteur,
+                objet_type="candidature", objet_id=candidature.id,
+                objet_libelle=nom,
+                avant=precedent, apres=suivant,
+                offre=offre.title if offre else None,
+            )
+            precedent = suivant
+            total += 1
+
+        # 4. Compte rendu d'entretien pour les candidatures allées jusque-là.
+        if candidature.status in ("interview", "hired"):
+            _tracer(
+                "evaluation_entretien", depot + timedelta(days=min(9, ecoule)),
+                auteur=auteur,
+                objet_type="candidature", objet_id=candidature.id,
+                objet_libelle=nom,
+                verdict="a_recruter" if candidature.status == "hired" else "reserve",
+                score_systeme=candidature.score,
+            )
+            total += 1
+
+        # 5. Relance d'analyse, sur une petite part des dossiers : c'est ce
+        #    qu'un recruteur fait quand un CV a mal été lu.
+        if aleatoire.random() < 0.08:
+            _tracer(
+                "candidature_analysee", depot + timedelta(days=1), auteur=auteur,
+                objet_type="candidature", objet_id=candidature.id,
+                objet_libelle=nom, motif="relance manuelle",
+            )
+            total += 1
+
+    # 6. Décisions sur les signalements déjà tranchés.
+    for signalement in Signalement.query.filter(
+        Signalement.statut.in_(("confirme", "ecarte"))
+    ).all():
+        dossier = signalement.application
+        auteur = dossier.offer.recruiter if dossier and dossier.offer else None
+        if auteur is None:
+            continue
+        _tracer(
+            "signalement_traite", signalement.created_at + timedelta(days=1),
+            auteur=auteur,
+            objet_type="signalement", objet_id=signalement.id,
+            objet_libelle=signalement.type,
+            statut=signalement.statut,
+        )
+        total += 1
+
+    # 7. Une modification des droits, par l'administrateur : c'est l'action la
+    #    plus sensible du modèle de permissions, elle doit figurer au journal.
+    if admin is not None:
+        _tracer(
+            "permissions_modifiees", _horodatage(34), auteur=admin,
+            objet_type="role", objet_libelle="recruiter",
+            permissions="manage_offers, view_applications, manage_applications, "
+                        "view_dashboard, use_chatbot",
+        )
+        total += 1
+
+    return total
+
+
+def _aware(date):
+    """Ramène une date au même référentiel horaire pour pouvoir la soustraire."""
+    return date if date.tzinfo else date.replace(tzinfo=timezone.utc)
 
 
 def _afficher_resume():
@@ -353,6 +524,15 @@ def _effacer(role_recruteur, role_candidat):
 
     for compte in comptes:
         db.session.delete(compte)
+
+    # Le journal repart de zero avec le jeu de donnees. Ses entrees ne
+    # portent pas de cle etrangere vers leur objet — c'est ce qui leur permet
+    # de survivre a une suppression — donc rien ne les emporte en cascade, et
+    # elles s'accumuleraient d'une remise a plat a l'autre. `--reset` est une
+    # option explicitement destructrice : le dire ici suffit.
+    efface = EntreeJournal.query.delete()
+    if efface:
+        click.echo(f"Journal d'audit vidé ({efface} entrées).")
 
     db.session.commit()
     click.echo("Jeu de démonstration précédent effacé.")

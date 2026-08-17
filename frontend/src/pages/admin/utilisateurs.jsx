@@ -4,6 +4,7 @@ import Layout from "@/components/Layout";
 import { Chargement, EtatErreur, EtatVide, Modale, useToast } from "@/components/ui";
 import { useGarde, useAuth } from "@/lib/auth";
 import { api } from "@/lib/api";
+import { retard } from "@/lib/mouvement";
 
 const LIBELLE_ROLE = { admin: "Administrateur", recruiter: "Recruteur", candidate: "Candidat" };
 const COULEUR_ROLE = {
@@ -127,8 +128,12 @@ export default function AdminUtilisateurs() {
                 </tr>
               </thead>
               <tbody>
-                {filtres.map((u) => (
-                  <tr key={u.id} className="border-b border-bordure last:border-0 hover:bg-surface2/60">
+                {filtres.map((u, rang) => (
+                  <tr
+                    key={u.id}
+                    className="border-b border-bordure last:border-0 hover:bg-surface2/60 transition-colors entree"
+                    style={{ animationDelay: retard(rang, 25, 260) }}
+                  >
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-bordure text-cyan grid place-items-center text-[11px] font-bold shrink-0">

@@ -12,6 +12,7 @@ import Link from "next/link";
 import Layout from "@/components/Layout";
 import { useGarde } from "@/lib/auth";
 import { api } from "@/lib/api";
+import { retard } from "@/lib/mouvement";
 
 const LIBELLE_TYPE = {
   identite_divergente: "Identité divergente",
@@ -154,8 +155,13 @@ export default function Signalements() {
             </p>
           ) : (
             <ul className="space-y-3">
-              {visibles.map((s) => (
-                <Signalement key={s.id} signalement={s} onTrancher={trancher} />
+              {visibles.map((s, rang) => (
+                <Signalement
+                  key={s.id}
+                  signalement={s}
+                  onTrancher={trancher}
+                  rang={rang}
+                />
               ))}
             </ul>
           )}
@@ -175,14 +181,17 @@ function Carte({ libelle, valeur, accent }) {
   );
 }
 
-function Signalement({ signalement: s, onTrancher }) {
+function Signalement({ signalement: s, onTrancher, rang = 0 }) {
   const [motif, setMotif] = useState("");
   const [saisieOuverte, setSaisieOuverte] = useState(false);
   const traite = ["confirme", "ecarte"].includes(s.statut);
   const details = s.details || {};
 
   return (
-    <li className="rounded-xl2 border border-bordure bg-surface p-4 space-y-3">
+    <li
+      className="rounded-xl2 border border-bordure bg-surface p-4 space-y-3 entree"
+      style={{ animationDelay: retard(rang, 60) }}
+    >
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="space-y-1">
           <div className="flex items-center gap-2 flex-wrap">

@@ -9,12 +9,23 @@
 # Le rythme est hebdomadaire et le nombre de demandes ouvertes est plafonné.
 # Un dépôt qui reçoit quinze demandes par jour finit par les fermer sans les
 # lire — la fréquence est ce qui décide si l'outil sert ou nuit.
+#
+# Les montées de version MAJEURE des socles techniques sont écartées, et ce
+# n'est pas de la frilosité. Le premier passage a proposé Next 16, React 19 et
+# Python 3.14 : la chaîne les a toutes rejetées, ce qui est le comportement
+# voulu, mais une proposition qu'on sait irrecevable d'avance n'apporte rien
+# et occupe la place. Ces socles se changent volontairement, avec du temps
+# devant soi, pas au fil d'une notification automatique.
+#
+# Les demandes visent `dev`, pas `main` : une dépendance passe par le même
+# chemin que le reste du code.
 
 version: 2
 
 updates:
   - package-ecosystem: pip
     directory: /backend
+    target-branch: dev
     schedule:
       interval: weekly
       day: monday
@@ -35,10 +46,11 @@ updates:
 
   - package-ecosystem: npm
     directory: /frontend
+    target-branch: dev
     schedule:
       interval: weekly
       day: monday
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 3
     commit-message:
       prefix: "deps(frontend)"
     groups:
@@ -46,24 +58,51 @@ updates:
       # séparées pour des outils de compilation n'apportent rien.
       outils-de-developpement:
         dependency-type: development
+    ignore:
+      # React 19 et Next 16 sont des refontes, pas des correctifs : elles
+      # demandent une migration assumée. Les correctifs de la série courante
+      # continuent d'arriver normalement.
+      - dependency-name: next
+        update-types: [version-update:semver-major]
+      - dependency-name: react
+        update-types: [version-update:semver-major]
+      - dependency-name: react-dom
+        update-types: [version-update:semver-major]
+      - dependency-name: eslint-config-next
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: github-actions
     directory: /
+    target-branch: dev
     schedule:
       interval: monthly
+    open-pull-requests-limit: 3
     commit-message:
       prefix: "ci"
 
   - package-ecosystem: docker
     directory: /backend
+    target-branch: dev
     schedule:
       interval: monthly
     commit-message:
       prefix: "deps(docker)"
+    ignore:
+      # L'image Python suit les versions pour lesquelles numpy, spaCy et
+      # PyTorch publient des paquets compilés. Passer à 3.14 avant elles
+      # obligerait à tout recompiler à la construction.
+      - dependency-name: python
+        update-types: [version-update:semver-major, version-update:semver-minor]
 
   - package-ecosystem: docker
     directory: /frontend
+    target-branch: dev
     schedule:
       interval: monthly
     commit-message:
       prefix: "deps(docker)"
+    ignore:
+      # La version de Node suit la matrice de compatibilité de Next, pas la
+      # dernière parue.
+      - dependency-name: node
+        update-types: [version-update:semver-major]

@@ -4,6 +4,7 @@ import Layout from "@/components/Layout";
 import { Chargement, EtatErreur, EtatVide, Modale, useToast } from "@/components/ui";
 import { useGarde } from "@/lib/auth";
 import { api } from "@/lib/api";
+import { retard } from "@/lib/mouvement";
 
 const ONGLETS = [
   { cle: "users", libelle: "Comptes" },
@@ -103,8 +104,12 @@ export default function AdminCorbeille() {
           />
         ) : (
           <div className="carte divide-y divide-bordure">
-            {elements.map((el) => (
-              <div key={el.id} className="flex flex-wrap items-center gap-4 px-5 py-3.5">
+            {elements.map((el, rang) => (
+              <div
+                key={el.id}
+                className="flex flex-wrap items-center gap-4 px-5 py-3.5 entree hover:bg-surface2/50 transition-colors"
+                style={{ animationDelay: retard(rang, 45) }}
+              >
                 <div className="flex-1 min-w-[200px]">
                   <p className="font-medium text-sm">
                     {onglet === "users" ? el.full_name : el.title}

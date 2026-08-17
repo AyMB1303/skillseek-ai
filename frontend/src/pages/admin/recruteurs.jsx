@@ -4,6 +4,7 @@ import Layout from "@/components/Layout";
 import { Chargement, EtatErreur, EtatVide, Modale, useToast } from "@/components/ui";
 import { useGarde } from "@/lib/auth";
 import { api } from "@/lib/api";
+import { retard } from "@/lib/mouvement";
 
 export default function AdminRecruteurs() {
   const { chargement: garde } = useGarde(["admin"]);
@@ -78,8 +79,12 @@ export default function AdminRecruteurs() {
           />
         ) : (
           <div className="space-y-3">
-            {demandes.map((d) => (
-              <article key={d.id} className="carte p-5 flex flex-wrap items-start gap-4">
+            {demandes.map((d, rang) => (
+              <article
+                key={d.id}
+                className="carte carte-reactive p-5 flex flex-wrap items-start gap-4 entree"
+                style={{ animationDelay: retard(rang, 70) }}
+              >
                 <div className="w-11 h-11 rounded-full bg-alerte/15 text-alerte grid place-items-center text-sm font-bold shrink-0">
                   {d.full_name.split(" ").map((m) => m[0]).slice(0, 2).join("").toUpperCase()}
                 </div>
