@@ -108,12 +108,16 @@ jobs:
       - name: Auditer les dépendances Python (pip-audit)
         # Interroge la base d'avis de l'écosystème Python. Non bloquant :
         # une bibliothèque transitive vulnérable sans correctif disponible ne
-        # doit pas empêcher de livrer, elle doit être connue. Le résultat est
-        # lisible dans le journal du job.
-        continue-on-error: true
+        # doit pas empêcher de livrer, elle doit être connue.
+        #
+        # Le code de sortie est absorbé et transformé en avertissement. Sans
+        # cela le travail passait au vert tout en affichant deux annotations
+        # rouges — un tableau de bord qui se contredit finit par n'être plus
+        # lu du tout.
         run: |
           pip install pip-audit
-          pip-audit -r backend/requirements.txt --desc
+          pip-audit -r backend/requirements.txt --desc \
+            || echo "::warning title=Dépendances Python::Vulnérabilités connues signalées, voir le journal ci-dessus." 
 
       - name: Installer Node
         uses: actions/setup-node@v4
@@ -121,9 +125,10 @@ jobs:
           node-version: "20"
 
       - name: Auditer les dépendances Node (npm audit)
-        continue-on-error: true
         working-directory: frontend
-        run: npm audit --audit-level=high
+        run: |
+          npm audit --audit-level=high \
+            || echo "::warning title=Dépendances Node::Vulnérabilités connues signalées, voir le journal ci-dessus." 
 
   securite:
     name: Sécurité — analyse du dépôt (Trivy)
@@ -135,10 +140,15 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Analyser le système de fichiers
+        # `@master` plutôt qu'une version figée : c'est la référence
+        # documentée par Trivy, et la seule qui résolve de façon fiable.
+        # Épingler une action est meilleure pratique — à faire dès qu'une
+        # version publiée aura été vérifiée dans la liste des étiquettes.
+        #
         # Cherche les dépendances vulnérables ET les secrets écrits en dur.
         # Le second point compte autant que le premier : une clé oubliée dans
         # un fichier de configuration est la faille la plus banale qui soit.
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@master
         with:
           scan-type: fs
           scan-ref: .
@@ -154,6 +164,7 @@ jobs:
         # d'être noyés dans un journal d'exécution.
         uses: github/codeql-action/upload-sarif@v3
         if: always()
+        continue-on-error: true
         with:
           sarif_file: trivy-depot.sarif
           category: trivy-depot
@@ -209,33 +220,29 @@ jobs:
             type=semver,pattern=v{{version}}
             type=semver,pattern=v{{major}}.{{minor}}
 
-      - name: Construire et publier
+      - name: Construire l'image pour inspection
+        # Construction locale d'abord : Trivy et Syft ont besoin d'une image
+        # présente dans le démon Docker pour l'ouvrir. Ni inventaire ni
+        # attestation à cette étape — l'exportateur `docker` ne sait pas les
+        # écrire, et les demander ici faisait échouer la construction.
         uses: docker/build-push-action@v6
         with:
           context: ${{ matrix.contexte }}
-          # Sur `main` l'image part au registre ; ailleurs elle est seulement
-          # construite, ce qui vérifie déjà le Dockerfile.
-          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-          tags: ${{ steps.meta.outputs.tags }}
+          load: true
+          push: false
+          tags: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
           labels: ${{ steps.meta.outputs.labels }}
           # Cache porté par la chaîne elle-même : sans lui, l'image backend
           # réinstallerait PyTorch et les modèles linguistiques à chaque
           # exécution, soit plus de dix minutes.
           cache-from: type=gha,scope=${{ matrix.service }}
           cache-to: type=gha,mode=max,scope=${{ matrix.service }}
-          # Inventaire logiciel attaché à l'image : la liste exacte des
-          # composants qu'elle contient. C'est ce qui permet de répondre en
-          # quelques secondes à « sommes-nous exposés à cette faille ? »
-          # au lieu de reconstruire pour aller voir.
-          sbom: true
-          provenance: mode=max
-          load: ${{ github.event_name != 'push' || github.ref != 'refs/heads/main' }}
 
-      - name: Analyser l'image construite (Trivy)
-        uses: aquasecurity/trivy-action@0.28.0
+      - name: Analyser l'image (Trivy)
+        uses: aquasecurity/trivy-action@master
         with:
           scan-type: image
-          image-ref: ${{ steps.meta.outputs.tags && fromJSON(steps.meta.outputs.json).tags[0] }}
+          image-ref: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
           format: sarif
           output: trivy-${{ matrix.service }}.sarif
           severity: CRITICAL,HIGH
@@ -247,16 +254,24 @@ jobs:
           ignore-unfixed: true
 
       - name: Publier dans l'onglet Security
+        # Non bloquant : l'envoi vers le service d'analyse de code exige
+        # GitHub Advanced Security sur un dépôt privé. Là où il n'est pas
+        # disponible, le rapport reste lisible dans le journal du travail et
+        # la chaîne ne doit pas s'arrêter pour autant.
         uses: github/codeql-action/upload-sarif@v3
         if: always()
+        continue-on-error: true
         with:
           sarif_file: trivy-${{ matrix.service }}.sarif
           category: trivy-image-${{ matrix.service }}
 
       - name: Produire l'inventaire logiciel (SBOM)
+        # Liste exacte des composants présents dans l'image. C'est ce qui
+        # permet de répondre en quelques secondes à « sommes-nous exposés à
+        # cette faille ? » au lieu de reconstruire pour aller voir.
         uses: anchore/sbom-action@v0
         with:
-          image: ${{ steps.meta.outputs.tags && fromJSON(steps.meta.outputs.json).tags[0] }}
+          image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
           format: spdx-json
           artifact-name: sbom-${{ matrix.service }}.spdx.json
           output-file: sbom-${{ matrix.service }}.spdx.json
@@ -267,6 +282,22 @@ jobs:
           name: sbom-${{ matrix.service }}
           path: sbom-${{ matrix.service }}.spdx.json
           retention-days: 90
+
+      - name: Publier au registre
+        # Seconde passe, réservée à `main`. Tout est en cache : elle ne
+        # reconstruit rien, elle pousse. C'est ici que l'inventaire et
+        # l'attestation d'origine sont attachés à l'image, l'exportateur du
+        # registre sachant les porter.
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.contexte }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=${{ matrix.service }}
+          sbom: true
+          provenance: mode=max
 
   # ------------------------------------------------------------------ #
   # 3. Vérification d'assemblage                                        #

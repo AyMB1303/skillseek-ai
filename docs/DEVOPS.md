@@ -87,8 +87,15 @@ datés, dédoublonnés, suivis dans le temps. Ils ne sont pas noyés dans un
 journal d'exécution.
 
 **Audit des dépendances** — `pip-audit` sur `requirements.txt`, `npm audit
---audit-level=high` sur le frontend. Non bloquants, lisibles dans le journal
-du travail correspondant.
+--audit-level=high` sur le frontend. Non bloquants : leur code de sortie est
+absorbé et converti en avertissement. Un travail qui passe au vert tout en
+affichant des annotations rouges est un tableau de bord qui se contredit, et
+qu'on finit par ne plus lire.
+
+**Dette connue** : l'action Trivy est référencée par `@master` et non par une
+version figée. C'est l'usage documenté par le projet, mais épingler une
+version publiée est meilleure pratique — à faire dès qu'une étiquette aura été
+vérifiée dans la liste des versions de l'action.
 
 ## 3. Inventaire logiciel (SBOM)
 

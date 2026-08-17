@@ -42,6 +42,10 @@ ENV PORT=3000
 # le conteneur.
 RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001
 
+# `public/` héberge les fichiers servis tels quels — favicon, images, robots.txt.
+# Le dossier est actuellement vide (un `.gitkeep` l'y maintient) mais la copie
+# est conservée : Next l'attend, et le premier fichier ajouté fonctionnera sans
+# qu'il faille penser à modifier ce Dockerfile.
 COPY --from=constructeur /app/public ./public
 COPY --from=constructeur --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=constructeur --chown=nextjs:nodejs /app/.next/static ./.next/static
