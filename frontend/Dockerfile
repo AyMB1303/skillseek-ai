@@ -7,7 +7,7 @@
 # construction, ni le cache npm n'y figurent.
 
 # --- 1. Dependances -----------------------------------------------------
-FROM node:20-alpine AS dependances
+FROM node:26-alpine AS dependances
 WORKDIR /app
 
 # `npm ci` plutot que `npm install` : l'installation suit exactement le fichier
@@ -17,7 +17,7 @@ COPY package.json package-lock.json* ./
 RUN npm ci
 
 # --- 2. Construction ----------------------------------------------------
-FROM node:20-alpine AS constructeur
+FROM node:26-alpine AS constructeur
 WORKDIR /app
 
 # L'adresse de l'API est inscrite dans le bundle navigateur au moment de la
@@ -31,7 +31,7 @@ COPY . .
 RUN npm run build
 
 # --- 3. Execution -------------------------------------------------------
-FROM node:20-alpine AS execution
+FROM node:26-alpine AS execution
 WORKDIR /app
 
 ENV NODE_ENV=production
