@@ -1,0 +1,31 @@
+# Fins de ligne.
+#
+# Git convertit par défaut les fins de ligne selon le système : LF dans le
+# dépôt, CRLF sur Windows. C'est commode pour l'édition, et sans conséquence
+# pour du Python ou du JavaScript.
+#
+# Ça l'est beaucoup moins pour ce qui est exécuté dans un conteneur Linux. Un
+# script shell portant des CRLF échoue avec un message incompréhensible du
+# genre « /bin/sh: not found », parce que le retour chariot fait partie du nom
+# de l'interpréteur. Même piège pour un Dockerfile ou un fichier YAML lu par
+# un outil strict.
+#
+# Ces fichiers-là restent donc en LF quel que soit le poste de travail.
+
+* text=auto
+
+*.sh          text eol=lf
+Dockerfile    text eol=lf
+*.dockerfile  text eol=lf
+*.yml         text eol=lf
+*.yaml        text eol=lf
+.env.example  text eol=lf
+
+# Binaires : aucune conversion, sous peine de les corrompre.
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.pdf    binary
+*.pbix   binary
+*.joblib binary
+*.ico    binary
