@@ -200,7 +200,7 @@ jobs:
         # Uniquement lorsqu'on publie : une pull request venue d'un fork n'a
         # pas les droits d'écriture, et la construction seule suffit à valider.
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ${{ env.REGISTRE }}
           username: ${{ github.actor }}
