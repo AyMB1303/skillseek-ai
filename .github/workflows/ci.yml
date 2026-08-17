@@ -225,7 +225,7 @@ jobs:
         # présente dans le démon Docker pour l'ouvrir. Ni inventaire ni
         # attestation à cette étape — l'exportateur `docker` ne sait pas les
         # écrire, et les demander ici faisait échouer la construction.
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ${{ matrix.contexte }}
           load: true
@@ -289,7 +289,7 @@ jobs:
         # l'attestation d'origine sont attachés à l'image, l'exportateur du
         # registre sachant les porter.
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ${{ matrix.contexte }}
           push: true
