@@ -25,11 +25,13 @@ const NAV = {
     { href: "/offres/gestion", libelle: "Mes offres", icone: IconeBriefcase },
     { href: "/candidatures", libelle: "Candidatures", icone: IconeFile, compteur: true },
     { href: "/pipeline", libelle: "Pipeline", icone: IconeColonnes },
+    { href: "/analyse", libelle: "Analyse", icone: IconeAnalyse },
     { href: "/signalements", libelle: "Contrôle des dossiers", icone: IconeAlerte },
     { href: "/assistant", libelle: "Assistant RH", icone: IconeChat },
     { href: "/profil", libelle: "Mon profil", icone: IconeUser },
   ],
   candidate: [
+    { href: "/mon-profil-pro", libelle: "Offres pour moi", icone: IconeCible },
     { href: "/offres", libelle: "Offres d'emploi", icone: IconeBriefcase },
     { href: "/mes-candidatures", libelle: "Mes candidatures", icone: IconeFile },
     { href: "/profil", libelle: "Mon profil", icone: IconeUser },
@@ -437,5 +439,7 @@ function IconeShield({ actif }) { return <svg {...props(actif)}><path d="M12 3l7
 function IconeBadge({ actif }) { return <svg {...props(actif)}><rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="12" cy="10" r="2.5"/><path d="M8 17c0-2 1.8-3 4-3s4 1 4 3"/></svg>; }
 function IconeColonnes({ actif }) { return <svg {...props(actif)}><rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="9.5" y="4" width="5" height="11" rx="1.5"/><rect x="16" y="4" width="5" height="7" rx="1.5"/></svg>; }
 function IconeJournal({ actif }) { return <svg {...props(actif)}><path d="M4 5a2 2 0 0 1 2-2h11v18H6a2 2 0 0 1-2-2z"/><path d="M8 8h6"/><path d="M8 12h6"/></svg>; }
+function IconeCible({ actif }) { return <svg {...props(actif)}><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.2"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M2 12h2"/><path d="M20 12h2"/></svg>; }
+function IconeAnalyse({ actif }) { return <svg {...props(actif)}><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/></svg>; }
 function IconeAlerte({ actif }) { return <svg {...props(actif)}><path d="M12 3l9 16H3z"/><path d="M12 9v4"/><path d="M12 16.5h.01"/></svg>; }
 function IconeCorbeille({ actif }) { return <svg {...props(actif)}><path d="M4 7h16"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><path d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12"/></svg>; }

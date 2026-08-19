@@ -15,7 +15,7 @@
  * `VERSION` invalide les visites déjà vues : si une refonte ajoute un écran,
  * l'incrémenter suffit à la reproposer à tout le monde.
  */
-export const VERSION = 1;
+export const VERSION = 2;
 
 const ETAPE_PROFIL = {
   cible: '[data-visite="profil"]',
@@ -41,6 +41,15 @@ export const VISITES = {
       texte:
         "Quelques secondes pour vous montrer où tout se trouve. Vous pouvez " +
         "interrompre à tout moment : la visite reste accessible depuis votre profil.",
+    },
+    {
+      cible: '[data-visite="nav:/mon-profil-pro"]',
+      titre: "Commencez par là",
+      texte:
+        "Indiquez ce que vous savez faire — quelques compétences, votre " +
+        "expérience, votre diplôme. La plateforme classera alors les offres " +
+        "selon votre profil et vous dira ce qu'il vous manque pour chacune. " +
+        "Une minute, et vous cessez de postuler au hasard.",
     },
     {
       cible: '[data-visite="nav:/offres"]',

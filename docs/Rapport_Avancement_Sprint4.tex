@@ -141,9 +141,11 @@
 % =====================================================================
 \section{Objet du rapport}
 % =====================================================================
-Ce document présente l'état d'avancement du projet \textbf{SkillSeek AI} à mi-parcours du Sprint~4, dernier sprint du stage. Il rend compte du fait marquant de la période : la \textbf{reprise de l'apprentissage supervisé}, écarté au Sprint~3 faute de corpus, désormais réalisé, évalué et intégré à la plateforme.
+Ce document clôt le \textbf{Sprint~4}, dernier sprint du stage, et constitue à ce titre le dernier rapport d'avancement du projet \textbf{SkillSeek AI}. Il rend compte de deux périodes de nature différente.
 
-Une place importante y est donnée à la méthode d'évaluation. Un modèle d'apprentissage se juge moins à la performance qu'il affiche qu'au protocole qui l'établit : ce rapport expose donc les quatre protocoles appliqués, les deux erreurs de mesure qu'ils ont permis de détecter, et le chiffre finalement retenu — modeste et vérifié plutôt que flatteur et fragile.
+La première (07/08 -- 10/08) porte sur le fait marquant du sprint : la \textbf{reprise de l'apprentissage supervisé}, écarté au Sprint~3 faute de corpus, désormais réalisé, évalué et intégré. Une place importante y est donnée à la méthode d'évaluation, car un modèle d'apprentissage se juge moins à la performance qu'il affiche qu'au protocole qui l'établit : ce rapport expose les quatre protocoles appliqués, les deux erreurs de mesure qu'ils ont permis de détecter, et le chiffre finalement retenu --- modeste et vérifié plutôt que flatteur et fragile.
+
+La seconde (11/08 -- 16/08) porte sur le passage de la plateforme d'un prototype fonctionnel à un \textbf{produit exploitable} : consolidation du cloisonnement entre recruteurs, instrumentation de la chaîne d'analyse, restitution décisionnelle intégrée à l'application, orientation du candidat, et industrialisation de la construction et de la livraison. Cette seconde partie ne figurait pas intégralement au périmètre initial ; la section~\ref{sec:consolidation} expose ce qui l'a motivée.
 
 % =====================================================================
 \section{Rappel des sprints précédents}
@@ -172,13 +174,13 @@ Le \textbf{Sprint~3} (28/07 -- 06/08) a livré le cœur analytique : lecture des
   Sprint 1 & 06/07 -- 15/07 & \textcolor{vert}{\textbf{Terminé}} & Socle technique, base de données, sécurité \\[1mm]
   Sprint 2 & 16/07 -- 27/07 & \textcolor{vert}{\textbf{Terminé}} & Interface, parcours métier, notifications \\[1mm]
   Sprint 3 & 28/07 -- 06/08 & \textcolor{vert}{\textbf{Terminé}} & Analyse des CV, classement explicable \\[1mm]
-  Sprint 4 & 07/08 -- 16/08 & \textcolor{accent}{\textbf{En cours}} & Apprentissage supervisé, décisionnel, finalisation \\
+  Sprint 4 & 07/08 -- 16/08 & \textcolor{vert}{\textbf{Terminé}} & Apprentissage supervisé, consolidation, industrialisation \\
   \bottomrule
 \end{tabular}
 \end{center}
 
 \vspace{2mm}
-\noindent Avancement global estimé : \textbf{92\,\%} du périmètre fonctionnel. La totalité des fonctions du cahier des charges est désormais réalisée, y compris le module d'apprentissage initialement abandonné. Les travaux restants portent sur la restitution décisionnelle et sur la mesure formelle des indicateurs.
+\noindent \textbf{La totalité du périmètre fonctionnel du cahier des charges est réalisée}, module d'apprentissage compris. Ce qui subsiste relève des perspectives d'industrialisation --- déploiement effectif sur un serveur, tests de bout en bout, métrologie d'exploitation --- et non de fonctions promises non livrées ; la section~\ref{sec:perspectives} le détaille sans le minimiser.
 
 \subsection{Tâches du Sprint 4}
 
@@ -192,18 +194,25 @@ Le \textbf{Sprint~3} (28/07 -- 06/08) a livré le cœur analytique : lecture des
   S3-06 & Modèle supervisé & Classifieur binaire, 17 indicateurs, évalué sous 4 protocoles & \textcolor{vert}{OK} \\
   S4-01 & Intégration au score & Ajustement borné, règles métiers souveraines & \textcolor{vert}{OK} \\
   S4-02 & Robustesse du dispositif & Fonctionnement garanti en l'absence de modèle & \textcolor{vert}{OK} \\
+  S3-07 & Audit de biais & Écart mesuré sur attributs non pertinents & \textcolor{vert}{OK} \\
+  S4-03 & Décisionnel & Écran d'analyse intégré et vues destinées à Power BI & \textcolor{vert}{OK} \\
+  S4-04 & Indicateurs du cahier des charges & Mesure du dispositif complet, protocole explicité & \textcolor{vert}{OK} \\
+  S4-07 & Documentation et soutenance & Guides d'exploitation, script d'enregistrement & \textcolor{vert}{OK} \\
   \midrule
-  S3-07 & Audit de biais & Corrélation entre notes et attributs non pertinents & \textcolor{accent}{En cours} \\
-  S4-03 & Décisionnel Power BI & Rapports recruteur et direction & \textcolor{accent}{En cours} \\
-  S4-04 & Indicateurs du cahier des charges & Précision et rappel du dispositif complet & \textcolor{accent}{En cours} \\
-  S4-05 & Tests de bout en bout & Parcours candidat, recruteur, administrateur & \textcolor{accent}{En cours} \\
-  S4-07 & Documentation et soutenance & Guide d'exploitation, support de présentation & \textcolor{accent}{En cours} \\
+  \multicolumn{4}{l}{\textit{Hors périmètre initial, engagés en seconde partie de sprint}} \\[1mm]
+  S4-08 & Cloisonnement par périmètre & Accès aux ressources vérifié route par route & \textcolor{vert}{OK} \\
+  S4-09 & Orientation du candidat & Classement des offres à partir du profil déclaré & \textcolor{vert}{OK} \\
+  S4-10 & Observabilité & Chronométrage par étape, provenance, sondes & \textcolor{vert}{OK} \\
+  S4-11 & Industrialisation & Six travaux d'intégration, images publiées, veille & \textcolor{vert}{OK} \\
+  \midrule
+  S4-05 & Tests de bout en bout & Parcours automatisés en navigateur & \textcolor{ambre}{Non réalisé} \\
+  S4-12 & Déploiement sur serveur & Procédure écrite, non activée & \textcolor{ambre}{Non réalisé} \\
   \bottomrule
 \end{tabular}
 \end{center}
 
 \vspace{2mm}
-\noindent Les tâches S3-04 et S3-06, déclarées écartées au Sprint~3, ont été réintégrées et achevées. La tâche S4-01 ne figurait pas au périmètre initial : elle est la conséquence directe de cette réintégration.
+\noindent Les tâches S3-04 et S3-06, déclarées écartées au Sprint~3, ont été réintégrées et achevées. La tâche S4-01 ne figurait pas au périmètre initial : elle est la conséquence directe de cette réintégration. Les tâches S4-08 à S4-11 procèdent d'une relecture critique du code menée après l'intégration du modèle, exposée en section~\ref{sec:consolidation}. Les deux tâches non réalisées sont assumées et justifiées en section~\ref{sec:perspectives}.
 
 \subsection{Indicateurs de réalisation}
 
@@ -211,21 +220,23 @@ Le \textbf{Sprint~3} (28/07 -- 06/08) a livré le cœur analytique : lecture des
 \small
 \begin{tabular}{lcc}
   \toprule
-  \textbf{Indicateur} & \textbf{Sprint 3} & \textbf{Aujourd'hui} \\
+  \textbf{Indicateur} & \textbf{Sprint 3} & \textbf{Fin de Sprint 4} \\
   \midrule
-  Écrans livrés & 18 & 18 \\
-  Points d'accès de l'interface de programmation & 38 & 38 \\
-  Tests automatisés (tous réussis) & 69 & \textbf{93} \\
+  Écrans livrés & 18 & \textbf{22} \\
+  Points d'accès de l'interface de programmation & 38 & \textbf{61} \\
+  Tests automatisés réussis & 69 & \textbf{192} \\
   Analyse statique du code & sans anomalie & sans anomalie \\
   Appariements du corpus d'apprentissage & — & \textbf{8\,000} \\
   Indicateurs calculés par appariement & — & \textbf{17} \\
+  Travaux d'intégration continue & 2 & \textbf{6} \\
+  Migrations de schéma & 8 & \textbf{11} \\
   Durée d'analyse d'un curriculum vitæ & $<$ 3 s & $<$ 3 s \\
   \bottomrule
 \end{tabular}
 \end{center}
 
 \vspace{1mm}
-\noindent L'ajout du modèle n'a pas dégradé le temps de traitement : la prédiction s'appuie sur des indicateurs déjà calculés par la chaîne d'analyse existante, et le modèle n'est chargé qu'une seule fois au démarrage du service.
+\noindent L'ajout du modèle n'a pas dégradé le temps de traitement : la prédiction s'appuie sur des indicateurs déjà calculés par la chaîne d'analyse existante, et le modèle n'est chargé qu'une seule fois au démarrage du service. Les écrans ajoutés sont l'analyse décisionnelle et l'orientation du candidat, l'un et l'autre décrits en section~\ref{sec:restitution}.
 
 % =====================================================================
 \section{Reprise de l'apprentissage supervisé}\label{sec:revision}
@@ -613,9 +624,126 @@ if eliminatoires:
 \end{figure}
 
 % =====================================================================
+\section{Consolidation de la sécurité applicative}\label{sec:consolidation}
+% =====================================================================
+
+\subsection{Origine de ces travaux}
+L'intégration du modèle achevée, une relecture systématique du code a été menée avant la clôture du stage, en prenant délibérément le point de vue d'un utilisateur mal intentionné plutôt que celui du développeur. Cette relecture a mis au jour un défaut réel, qui ne relevait ni d'une fonction manquante ni d'un défaut d'affichage, et dont la portée justifie qu'il soit exposé ici en toute franchise.
+
+\subsection{Un cloisonnement incomplet entre recruteurs}
+
+\subsubsection{Le défaut}
+Le contrôle d'accès par rôles répond à la question « cet utilisateur a-t-il le droit de consulter des candidatures ? ». Il ne répond pas à « celle-ci ? ». Or deux recruteurs détiennent exactement les mêmes permissions ; ce qui les sépare n'est pas le rôle mais le \textbf{périmètre} : la chaîne de propriété qui va du recruteur à son offre, de l'offre à ses candidatures, et de la candidature au document déposé.
+
+Plusieurs routes vérifiaient la permission sans vérifier le périmètre. Un recruteur authentifié pouvait ainsi, en modifiant l'identifiant dans l'adresse d'une requête, consulter le détail d'une candidature adressée à une entreprise concurrente, et télécharger le curriculum vitæ correspondant. Aucune interface n'y conduisait, mais l'interface n'est pas une frontière de sécurité.
+
+\subsubsection{La correction}
+La vérification de propriété a été centralisée dans un module dédié, plutôt que réécrite à chaque route. Un contrôle dispersé se maintient mal : il suffit d'un point d'accès ajouté plus tard pour rouvrir la brèche, et rien dans le code ne signale l'oubli.
+
+\begin{lstlisting}[caption={Résolution d'une ressource avec vérification du périmètre. La fonction rend un couple : la ressource si l'accès est légitime, sinon la réponse de refus déjà formée.}]
+def candidature(utilisateur, identifiant):
+    obj = Application.query.get(identifiant)
+    if obj is None:
+        return None, (jsonify(error="Candidature introuvable."), 404)
+    if not possede_offre(utilisateur, obj.offer):
+        return None, (jsonify(error=MESSAGE_PERIMETRE), 403)
+    return obj, None
+\end{lstlisting}
+
+\noindent Les listes suivent le même principe : la requête est restreinte au périmètre avant d'être exécutée, et non filtrée après coup.
+
+\subsubsection{La vérification}
+Onze cas de test ont été écrits \textbf{du point de vue de l'attaquant} : le recruteur~B demande explicitement une ressource du recruteur~A et doit se voir opposer un refus. Cette formulation n'est pas indifférente. Un test qui se contenterait de vérifier que~A consulte bien ses propres données passerait tout aussi bien \emph{sans} le correctif, et n'aurait donc aucune valeur probante.
+
+\subsection{Verrou de connexion}
+Le formulaire de connexion n'opposait aucune limite au nombre d'essais. Un verrou temporaire a été ajouté après une série d'échecs consécutifs, avec deux précautions.
+
+La première : le verrou est évalué \textbf{avant} la vérification du mot de passe. Un contrôle placé après aurait laissé subsister un moyen de distinguer un compte verrouillé d'un compte inexistant, à la simple mesure du temps de réponse.
+
+La seconde : la réponse annonce la durée restante. Un refus muet conduit l'utilisateur légitime --- qui s'est simplement trompé --- à multiplier les tentatives et à prolonger son propre verrou, quand il devrait seulement patienter.
+
+\subsection{Séparation des domaines de l'assistant}
+L'assistant conversationnel avait été conçu pour le recruteur. Son ouverture à l'administrateur, souhaitée en cours de sprint, posait une difficulté qui n'était pas d'interface : la base de connaissances interrogée contenait le contenu des candidatures, et le rôle administrateur ne détient pas le droit de les consulter. Une conversation ne doit pas devenir le moyen de contourner le modèle de permissions.
+
+Deux bases de connaissances \textbf{disjointes} ont donc été constituées, l'une pour le recrutement et l'autre pour l'administration --- comptes en attente, signalements ouverts, activité récente, aide à l'usage. Un test vérifie qu'aucun document du domaine administration n'est de nature « candidature » ou « offre », et qu'aucune note d'adéquation n'y figure.
+
+% =====================================================================
+\section{Restitution et orientation}\label{sec:restitution}
+% =====================================================================
+
+\subsection{Le pilotage rendu à l'application}
+La restitution décisionnelle était prévue sous la seule forme de rapports Power BI. Ce choix a été complété plutôt que remplacé : un recruteur qui doit ouvrir un outil séparé pour savoir où en sont ses recrutements ne le fait pas. Un écran d'analyse a donc été intégré à la plateforme, alimenté par les mêmes données.
+
+Il présente la répartition des notes, les motifs d'écartement regroupés par nature, les compétences les plus souvent absentes des dossiers reçus, et le délai médian avant première décision. Ce dernier indicateur mérite une note de méthode : la candidature ne porte pas de date de modification, et le délai est donc lu dans le \textbf{journal d'audit}, à la première trace de changement de statut. Le journal, conçu comme une garantie de traçabilité, acquiert ainsi une seconde utilité.
+
+\subsubsection{La section qui engage le système}
+L'écran comporte une section intitulée « le classement tient-il ses promesses ? », qui confronte la note calculée \emph{avant} l'entretien au verdict porté \emph{après}, sur les candidats réellement reçus. Deux quantités y sont comptées séparément, et cette séparation est délibérée : les \textbf{faux espoirs} --- bien notés, mal évalués en entretien --- et les \textbf{pépites manquées} --- mal notées, bien évaluées. Les confondre en un taux d'erreur unique masquerait que leurs coûts n'ont rien de comparable. Un faux espoir coûte une heure d'entretien ; une pépite manquée coûte un candidat, définitivement.
+
+\subsection{L'orientation du candidat}
+Le candidat n'avait, jusqu'ici, qu'un catalogue à parcourir. Il postulait au jugé, et le recruteur recevait des dossiers hors sujet : les deux y perdaient.
+
+Le moteur a été retourné. Le calcul qui répond « ce candidat convient-il à cette offre ? » répond désormais aussi « quelles offres conviennent à ce profil ? », sans qu'aucune logique de notation ait été réimplémentée. Le candidat déclare ses compétences, son expérience et son diplôme ; les offres lui sont présentées par proximité décroissante. Lorsqu'un curriculum vitæ a déjà été analysé, le profil qui en est extrait \textbf{prime sur le profil déclaré} : l'observé l'emporte sur le déclaré, personne ne vérifiant une saisie.
+
+\medskip
+\noindent\textbf{Aucune note n'est communiquée au candidat, et c'est une règle et non un oubli.} Un chiffre sans son barème invite au malentendu, et une personne qui aurait lu « 87~\% » avant d'être écartée disposerait d'un grief légitime. Ce qui lui est montré, ce sont les \textbf{compétences manquantes} --- la seule chose qu'elle puisse corriger --- et un niveau de correspondance qualitatif. Un test vérifie qu'aucune valeur numérique d'adéquation ne figure dans la réponse, ni au premier niveau ni dans un sous-objet.
+
+\subsection{Première connexion et retenue des animations}
+Une visite guidée se déclenche à la première connexion, dans une version propre à chaque rôle : les trois profils n'entrent pas par la même porte, et une visite unique les servirait tous mal. Elle désigne les éléments par des attributs nommés plutôt que par des classes de style --- une classe change au premier ajustement visuel et casse la visite en silence.
+
+Les transitions ajoutées à l'interface obéissent à une contrainte simple : elles accompagnent une information, jamais l'inverse. Un compteur qui s'incrémente donne l'ordre de grandeur avant le chiffre exact ; une jauge qui se remplit rend la proportion lisible sans la lire. Toutes sont désactivées d'un seul bloc lorsque le système de l'utilisateur signale une préférence pour un mouvement réduit, réglage qui répond à des troubles vestibulaires réels et n'est pas une question de goût.
+
+% =====================================================================
+\section{Industrialisation et exploitation}\label{sec:industrialisation}
+% =====================================================================
+
+\subsection{La chaîne d'intégration et de livraison}
+La chaîne d'intégration continue comptait deux travaux ; elle en compte \textbf{six}, exécutés à chaque poussée de code.
+
+\begin{center}
+\small
+\begin{tabular}{lp{8.6cm}}
+  \toprule
+  \textbf{Travail} & \textbf{Objet} \\
+  \midrule
+  Service applicatif & Analyse statique et exécution de la totalité des tests \\[1mm]
+  Interface & Analyse statique et construction de production \\[1mm]
+  Dépendances & Recherche de vulnérabilités connues dans les bibliothèques des deux écosystèmes \\[1mm]
+  Sécurité & Analyse du dépôt : secrets exposés, défauts de configuration \\[1mm]
+  Images & Construction des deux images, analyse de leur contenu, publication au registre avec inventaire logiciel \\[1mm]
+  Assemblage & Démarrage de la pile complète et interrogation des sondes de disponibilité \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{2mm}
+\noindent Le dernier travail est celui qui apporte le plus. Les cinq premiers vérifient des composants isolément ; celui-ci vérifie qu'ils \textbf{fonctionnent ensemble} --- une base de données qui se lève, un service qui applique ses migrations et répond, une interface qui se construit avec la bonne adresse d'interface de programmation. C'est l'assemblage, non les composants, qui échoue en pratique.
+
+\subsection{Chaîne d'approvisionnement logicielle}
+Chaque construction produit un \textbf{inventaire des composants} de l'image, publié comme artefact. La justification est directe : lorsqu'une vulnérabilité est rendue publique, la question n'est pas de savoir si elle est grave --- l'avis le dit --- mais si le projet en est porteur. Sans inventaire, y répondre demande une inspection manuelle ; avec, c'est une recherche.
+
+Les images sont étiquetées par l'empreinte du commit qui les a produites. Chaque état du code correspond donc à un artefact déployable et identifiable, ce qui rend le retour arrière trivial : redémarrer avec l'étiquette précédente.
+
+Une veille automatique propose enfin les montées de version des dépendances. Elle est configurée pour \textbf{ignorer les montées de version majeures}, qui appellent une lecture des notes de version et non une acceptation automatique, et pour viser la branche de développement plutôt que la branche principale.
+
+\subsection{Observabilité}
+Trois dispositifs ont été ajoutés à la chaîne d'analyse.
+
+\begin{itemize}[leftmargin=1.5em, itemsep=2pt]
+  \item \textbf{Chronométrage par étape.} Le coût d'une analyse se répartit très inégalement --- la reconnaissance optique et le calcul des plongements dominent --- et seule la mesure permet de savoir laquelle ralentit une analyse donnée. Les durées sont conservées avec le résultat.
+  \item \textbf{Bloc de provenance.} Chaque note porte la version du moteur, les modèles utilisés, l'empreinte du code et la date d'analyse. Une note contestée six mois plus tard doit pouvoir être rattachée à la version exacte qui l'a produite ; sans cela, la reproduire est une conjecture.
+  \item \textbf{Identifiant de requête et sondes distinctes.} Une sonde de \emph{vivacité} répond tant que le service est en vie ; une sonde de \emph{disponibilité} n'annonce l'état favorable que si la base de données et les modèles répondent. Les confondre conduit un orchestrateur à envoyer du trafic vers un service incapable de le traiter.
+\end{itemize}
+
+\subsection{Ce que la conteneurisation apporte, et ce qu'elle n'apporte pas}
+La plateforme se lève d'une seule commande, sur n'importe quel poste, sans installation préalable d'un interpréteur, d'une base de données ni d'un environnement d'exécution. C'est ce qui rend la chaîne d'intégration crédible : elle exécute la même image que le poste de développement, et un échec y est reproductible localement.
+
+\medskip
+\noindent\textbf{Il convient en revanche de ne pas confondre livraison et déploiement.} Le projet dispose d'une \emph{livraison} continue : chaque commit produit un artefact prêt à être déployé. Il ne dispose pas de \emph{déploiement} continu : aucun serveur ne reçoit cet artefact. La procédure de déploiement est écrite et versionnée, mais désactivée faute d'infrastructure dans le cadre du stage. La distinction est nette et un jury la connaît ; la revendiquer serait une faute.
+
+% =====================================================================
 \section{Vérification}
 % =====================================================================
-La couverture de tests a été portée de soixante-neuf à \textbf{quatre-vingt-treize} cas, tous réussis.
+La couverture de tests a été portée de soixante-neuf à \textbf{cent quatre-vingt-douze} cas réussis, auxquels s'ajoutent deux cas ignorés lorsque les modèles optionnels ne sont pas présents.
 
 \begin{center}
 \small
@@ -624,45 +752,76 @@ La couverture de tests a été portée de soixante-neuf à \textbf{quatre-vingt-
   \textbf{Domaine testé} & \textbf{Cas} & \textbf{Résultat} \\
   \midrule
   Authentification et sessions & 6 & \textcolor{vert}{Réussis} \\
-  Contrôle d'accès & 3 & \textcolor{vert}{Réussis} \\
-  Moteur de notation et règle de présélection & 10 & \textcolor{vert}{Réussis} \\
-  \textbf{Modèle appris --- robustesse} & \textbf{5} & \textcolor{vert}{Réussis} \\
-  Offres, tableau de bord, profil & 5 & \textcolor{vert}{Réussis} \\
-  Notifications et cloisonnement & 5 & \textcolor{vert}{Réussis} \\
-  Analyse linguistique et sémantique & 14 & \textcolor{vert}{Réussis} \\
+  \textbf{Verrou de connexion} & \textbf{5} & \textcolor{vert}{Réussis} \\
+  Contrôle d'accès par permissions & 3 & \textcolor{vert}{Réussis} \\
+  \textbf{Cloisonnement par périmètre} & \textbf{11} & \textcolor{vert}{Réussis} \\
+  Moteur de notation et règle de présélection & 14 & \textcolor{vert}{Réussis} \\
+  Modèle appris --- robustesse et bornes & 5 & \textcolor{vert}{Réussis} \\
+  Chaîne d'analyse d'un curriculum vitæ & 14 & \textcolor{vert}{Réussis} \\
   Reconstitution du profil structuré & 16 & \textcolor{vert}{Réussis} \\
-  Assistant conversationnel & 15 & \textcolor{vert}{Réussis} \\
+  Contrôles d'anomalies sur les dossiers & 22 & \textcolor{vert}{Réussis} \\
+  Assistant --- domaine recrutement & 20 & \textcolor{vert}{Réussis} \\
+  \textbf{Assistant --- domaine administration} & \textbf{11} & \textcolor{vert}{Réussis} \\
+  \textbf{Orientation du candidat} & \textbf{10} & \textcolor{vert}{Réussis} \\
+  \textbf{Analyse décisionnelle} & \textbf{8} & \textcolor{vert}{Réussis} \\
+  \textbf{Observabilité et provenance} & \textbf{9} & \textcolor{vert}{Réussis} \\
+  \textbf{Document manquant et réparation} & \textbf{4} & \textcolor{vert}{Réussis} \\
+  Qualification des recruteurs & 12 & \textcolor{vert}{Réussis} \\
   Validation des comptes et corbeille & 14 & \textcolor{vert}{Réussis} \\
+  Offres, notifications, profil & 10 & \textcolor{vert}{Réussis} \\
   \midrule
-  \textbf{Total} & \textbf{93} & \textcolor{vert}{\textbf{100 \%}} \\
+  \textbf{Total collecté} & \textbf{194} & \textcolor{vert}{\textbf{192 réussis, 2 ignorés}} \\
   \bottomrule
 \end{tabular}
 \end{center}
 
+\vspace{1mm}
+\noindent Les deux cas ignorés dépendent de modèles optionnels absents de l'environnement d'intégration ; ils sont exécutés localement lorsque ces modèles sont présents. Aucun cas n'est en échec.
+
 \vspace{2mm}
-\noindent Les vingt-quatre cas ajoutés portent principalement sur les modes de défaillance du modèle. L'exigence testée n'est pas la qualité des prédictions — elle relève des protocoles d'évaluation — mais la garantie qu'\textbf{aucune analyse de candidature ne peut échouer à cause du modèle} : fichier absent, fichier corrompu, modèle entraîné sur d'autres indicateurs, chacun de ces cas est vérifié individuellement et doit aboutir à une note calculée sans cette composante.
+\noindent Trois familles de cas méritent d'être distinguées, parce qu'elles ne testent pas un comportement mais un \textbf{engagement}.
 
-Quatre cas vérifient par ailleurs les propriétés de l'ajustement : neutralité à probabilité 0,5, respect de la borne de $\pm$8 points, et impossibilité de rattraper une candidature écartée par une règle.
+\medskip
+\noindent\textbf{Le cloisonnement} (11 cas). Chacun est écrit du point de vue de l'attaquant : le recruteur~B réclame nommément une ressource du recruteur~A. Une formulation inverse aurait produit des tests qui passent avec ou sans le correctif.
+
+\medskip
+\noindent\textbf{Le silence de la note vis-à-vis du candidat} (dans les 10 cas d'orientation). Un cas énumère les clés interdites --- note, score, détail du calcul, probabilité --- et vérifie leur absence à chaque niveau d'imbrication de la réponse. L'engagement porte sur ce qui ne doit \emph{pas} être transmis, et un test de présence ne l'aurait pas couvert.
+
+\medskip
+\noindent\textbf{La robustesse du modèle} (5 cas). L'exigence testée n'est pas la qualité des prédictions --- elle relève des protocoles d'évaluation --- mais la garantie qu'\textbf{aucune analyse ne peut échouer à cause du modèle} : fichier absent, fichier corrompu, modèle entraîné sur d'autres indicateurs. Chacun doit aboutir à une note calculée sans cette composante. S'y ajoutent la neutralité à probabilité~0,5, le respect de la borne de $\pm$8~points, et l'impossibilité de rattraper une candidature écartée par une règle.
 
 % =====================================================================
-\section{Travaux restants}
+\section{Ce qui n'a pas été fait}\label{sec:perspectives}
 % =====================================================================
+Un rapport de clôture qui ne présenterait que des réussites serait suspect. Deux éléments du périmètre élargi n'ont pas été livrés, et deux autres ont été livrés sous une forme réduite. Ils sont exposés ici avec leur motif, et non renvoyés à une rubrique de perspectives.
 
-\subsection{Mesure des indicateurs du cahier des charges}
-Le cahier des charges annonce une précision supérieure ou égale à 85~\% et un rappel supérieur ou égal à 80~\%. Ces indicateurs portent sur le \textbf{dispositif de présélection dans son ensemble} — lecture du document, reconstitution du profil, règles métiers, calcul de la note — et non sur le seul modèle d'apprentissage, dont l'intervention se limite à huit points d'ajustement.
+\subsection{Déploiement sur un serveur}
+La procédure de déploiement est écrite, versionnée et paramétrée, mais \textbf{désactivée} : elle ne s'exécute qu'en présence des identifiants d'un serveur cible, absents du dépôt. Aucune infrastructure n'a été mise à disposition dans le cadre du stage, et aucun service payant n'a été souscrit --- contrainte assumée dès le début du projet.
 
-Cette distinction doit être établie sans ambiguïté dans le document final : rapprocher les 61,9~\% du modèle des 85~\% annoncés reviendrait à comparer deux grandeurs différentes. La mesure du dispositif complet sera conduite sur le jeu francophone, où la qualité attendue de chaque profil est connue à l'avance, et présentée avec le détail de son mode de calcul.
+La conséquence doit être énoncée clairement : la plateforme dispose d'une \emph{livraison} continue, non d'un \emph{déploiement} continu. Ce qui manque n'est pas du code mais une machine.
 
-\subsection{Audit de biais}
-Il s'agit de vérifier l'absence de corrélation entre les notes attribuées et des attributs sans rapport avec la compétence : marqueurs de genre, indices d'âge, origine perceptible du nom, établissement de formation. Le dispositif est favorable à ce contrôle, chaque note étant décomposée en composantes traçables : une corrélation anormale peut être rattachée à la composante qui la produit.
+\subsection{Tests de bout en bout}
+Les parcours des trois profils sont vérifiés manuellement et documentés par un script d'enregistrement, mais ils ne sont pas automatisés en navigateur. L'arbitrage a été explicite : à temps égal, onze cas de cloisonnement écrits du point de vue de l'attaquant protègent davantage la plateforme qu'un parcours de connexion automatisé. Ce choix reste discutable, et il est présenté comme tel.
 
-\subsection{Restitution décisionnelle et finalisation}
-\begin{itemize}[leftmargin=1.5em, nosep]
-  \item rapports Power BI connectés à la base : vue recruteur (entonnoir de conversion, délais de traitement) et vue direction (volumes, taux de conversion, qualité des candidatures reçues) ;
-  \item tests de bout en bout des trois parcours critiques ;
-  \item notifications complémentaires sur les événements de cycle de vie des comptes ;
-  \item guide d'exploitation et support de soutenance.
-\end{itemize}
+\subsection{Deux livrables réduits}
+\textbf{L'audit de biais} a été conduit et son résultat est énoncé --- au plus deux points de variation, imputables à la similarité sémantique qui encode le document entier, identité comprise. Il ne s'agit pas d'une étude statistique sur un large échantillon, et la formule « sans biais » serait fausse. L'écart est négligeable mais réel.
+
+\textbf{La métrologie d'exploitation} se limite au chronométrage conservé avec chaque analyse. Il n'existe pas de collecte centralisée ni de système d'alerte, dont l'intérêt reste théorique tant qu'aucun serveur ne reçoit de trafic.
+
+\subsection{Récapitulatif}
+\begin{center}
+\small
+\begin{tabular}{lcp{7.4cm}}
+  \toprule
+  \textbf{Élément} & \textbf{État} & \textbf{Motif} \\
+  \midrule
+  Déploiement sur serveur & \textcolor{ambre}{Non activé} & Absence d'infrastructure ; procédure écrite et prête \\[1mm]
+  Tests de bout en bout & \textcolor{ambre}{Non réalisé} & Arbitrage en faveur des tests de sécurité \\[1mm]
+  Audit de biais & \textcolor{accent}{Réduit} & Mesure conduite, portée statistique limitée \\[1mm]
+  Métrologie centralisée & \textcolor{accent}{Réduite} & Sans objet en l'absence de trafic réel \\
+  \bottomrule
+\end{tabular}
+\end{center}
 
 % =====================================================================
 \section{Planification}
@@ -684,15 +843,15 @@ Il s'agit de vérifier l'absence de corrélation entre les notes attribuées et 
     \node[white, font=\scriptsize\bfseries] at (8.45, 1.9) {Sprint 3};
     \fill[vert] (10, 2.3) rectangle (11.3, 2.8);
     \node[white, font=\scriptsize\bfseries] at (10.65, 2.55) {S4-a};
-    \fill[accent] (11.3, 2.3) rectangle (13, 2.8);
+    \fill[vert] (11.3, 2.3) rectangle (13, 2.8);
     \node[white, font=\scriptsize\bfseries] at (12.15, 2.55) {S4-b};
-    \draw[dashed, thick, color=vert] (11.3, -0.4) -- (11.3, 3.15);
-    \node[font=\scriptsize\bfseries, color=vert, above] at (11.3, 3.15) {aujourd'hui};
+    \draw[dashed, thick, color=vert] (13, -0.4) -- (13, 3.15);
+    \node[font=\scriptsize\bfseries, color=vert, above] at (13, 3.15) {clôture};
     \node[font=\scriptsize, color=gris, right] at (0.1, 3.5)
-      {S4-a : apprentissage supervisé, intégration, tests \quad
-       S4-b : décisionnel, indicateurs, audit, finalisation};
+      {S4-a : apprentissage supervisé, évaluation, intégration \quad
+       S4-b : consolidation, restitution, industrialisation};
   \end{tikzpicture}
-  \caption{Avancement du projet au 10 août. La livraison finale reste fixée au 16 août.}
+  \caption{Déroulement du projet. Les quatre sprints sont achevés, la livraison finale au 16 août ayant été tenue.}
   \label{fig:gantt4}
 \end{figure}
 
@@ -703,8 +862,9 @@ Il s'agit de vérifier l'absence de corrélation entre les notes attribuées et 
   \textbf{Période} & \textbf{Jours} & \textbf{Contenu} \\
   \midrule
   07/08 -- 10/08 & 4 & Corpus, modèle supervisé, protocoles d'évaluation, intégration au score, tests \\[1mm]
-  11/08 -- 13/08 & 3 & Indicateurs du cahier des charges, audit de biais, tests de bout en bout \\[1mm]
-  14/08 -- 16/08 & 3 & Rapports Power BI, documentation d'exploitation, préparation de la soutenance \\
+  11/08 -- 13/08 & 3 & Relecture de sécurité, cloisonnement par périmètre, verrou de connexion, séparation des domaines de l'assistant \\[1mm]
+  14/08 -- 15/08 & 2 & Analyse décisionnelle intégrée, orientation du candidat, visite guidée, observabilité \\[1mm]
+  16/08 & 1 & Industrialisation de la construction et de la livraison, documentation, jeu de démonstration \\
   \bottomrule
 \end{tabular}
 \end{center}
@@ -719,10 +879,11 @@ Il s'agit de vérifier l'absence de corrélation entre les notes attribuées et 
   \toprule
   \textbf{Risque} & \textbf{Criticité} & \textbf{Mesure retenue} \\
   \midrule
-  Performance modeste du modèle & Faible & Ajustement volontairement borné à $\pm$8 points : la qualité du classement ne dépend pas du modèle, qui n'apporte qu'un départage complémentaire. \\[1mm]
   Interprétation erronée des chiffres à la soutenance & \textcolor{ambre}{\textbf{Élevée}} & Distinction explicite, dans le rapport et à l'oral, entre l'exactitude du modèle et les indicateurs du dispositif complet ; chaque chiffre est présenté avec le protocole qui l'établit. \\[1mm]
+  Confusion entre livraison et déploiement continus & \textcolor{ambre}{\textbf{Élevée}} & Formulation arrêtée et répétée : intégration et livraison automatisées, déploiement prêt mais non activé. Aucune revendication au-delà. \\[1mm]
+  Performance modeste du modèle & Faible & Ajustement volontairement borné à $\pm$8 points : la qualité du classement ne dépend pas du modèle, qui n'apporte qu'un départage complémentaire. \\[1mm]
   Volume restreint du jeu de validation français & Moyenne & Ce protocole est présenté comme une vérification de transfert linguistique, jamais comme une mesure de précision. \\[1mm]
-  Densité de la fin de sprint & Moyenne & Priorisation : indicateurs et audit de biais avant les rapports décisionnels, ces derniers étant les plus aisément réductibles en cas de contrainte. \\[1mm]
+  Défauts de cloisonnement réintroduits par un ajout ultérieur & Moyenne & Vérification centralisée dans un module unique plutôt que répétée par route ; onze tests écrits du point de vue de l'attaquant échouent si la vérification est omise. \\[1mm]
   Coût des services externes & Faible & Chaîne complète construite sur des outils gratuits ou en licence libre ; aucun service payant n'est requis pour l'exécution. \\
   \bottomrule
 \end{tabular}
@@ -737,6 +898,14 @@ Le chiffre retenu — 8,5 points d'exactitude au-dessus de la référence — es
 
 L'intégration retenue tire les conséquences de cette mesure. Le modèle n'occupe pas une part fixe de la note mais applique un ajustement borné, ne peut jamais rattraper une candidature écartée par une règle explicite, et son absence n'empêche aucune analyse d'aboutir. La plateforme conserve ainsi la propriété qui fait sa valeur : chaque note attribuée reste intégralement justifiable auprès du recruteur comme auprès du candidat.
 
-Les jours restants seront consacrés à la mesure des indicateurs annoncés au cahier des charges, à l'audit de biais, aux rapports décisionnels et à la préparation de la soutenance.
+\medskip
+La seconde partie du sprint a porté sur une exigence différente, et sans doute plus déterminante pour la suite. Une relecture menée du point de vue d'un utilisateur mal intentionné a révélé que les permissions, correctement appliquées, ne suffisaient pas : elles disent ce qu'un rôle a le droit de faire, non sur quelles ressources. Le défaut a été corrigé au moyen d'une vérification centralisée et de onze tests qui échouent si elle est omise. Un projet d'école peut se contenter d'une fonction qui marche ; un produit destiné à recevoir des candidatures réelles ne le peut pas.
+
+Les mêmes jours ont ramené le pilotage dans l'application plutôt que dans un outil séparé, retourné le moteur au bénéfice du candidat --- qui reçoit ses compétences manquantes et jamais sa note --- et industrialisé la construction : six travaux d'intégration, deux images publiées avec leur inventaire logiciel, une veille des dépendances.
+
+\medskip
+\noindent\textbf{Le projet est livré dans son périmètre fonctionnel intégral.} Ce qui manque relève de l'exploitation --- un serveur qui reçoive l'artefact, des parcours automatisés en navigateur --- et la section~\ref{sec:perspectives} l'énonce sans le déguiser en perspective. La distinction entre livraison continue, acquise, et déploiement continu, non réalisé, sera maintenue à l'oral comme elle l'est ici.
+
+Reste, pour la soutenance, ce qu'aucun rapport ne remplace : montrer le dispositif en fonctionnement, et notamment la démonstration qui l'expose le mieux --- retirer une permission à un rôle et voir l'accès refusé à la requête suivante, sans attendre l'expiration d'aucune session.
 
 \end{document}

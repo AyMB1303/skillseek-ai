@@ -313,6 +313,17 @@ jobs:
     # coûterait plus qu'elle ne rapporte, les tests unitaires couvrant déjà
     # la logique.
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Le dépôt contient un `docker-compose.override.yml` destiné au poste de
+    # développement — frontend en rechargement à chaud, backend en mode debug.
+    # Compose le charge automatiquement, ce qui reviendrait ici à vérifier
+    # l'environnement de développement au lieu de celui de production, soit
+    # l'exact contraire de l'objet de ce travail.
+    #
+    # La variable est posée au niveau du travail plutôt que par un `-f` répété
+    # sur chaque appel : un drapeau se perd le jour où une étape est ajoutée,
+    # et l'oubli serait silencieux.
+    env:
+      COMPOSE_FILE: docker-compose.yml
     steps:
       - uses: actions/checkout@v4
 

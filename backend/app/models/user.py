@@ -39,6 +39,17 @@ class User(db.Model):
     # c'est pourquoi le verrou est court et le titulaire prevenu.
     locked_until = db.Column(db.DateTime)
 
+    # Profil declare par le candidat : competences, annees d'experience,
+    # niveau de diplome.
+    #
+    # Il sert a lui recommander des offres AVANT toute candidature — sans quoi
+    # la plateforme ne peut rien lui dire tant qu'il n'a pas postule au hasard.
+    # Declare et non extrait : personne ne le verifie, et c'est acceptable
+    # parce qu'il ne sert qu'a l'orienter, jamais a decider de son sort. Des
+    # qu'une candidature est analysee, le profil tire de son CV prend le
+    # relais : l'observe l'emporte toujours sur le declare.
+    profil_declare = db.Column(db.JSON)
+
     # Suppression logique : le compte disparait des listes mais reste
     # restaurable, et les donnees liees (candidatures) ne sont pas perdues.
     deleted_at = db.Column(db.DateTime, index=True)

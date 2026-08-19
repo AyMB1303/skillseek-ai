@@ -206,6 +206,17 @@ def analyser(current_user, app_id):
         candidature.score = score
         candidature.score_details = details
     else:
+        # Un document absent du disque et une extraction infructueuse sont deux
+        # incidents differents, et le second seul autorise la saisie manuelle
+        # comme recours. Les confondre renverrait un score vide sans dire
+        # pourquoi ; le recruteur relancerait indefiniment la meme analyse.
+        if not (candidature.cv_path and os.path.exists(candidature.cv_path)):
+            return jsonify(
+                error="Le fichier du CV est introuvable sur le serveur. "
+                      "Demandez au candidat de le redéposer, ou saisissez le "
+                      "profil manuellement.",
+            ), 409
+
         details = analyser_candidature(candidature)
         db.session.flush()
         # A la reanalyse, seules les anomalies nouvelles sont signalees : les

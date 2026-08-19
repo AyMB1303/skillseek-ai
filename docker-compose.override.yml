@@ -1,0 +1,65 @@
+# Surcouche de developpement.
+#
+# Compose charge ce fichier AUTOMATIQUEMENT en plus de `docker-compose.yml`,
+# sans aucun drapeau. `docker compose up -d` suffit donc a lever la plateforme
+# entiere en mode developpement : rechargement a chaud du frontend, mode debug
+# du backend, aucune commande separee.
+#
+# Le fichier principal reste ce qu'il est — la description de la pile telle
+# qu'elle tourne en production. C'est lui, et lui seul, que verifie le travail
+# d'assemblage de la chaine d'integration, qui neutralise cette surcouche par
+# la variable COMPOSE_FILE.
+#
+# Pour lever deliberement la pile de production sur ce poste :
+#   docker compose -f docker-compose.yml up -d --build
+
+services:
+
+  backend:
+    environment:
+      # Le CMD de l'image lance `flask run` sans rechargement : c'est le bon
+      # choix pour une image de production, ou un processus qui se relance
+      # tout seul apres modification d'un fichier serait une anomalie.
+      # En developpement l'inverse est vrai.
+      FLASK_DEBUG: 1
+    command: flask run --host=0.0.0.0 --port=5000 --reload
+    # `watchdog` n'etant pas installe, Werkzeug surveille les fichiers par
+    # relecture periodique de leurs dates. C'est plus lent qu'une notification
+    # du systeme de fichiers, mais cela traverse les montages Windows, ce que
+    # la notification ne fait pas.
+    #
+    # Si le demarrage devenait poussif — la surveillance parcourt aussi les
+    # dependances, torch et spaCy compris — supprimer les deux directives
+    # ci-dessus suffit a revenir au comportement precedent :
+    #   docker compose restart backend  apres chaque modification Python.
+
+  frontend:
+    build:
+      context: ./frontend
+      # L'etape `dependances` du Dockerfile porte `node_modules` sans le code
+      # source ni la construction de production. C'est exactement ce qu'il
+      # faut : les paquets viennent de l'image, les sources du montage.
+      target: dependances
+    command: npm run dev
+    volumes:
+      - ./frontend:/app
+      # Volumes anonymes places APRES le montage du dossier : ils empechent
+      # `./frontend` de masquer les dependances installees dans l'image. Sans
+      # eux, `node_modules` serait vide dans le conteneur — le dossier n'existe
+      # pas sur le poste hote lorsque l'on travaille uniquement en conteneur.
+      - /app/node_modules
+      - /app/.next
+    environment:
+      # En developpement, Next lit cette valeur au demarrage. Elle n'a donc
+      # pas besoin d'etre inscrite a la construction comme dans l'image de
+      # production, ou le bundle navigateur la fige.
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:5000/api}
+      NEXT_TELEMETRY_DISABLED: 1
+      # Sans cela, la surveillance des fichiers ne remonte pas au travers d'un
+      # montage Windows et le rechargement a chaud reste muet.
+      WATCHPACK_POLLING: true
+    healthcheck:
+      # La sonde de l'image de production interroge une page rendue. Le serveur
+      # de developpement compile a la demande : la premiere requete peut
+      # depasser le delai et faire declarer le conteneur malade a tort.
+      disable: true

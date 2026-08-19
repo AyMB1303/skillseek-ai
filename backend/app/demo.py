@@ -191,6 +191,7 @@ def demo_command(reset):
 
     nouveaux_candidats = 0
     nouvelles_candidatures = 0
+    reparees = 0
     echecs = []
     deposees = []            # candidatures creees, reprises par le journal
 
@@ -219,14 +220,36 @@ def demo_command(reset):
         offre = offres.get(candidat["offre"])
         if offre is None:
             continue
-        if Application.query.filter_by(
-            candidate_id=utilisateur.id, offer_id=offre.id
-        ).first():
-            continue
 
-        # CV au format PDF, lu ensuite par la chaine d'analyse standard
+        # Le CV est (re)ecrit systematiquement, avant meme de savoir si la
+        # candidature existe. C'est ce qui rend la commande reparatrice : une
+        # base qui reference un fichier disparu est l'incident le plus penible
+        # a diagnostiquer — l'interface echoue a ouvrir le document, l'analyse
+        # rend une note vide, et rien n'explique pourquoi. Le seul remede est
+        # de reproduire le fichier, et il ne coute rien de le faire a chaque
+        # execution.
         chemin = os.path.join(dossier, f"demo_{utilisateur.id}.pdf")
         ecrire_cv_pdf(chemin, texte_cv(candidat))
+        if not os.path.exists(chemin):
+            # L'ecriture a rendu la main sans produire de fichier : le signaler
+            # ici plutot que de creer une ligne qui pointe dans le vide.
+            echecs.append(f"{candidat['full_name']} : CV non écrit ({chemin})")
+            continue
+
+        existante = Application.query.filter_by(
+            candidate_id=utilisateur.id, offer_id=offre.id
+        ).first()
+        if existante:
+            existante.cv_path = chemin
+            # Le document vient d'etre retabli : une analyse restee sans note
+            # faute de fichier peut aboutir maintenant.
+            if existante.score is None:
+                try:
+                    analyser_candidature(existante, chemin_cv=chemin)
+                    reparees += 1
+                except Exception as exc:  # noqa: BLE001
+                    echecs.append(f"{candidat['full_name']} : {exc}")
+            continue
 
         depose_il_y_a = aleatoire.randint(1, 75)
         candidature = Application(
@@ -290,6 +313,8 @@ def demo_command(reset):
     click.echo(f"  Offres publiées      : {nouvelles_offres}")
     click.echo(f"  Candidatures déposées: {nouvelles_candidatures}")
     click.echo(f"  Traces d'audit       : {entrees}")
+    if reparees:
+        click.echo(f"  Dossiers réparés     : {reparees}")
 
     if echecs:
         click.echo("")
@@ -297,6 +322,7 @@ def demo_command(reset):
         for message in echecs:
             click.echo(f"    - {message}")
 
+    _verifier_fichiers()
     _afficher_resume()
 
 
@@ -433,6 +459,27 @@ def _aware(date):
     return date if date.tzinfo else date.replace(tzinfo=timezone.utc)
 
 
+def _verifier_fichiers():
+    """Vérifie que chaque candidature pointe sur un fichier réellement présent.
+
+    Une remise à plat qui laisse la base et le disque désaccordés n'a pas
+    rempli son office. Mieux vaut le dire ici, en une ligne, que le découvrir
+    en pleine démonstration.
+    """
+    manquants = [
+        c for c in Application.query.all()
+        if not (c.cv_path and os.path.exists(c.cv_path))
+    ]
+    click.echo("")
+    if manquants:
+        click.echo(f"  ⚠ {len(manquants)} candidature(s) sans fichier sur le disque :")
+        for candidature in manquants[:5]:
+            nom = candidature.candidate.full_name if candidature.candidate else "?"
+            click.echo(f"      #{candidature.id} {nom} → {candidature.cv_path}")
+    else:
+        click.echo("  ✓ Tous les CV référencés sont présents sur le disque.")
+
+
 def _afficher_resume():
     """Contrôle de cohérence : les scores obtenus doivent refléter les profils."""
     candidatures = Application.query.filter(Application.score.isnot(None)).all()
@@ -516,6 +563,13 @@ def _effacer(role_recruteur, role_candidat):
     for offre in offres:
         for candidature in list(offre.applications):
             AiMetric.query.filter_by(application_id=candidature.id).delete()
+            # Le document part avec la ligne. Un CV conserve sans candidature
+            # n'a plus de base legale pour l'etre, et encombre le volume.
+            if candidature.cv_path and os.path.exists(candidature.cv_path):
+                try:
+                    os.remove(candidature.cv_path)
+                except OSError:
+                    pass
             db.session.delete(candidature)
         db.session.delete(offre)
 
@@ -524,6 +578,48 @@ def _effacer(role_recruteur, role_candidat):
 
     for compte in comptes:
         db.session.delete(compte)
+
+    # Candidatures dont le fichier a disparu du disque, quel que soit leur
+    # proprietaire. C'est l'etat le plus penible a diagnostiquer : la base
+    # affirme qu'un CV existe, l'interface echoue a l'ouvrir, et rien
+    # n'explique pourquoi. La remise a plat doit les emporter, sinon elle
+    # laisse le probleme exactement ou il etait.
+    orphelines = [
+        c for c in Application.query.all()
+        if not (c.cv_path and os.path.exists(c.cv_path))
+    ]
+    for candidature in orphelines:
+        AiMetric.query.filter_by(application_id=candidature.id).delete()
+        db.session.delete(candidature)
+    if orphelines:
+        click.echo(f"{len(orphelines)} candidature(s) sans fichier supprimée(s).")
+    db.session.flush()
+
+    # Fichiers de demonstration restes sur le disque sans ligne en base :
+    # l'inverse du cas precedent, et tout aussi silencieux.
+    #
+    # Le balayage epargne tout fichier encore reference par une candidature
+    # survivante. Sans cette precaution, la remise a plat fabriquerait
+    # elle-meme le desaccord qu'elle est censee corriger.
+    references = {
+        c.cv_path for c in Application.query.all() if c.cv_path
+    }
+    dossier = current_app.config["UPLOAD_FOLDER"]
+    restes = 0
+    if os.path.isdir(dossier):
+        for nom in os.listdir(dossier):
+            if not (nom.startswith("demo_") and nom.endswith(".pdf")):
+                continue
+            complet = os.path.join(dossier, nom)
+            if complet in references:
+                continue
+            try:
+                os.remove(complet)
+                restes += 1
+            except OSError:
+                pass
+    if restes:
+        click.echo(f"{restes} fichier(s) de démonstration effacé(s).")
 
     # Le journal repart de zero avec le jeu de donnees. Ses entrees ne
     # portent pas de cle etrangere vers leur objet — c'est ce qui leur permet

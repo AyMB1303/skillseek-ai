@@ -131,6 +131,8 @@ export const api = {
 
   // Tableau de bord
   statistiques: (periode = 30) => appel(`/dashboard/stats?days=${periode}`),
+  // Lecture analytique : distribution des notes, motifs d'écartement, délais.
+  analyse: (periode = 90) => appel(`/dashboard/analyse?days=${periode}`),
 
   // Assistant conversationnel
   // L'historique accompagne la question : sans lui, chaque message repartirait
@@ -186,6 +188,17 @@ export const api = {
   changerMotDePasse: (actuel, nouveau) =>
     appel("/profile/password", { method: "POST", body: { current_password: actuel, new_password: nouveau } }),
   exporterDonnees: () => appel("/profile/data"),
+
+  // Profil déclaré par le candidat, et offres qui en découlent.
+  profilCompetences: () => appel("/profile/competences"),
+  enregistrerCompetences: (donnees) =>
+    appel("/profile/competences", { method: "PUT", body: donnees }),
+  recommandations: (filtres = {}) => {
+    const params = new URLSearchParams(
+      Object.entries(filtres).filter(([, v]) => v)
+    ).toString();
+    return appel(`/profile/recommandations${params ? `?${params}` : ""}`);
+  },
   supprimerCompte: () => appel("/profile", { method: "DELETE" }),
 
   // Administration
