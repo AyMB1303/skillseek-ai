@@ -243,6 +243,12 @@ jobs:
     permissions:
       contents: read
       packages: write
+      # Ce travail analyse les images construites et publie le resultat dans
+      # l'onglet Security, comme les deux travaux de securite. Sans cette
+      # permission l'analyse est bien calculee mais l'envoi echoue, et le
+      # constat se perd dans le journal d'execution — l'analyse ne sert alors
+      # a rien.
+      security-events: write
     strategy:
       # Les deux images se construisent en parallèle et l'échec de l'une
       # n'interrompt pas l'autre : on veut connaître les deux résultats.
