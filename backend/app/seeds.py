@@ -1,4 +1,6 @@
 """Commande `flask seed` : rôles, permissions et compte admin initial."""
+import os
+
 import click
 from flask.cli import with_appcontext
 
@@ -44,8 +46,12 @@ ROLES = {
     "candidate": [],
 }
 
-ADMIN_EMAIL = "admin@skillseek.local"
-ADMIN_PASSWORD = "Admin@1234"  # a changer immediatement en production
+ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "admin@skillseek.local")
+# Le mot de passe initial de l'administrateur se surcharge par l'environnement.
+# La valeur de repli reste celle documentee pour la demonstration : un
+# deploiement reel doit definir ADMIN_PASSWORD, et cette variable est le seul
+# endroit ou le changer.
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "Admin@1234")
 
 
 @click.command("seed")

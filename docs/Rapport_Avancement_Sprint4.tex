@@ -228,7 +228,7 @@ Le \textbf{Sprint~3} (28/07 -- 06/08) a livré le cœur analytique : lecture des
   Analyse statique du code & sans anomalie & sans anomalie \\
   Appariements du corpus d'apprentissage & — & \textbf{8\,000} \\
   Indicateurs calculés par appariement & — & \textbf{17} \\
-  Travaux d'intégration continue & 2 & \textbf{6} \\
+  Travaux d'intégration continue & 2 & \textbf{7} \\
   Migrations de schéma & 8 & \textbf{11} \\
   Durée d'analyse d'un curriculum vitæ & $<$ 3 s & $<$ 3 s \\
   \bottomrule
@@ -697,7 +697,7 @@ Les transitions ajoutées à l'interface obéissent à une contrainte simple : e
 % =====================================================================
 
 \subsection{La chaîne d'intégration et de livraison}
-La chaîne d'intégration continue comptait deux travaux ; elle en compte \textbf{six}, exécutés à chaque poussée de code.
+La chaîne d'intégration continue comptait deux travaux ; elle en compte \textbf{sept}, exécutés à chaque poussée de code.
 
 \begin{center}
 \small
@@ -708,7 +708,8 @@ La chaîne d'intégration continue comptait deux travaux ; elle en compte \textb
   Service applicatif & Analyse statique et exécution de la totalité des tests \\[1mm]
   Interface & Analyse statique et construction de production \\[1mm]
   Dépendances & Recherche de vulnérabilités connues dans les bibliothèques des deux écosystèmes \\[1mm]
-  Sécurité & Analyse du dépôt : secrets exposés, défauts de configuration \\[1mm]
+  Sécurité du dépôt & Analyse Trivy : secrets exposés, défauts de configuration \\[1mm]
+  Sécurité du code & Analyse statique orientée sûreté (Bandit, Semgrep) sur les deux écosystèmes \\[1mm]
   Images & Construction des deux images, analyse de leur contenu, publication au registre avec inventaire logiciel \\[1mm]
   Assemblage & Démarrage de la pile complète et interrogation des sondes de disponibilité \\
   \bottomrule
@@ -716,6 +717,27 @@ La chaîne d'intégration continue comptait deux travaux ; elle en compte \textb
 \end{center}
 
 \vspace{2mm}
+\noindent\textbf{Une précision sur l'analyse statique de sûreté.} \texttt{flake8} et
+ESLint étaient présents depuis le premier sprint, mais ils jugent le style et
+non la sûreté : ils n'ont aucune opinion sur un hachage affaibli ou sur une
+requête construite par concaténation. Le travail ajouté comble cette lacune.
+
+Sa mise en service illustre ce qu'on attend d'un tel outil. Douze constats ont
+été relevés au premier passage. \textbf{Cinq ont donné lieu à une correction} :
+un condensat MD5 servant de clé de cache désormais déclaré comme non
+cryptographique, le mot de passe initial de l'administrateur lu depuis
+l'environnement, et surtout la vérification du schéma de l'adresse du modèle de
+langue avant tout appel réseau --- sans elle, une adresse en \texttt{file://}
+aurait transformé un appel distant en lecture de fichier local. \textbf{Les sept
+autres sont des faux positifs}, chacun accompagné dans le code du motif qui
+l'écarte : des libellés français pris pour des mots de passe, un générateur
+pseudo-aléatoire employé pour composer un jeu de démonstration, et des noms de
+vues provenant d'une constante du module et non d'une saisie.
+
+Le rapport d'un analyseur n'a de valeur que lu et arbitré. Le laisser produire
+des avertissements que personne ne tranche revient à ne pas l'avoir.
+
+\medskip
 \noindent Le dernier travail est celui qui apporte le plus. Les cinq premiers vérifient des composants isolément ; celui-ci vérifie qu'ils \textbf{fonctionnent ensemble} --- une base de données qui se lève, un service qui applique ses migrations et répond, une interface qui se construit avec la bonne adresse d'interface de programmation. C'est l'assemblage, non les composants, qui échoue en pratique.
 
 \subsection{Chaîne d'approvisionnement logicielle}

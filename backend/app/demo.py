@@ -130,7 +130,8 @@ def _creer_utilisateur(donnees, role, statut="active", cree_il_y_a=60):
 @with_appcontext
 def demo_command(reset):
     """Crée comptes, offres, CV et candidatures de démonstration."""
-    aleatoire = random.Random(42)  # reproductible d'une execution a l'autre
+    # aucune valeur produite ici ne protege quoi que ce soit.
+    aleatoire = random.Random(42)  # reproductible d'une execution a l'autre  # nosec B311
 
     role_recruteur = _obtenir_role("recruiter")
     role_candidat = _obtenir_role("candidate")

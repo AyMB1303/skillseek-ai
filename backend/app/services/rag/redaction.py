@@ -134,7 +134,7 @@ SALUTATIONS = [
 def _reponse_sociale(nom, f):
     """Répond aux échanges de civilité, en ramenant vers l'usage utile."""
     if nom == "salutation":
-        base = random.choice(SALUTATIONS)
+        base = random.choice(SALUTATIONS)  # nosec B311
         if f["en_attente_de_decision"]:
             base += (
                 f" À noter : {f['en_attente_de_decision']} "

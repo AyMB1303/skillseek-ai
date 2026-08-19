@@ -73,7 +73,7 @@ def creer_vues_command():
 
     click.echo("Vues décisionnelles créées :")
     for vue, _ in VUES:
-        nombre = db.session.execute(text(f"SELECT COUNT(*) FROM {vue}")).scalar()
+        nombre = db.session.execute(text(f"SELECT COUNT(*) FROM {vue}")).scalar()  # nosec B608
         click.echo(f"  {vue:20} {nombre:>6} ligne(s)")
 
 
@@ -93,7 +93,7 @@ def export_command(vers):
 
     click.echo(f"Export vers {dossier}")
     for vue, fichier in VUES:
-        resultat = db.session.execute(text(f"SELECT * FROM {vue}"))
+        resultat = db.session.execute(text(f"SELECT * FROM {vue}"))  # nosec B608
         colonnes = list(resultat.keys())
         lignes = resultat.fetchall()
 

@@ -50,7 +50,14 @@ def _charger_modele():
 
 
 def _cle(texte):
-    return hashlib.md5(texte.encode("utf-8")).hexdigest()
+    """Clé de cache, et rien d'autre.
+
+    MD5 est ici choisi pour sa rapidité, non pour une propriété de sécurité :
+    il s'agit d'indexer un texte déjà encodé, pas de protéger un secret.
+    `usedforsecurity=False` le dit à l'analyseur statique comme au lecteur, et
+    reste valide sur les systèmes où les algorithmes affaiblis sont désactivés.
+    """
+    return hashlib.md5(texte.encode("utf-8"), usedforsecurity=False).hexdigest()
 
 
 def encoder(texte):

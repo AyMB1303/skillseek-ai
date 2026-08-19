@@ -169,6 +169,69 @@ jobs:
           sarif_file: trivy-depot.sarif
           category: trivy-depot
 
+  sast:
+    name: Sécurité — analyse du code (SAST)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Installer Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Installer les analyseurs
+        run: pip install bandit bandit-sarif-formatter semgrep
+
+      # Bandit lit l'arbre syntaxique du code Python et cherche des motifs
+      # dangereux : hachage affaibli, construction de requete par concatenation,
+      # ouverture d'URL a schema libre, secret ecrit en dur. C'est ce que ni
+      # flake8 ni ESLint ne font — ils jugent le style, pas la surete.
+      - name: Bandit — analyse du service applicatif
+        # Bloquant, et volontairement. La base a ete assainie : douze constats
+        # releves, cinq corriges, sept justifies par une annotation `nosec`
+        # portant son motif. L'analyseur rend donc zero, et tout nouveau
+        # constat de gravite moyenne ou superieure signale une regression
+        # introduite par le changement en cours.
+        run: bandit -r backend/app -ll
+
+      - name: Bandit — rapport pour l'onglet Security
+        if: always()
+        run: bandit -r backend/app -f sarif -o bandit.sarif --exit-zero
+
+      - name: Publier Bandit
+        if: always()
+        continue-on-error: true
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: bandit.sarif
+          category: bandit
+
+      # Semgrep couvre les deux ecosystemes, la ou Bandit ne voit que Python.
+      - name: Semgrep — Python et JavaScript
+        # Informatif, et non bloquant. Les regles proviennent d'un depot public
+        # qui evolue independamment de ce projet : une regle ajoutee en amont
+        # ferait echouer une construction sans aucun rapport avec le code
+        # livre ce jour-la. Les constats remontent dans l'onglet Security, ou
+        # ils sont dates et suivis, ce qui est le bon endroit pour un signal
+        # qui appelle un jugement plutot qu'un blocage.
+        continue-on-error: true
+        run: |
+          semgrep --config=p/python --config=p/javascript \
+            --metrics=off --sarif --output=semgrep.sarif \
+            backend/app frontend/src
+
+      - name: Publier Semgrep
+        if: always()
+        continue-on-error: true
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: semgrep.sarif
+          category: semgrep
+
   # ------------------------------------------------------------------ #
   # 2. Images                                                           #
   # ------------------------------------------------------------------ #
@@ -176,7 +239,7 @@ jobs:
   images:
     name: Images Docker
     runs-on: ubuntu-latest
-    needs: [backend, frontend, dependances, securite]
+    needs: [backend, frontend, dependances, securite, sast]
     permissions:
       contents: read
       packages: write

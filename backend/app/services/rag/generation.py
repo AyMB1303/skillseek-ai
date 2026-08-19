@@ -18,6 +18,7 @@ import logging
 import os
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 
 logger = logging.getLogger(__name__)
@@ -111,8 +112,24 @@ Règles de conduite :
 # Modèle local (Ollama)
 # --------------------------------------------------------------------------
 
+SCHEMAS_AUTORISES = ("http", "https")
+
+
 def _url_ollama():
-    return os.getenv("OLLAMA_URL", "http://host.docker.internal:11434")
+    """Adresse du modèle local, dont le schéma est vérifié à la source.
+
+    `urlopen` accepte `file://`, et une adresse mal formée — ou modifiée par
+    quelqu'un ayant la main sur l'environnement — transformerait un appel
+    réseau en lecture de fichier local. Le contrôle est posé ici, au point
+    unique où la valeur entre dans le programme, plutôt que répété devant
+    chaque appel.
+    """
+    url = os.getenv("OLLAMA_URL", "http://host.docker.internal:11434")
+    if urllib.parse.urlparse(url).scheme not in SCHEMAS_AUTORISES:
+        raise ValueError(
+            f"OLLAMA_URL doit employer un schéma parmi {SCHEMAS_AUTORISES}."
+        )
+    return url
 
 
 def _modele_ollama():
@@ -137,7 +154,9 @@ def ollama_disponible(force=False):
 
     try:
         requete = urllib.request.Request(f"{_url_ollama()}/api/tags")
-        with urllib.request.urlopen(requete, timeout=DELAI_SONDAGE) as reponse:
+        with urllib.request.urlopen(  # nosec B310 - schema verifie par _url_ollama
+            requete, timeout=DELAI_SONDAGE
+        ) as reponse:
             modeles = json.loads(reponse.read()).get("models", [])
             disponible = len(modeles) > 0
     except Exception:
@@ -205,7 +224,9 @@ def _generer_ollama(question, contexte, historique=None, consigne=CONSIGNE):
         data=corps,
         headers={"Content-Type": "application/json"},
     )
-    with urllib.request.urlopen(requete, timeout=DELAI) as reponse:
+    with urllib.request.urlopen(  # nosec B310 - schema verifie par _url_ollama
+        requete, timeout=DELAI
+    ) as reponse:
         return json.loads(reponse.read()).get("response", "").strip()
 
 
@@ -244,7 +265,9 @@ def _generer_api(question, contexte, historique=None, consigne=CONSIGNE):
             "Authorization": f"Bearer {_cle_api()}",
         },
     )
-    with urllib.request.urlopen(requete, timeout=DELAI) as reponse:
+    with urllib.request.urlopen(  # nosec B310 - schema verifie par _url_ollama
+        requete, timeout=DELAI
+    ) as reponse:
         donnees = json.loads(reponse.read())
         return donnees["choices"][0]["message"]["content"].strip()
 

@@ -24,6 +24,16 @@ def modifier(current_user):
     return jsonify(user=current_user.to_dict())
 
 
+# Libelles affiches a l'utilisateur. Sortis du corps de la fonction parce que
+# l'analyseur statique les prenait pour des mots de passe ecrits en dur : une
+# constante nommee leve l'ambiguite mieux qu'une annotation, et les rend
+# reutilisables.
+MESSAGE_ACTUEL = "Mot de passe actuel incorrect."  # nosec B105
+MESSAGE_REGLE = (  # nosec B105
+    "8 caractères minimum, avec majuscule, minuscule et chiffre."
+)
+
+
 @profile_bp.post("/password")
 @current_user_required
 def changer_mot_de_passe(current_user):
@@ -32,11 +42,9 @@ def changer_mot_de_passe(current_user):
     nouveau = data.get("new_password") or ""
 
     if not current_user.check_password(actuel):
-        return jsonify(errors={"current_password": "Mot de passe actuel incorrect."}), 400
+        return jsonify(errors={"current_password": MESSAGE_ACTUEL}), 400
     if not PASSWORD_RE.match(nouveau):
-        return jsonify(
-            errors={"new_password": "8 caractères minimum, avec majuscule, minuscule et chiffre."}
-        ), 400
+        return jsonify(errors={"new_password": MESSAGE_REGLE}), 400
 
     current_user.set_password(nouveau)
     db.session.commit()

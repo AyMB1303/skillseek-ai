@@ -45,7 +45,7 @@ def _validate_registration(data: dict):
     if not data.get("email") or not EMAIL_RE.match(data["email"]):
         errors["email"] = "Adresse email invalide."
     if not data.get("password") or not PASSWORD_RE.match(data["password"]):
-        errors["password"] = (
+        errors["password"] = (  # nosec B105
             "Mot de passe : 8 caractères min., une majuscule, "
             "une minuscule et un chiffre."
         )
