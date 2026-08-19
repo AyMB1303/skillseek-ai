@@ -1,85 +1,192 @@
-# SkillSeek AI — Plateforme intelligente de gestion du recrutement
+# SkillSeek AI
 
-Projet de stage BC SKILLS (Juillet–Août 2026) — Aymen Benrbib, ESI (ISITD).
+**Plateforme de présélection de candidatures dont chaque note est justifiable.**
 
-## Sprint 1 — Contenu livré
+[![CI/CD](https://github.com/AyMB1303/skillseek-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/AyMB1303/skillseek-ai/actions/workflows/ci.yml)
+![Tests](https://img.shields.io/badge/tests-192%20reussis-brightgreen)
+![Python](https://img.shields.io/badge/python-3.12-blue)
+![Next.js](https://img.shields.io/badge/next.js-14.2-black)
+![Licence](https://img.shields.io/badge/licence-usage%20pédagogique-lightgrey)
 
-| Tâche | Où |
+Un recruteur reçoit deux cents candidatures pour un poste. Les outils courants
+lui rendent un classement sans lui dire pourquoi. SkillSeek AI fait l'inverse :
+il lit chaque CV, le confronte à l'offre, et **restitue le détail du calcul** —
+quelles compétences ont été trouvées, lesquelles manquent, et ce qui a fait
+écarter un dossier.
+
+Le principe qui gouverne le projet : **le système propose, l'humain tranche.**
+Aucune candidature n'est supprimée, toute décision est motivée, et une note
+contestée peut être reconstituée six mois plus tard.
+
+![Détail d'une note et du profil reconstitué](docs/captures/05_detail_score_profil_ats.jpg)
+
+---
+
+## Ce que fait la plateforme
+
+**Pour le candidat.** Il déclare ses compétences, son expérience et son diplôme ;
+les offres lui sont présentées par proximité décroissante avec son profil. Il
+voit les **compétences qui lui manquent** pour chaque offre — la seule chose
+qu'il puisse corriger. *Aucune note ne lui est jamais communiquée* : un chiffre
+sans son barème invite au malentendu.
+
+**Pour le recruteur.** Chaque candidature reçoit une note sur 100, décomposée en
+cinq composantes traçables, accompagnée du motif d'écartement s'il y a lieu. Un
+écran d'analyse mesure ensuite si le classement tient ses promesses, en
+confrontant la note calculée *avant* l'entretien au verdict porté *après*.
+
+**Pour l'administrateur.** Validation des comptes recruteurs, gestion des rôles
+et permissions, journal d'audit immuable, corbeille réversible.
+
+## Comment la note est calculée
+
+| Composante | Poids |
 |---|---|
-| S1-01 Structure repo | ce dossier (monorepo `backend/`, `frontend/` arrive au Sprint 2) |
-| S1-02 Docker | `docker-compose.yml`, `backend/Dockerfile` |
-| S1-03 CI/CD | `.github/workflows/ci.yml` |
-| S1-04 Modélisation BDD | `backend/app/models/` + migrations Alembic |
-| S1-05 Architecture Flask | `backend/app/` (Blueprints auth/users/offers/applications) |
-| S1-06 Auth JWT | `backend/app/blueprints/auth.py` (access 15 min + refresh + blacklist) |
-| S1-07 RBAC temps réel | `backend/app/middleware/permissions.py` |
+| Compétences obligatoires | 35 |
+| Compétences souhaitées | 10 |
+| Proximité sémantique avec l'offre | 25 |
+| Expérience | 20 |
+| Diplôme | 10 |
 
-## Démarrage rapide
+Un modèle d'apprentissage supervisé ajuste ensuite la note de **±8 points au
+maximum**. Il ne peut jamais rattraper une candidature écartée par une règle
+explicite, et son absence n'empêche aucune analyse d'aboutir.
+
+**Règle de présélection.** En dessous de 50, la candidature est écartée du
+classement — jamais supprimée, et toujours repêchable. Parmi celles au-dessus,
+les dix meilleures forment la présélection.
+
+## Deux propriétés que le code garantit
+
+**Le cloisonnement par périmètre.** Les permissions répondent à « ce rôle
+peut-il consulter des candidatures ? ». Elles ne répondent pas à « celle-ci ? ».
+Deux recruteurs ont exactement les mêmes droits ; ce qui les sépare est la
+chaîne de propriété recruteur → offre → candidature → CV. La vérification est
+centralisée dans `backend/app/services/acces.py`, et onze tests écrits **du
+point de vue de l'attaquant** échouent si elle est omise.
+
+**Les permissions en temps réel.** Elles sont relues en base à chaque requête
+sensible. Retirer un droit prend effet immédiatement, sans attendre
+l'expiration des sessions ouvertes. Le rôle administrateur ne bénéficie
+d'aucun contournement.
+
+---
+
+## Démarrage
 
 ```bash
-# 1. Copier la configuration
-cp .env.example .env        # (Windows : copy .env.example .env)
+git clone https://github.com/AyMB1303/skillseek-ai.git
+cd skillseek-ai
+cp .env.example .env          # Windows : copy .env.example .env
 
-# 2. Lancer PostgreSQL + backend
-docker compose up --build
-
-# 3. Dans un autre terminal : créer les tables et les données initiales
-docker compose exec backend flask db init      # première fois seulement
-docker compose exec backend flask db migrate -m "initial schema"
+docker compose up -d --build
 docker compose exec backend flask db upgrade
 docker compose exec backend flask seed
-
-# L'API répond sur http://localhost:5000/api/health
+docker compose exec backend flask demo --reset
 ```
 
-Compte admin créé par le seed : `admin@skillseek.local` / `Admin@1234` (à changer).
+L'interface répond sur **http://localhost:3000**, l'API sur
+**http://localhost:5000/api**.
 
-## Tester l'API rapidement
+`docker-compose.override.yml` est chargé automatiquement : le frontend démarre
+en rechargement à chaud et le backend en mode debug. Rien d'autre à lancer.
 
-```bash
-# Connexion
-curl -X POST http://localhost:5000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"admin@skillseek.local","password":"Admin@1234"}'
+### Comptes de démonstration
 
-# Utiliser le token retourné
-curl http://localhost:5000/api/users -H "Authorization: Bearer <ACCESS_TOKEN>"
-```
+| Rôle | Identifiant | Mot de passe |
+|---|---|---|
+| Candidat | `y.tazi@example.ma` | `Demo@1234` |
+| Recruteur | `s.lamrani@bcskills.ma` | `Demo@1234` |
+| Administrateur | `admin@skillseek.local` | `Admin@1234` |
 
-## Lancer les tests et le linting (comme la CI)
+### Tests
 
 ```bash
 cd backend
 pip install -r requirements.txt
 flake8 app tests
-pytest -v
+pytest -q
 ```
+
+---
 
 ## Architecture
 
 ```
-skillseek-ai/
-├── docker-compose.yml        # PostgreSQL + backend
-├── .env.example              # variables d'environnement
-├── .github/workflows/ci.yml  # lint + tests à chaque push
-└── backend/
-    ├── Dockerfile
-    ├── requirements.txt
-    ├── run.py                # point d'entrée
-    ├── config.py             # config par environnement
-    ├── app/
-    │   ├── __init__.py       # factory create_app()
-    │   ├── extensions.py     # db, migrate, jwt, bcrypt, cors
-    │   ├── seeds.py          # commande `flask seed`
-    │   ├── models/           # User, Role, Permission, JobOffer, Application, AiMetric, TokenBlocklist
-    │   ├── blueprints/       # auth, users, offers, applications
-    │   └── middleware/
-    │       └── permissions.py  # @require_permission — vérif BDD à chaque requête
-    └── tests/                # Pytest (auth + révocation temps réel)
+backend/app/
+  blueprints/     61 routes HTTP — reçoivent, délèguent, répondent
+  services/       le raisonnement métier, sans dépendance à HTTP
+  models/         une classe par table (SQLAlchemy)
+  middleware/     contrôle des permissions
+frontend/src/
+  pages/          22 écrans (un fichier = une URL)
+  components/     éléments partagés
+  lib/            appels API, thème, animations
+.github/workflows/
+  ci.yml          7 travaux d'intégration continue
 ```
 
-## Points clés pour la soutenance
+**La séparation `blueprints` / `services` est délibérée.** Les services ignorent
+qu'HTTP existe : ils prennent des objets Python et en rendent. C'est ce qui
+permet de tester le moteur de notation sans démarrer de serveur web.
 
-- **RBAC temps réel** : le JWT ne contient que l'identité ; les permissions sont relues en base à chaque requête sensible → une révocation par l'admin est effective immédiatement (RG-02 du cahier des charges).
-- **Sécurité** : bcrypt pour les mots de passe, tokens 15 min + refresh, blacklist de tokens, SQLAlchemy (anti-injection).
-- **CI** : chaque commit déclenche flake8 + Pytest ; un échec bloque le merge.
+### Pile technique
+
+Flask 3 · SQLAlchemy · PostgreSQL 16 · Alembic · JWT · bcrypt
+Next.js 14 · React 18 · Tailwind CSS
+spaCy · sentence-transformers · scikit-learn · Tesseract OCR
+Docker · GitHub Actions · Trivy · Bandit · Semgrep
+
+### Chaîne d'intégration continue
+
+Sept travaux à chaque poussée : analyse statique et tests du service
+applicatif, analyse statique et construction de l'interface, audit des
+dépendances des deux écosystèmes, analyse du dépôt (Trivy), **analyse de
+sûreté du code** (Bandit et Semgrep), construction et publication des images
+avec leur inventaire logiciel, et démarrage de la pile complète.
+
+Les images sont étiquetées par l'empreinte du commit qui les a produites :
+chaque état du code correspond à un artefact déployable et identifiable.
+
+---
+
+## État du projet
+
+Le périmètre fonctionnel est **complet**. Ce qui manque relève de
+l'exploitation, et figure ici sans être déguisé en perspective :
+
+- **Déploiement non activé** — la procédure est écrite et versionnée, mais
+  aucune infrastructure n'a été mise à disposition dans le cadre du stage. Le
+  projet dispose donc d'une *livraison* continue, non d'un *déploiement*
+  continu.
+- **Pas de tests de bout en bout** en navigateur. Les parcours des trois profils
+  sont vérifiés manuellement.
+- **Audit de biais de portée limitée** — au plus deux points de variation
+  mesurés, imputables à la similarité sémantique qui encode le document entier,
+  identité comprise. Négligeable, mais réel : la formule « sans biais » serait
+  fausse.
+
+## Documentation
+
+| Document | Contenu |
+|---|---|
+| [`docs/DEVOPS.md`](docs/DEVOPS.md) | conteneurisation, images, exploitation |
+| [`docs/CI_CD.md`](docs/CI_CD.md) | détail des travaux d'intégration |
+| [`docs/SCRIPT_DEMONSTRATION.md`](docs/SCRIPT_DEMONSTRATION.md) | déroulé d'une démonstration |
+| `docs/Rapport_Avancement_Sprint*.pdf` | rapports d'avancement des quatre sprints |
+| [`bi/GUIDE_POWER_BI.md`](bi/GUIDE_POWER_BI.md) | vues décisionnelles |
+
+---
+
+## Contexte
+
+Projet de fin d'année (PFA) réalisé au sein de **BC SKILLS**, juillet–août 2026.
+
+**Aymen Benrbib** — École des Sciences de l'Information (ESI), filière
+Ingénierie des Systèmes d'Information et Transformation Digitale.
+
+Développé sur quatre sprints : socle technique et sécurité, interface et
+parcours métier, moteur d'analyse et de notation, apprentissage supervisé et
+industrialisation.
+
+Code publié à des fins pédagogiques et de démonstration.
