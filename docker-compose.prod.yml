@@ -53,8 +53,9 @@ services:
       # Les CV déposés survivent au remplacement du conteneur.
       - cv_uploads:/app/uploads
       - ./models:/app/models
-    ports:
-      - "5000:5000"
+    # Aucun port publie : le service n'est joignable que par le proxy, sur le
+    # reseau interne. Exposer directement 5000 offrirait un second chemin vers
+    # l'API, echappant aux limites de taille et de delai posees par le proxy.
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/api/ready')\""]
       interval: 15s
@@ -68,11 +69,23 @@ services:
   frontend:
     image: ghcr.io/${GITHUB_REPOSITORY:-aymen/skillseek}/frontend:${IMAGE_TAG:-latest}
     restart: always
-    ports:
-      - "3000:3000"
     depends_on:
       backend:
         condition: service_healthy
+
+  # Seul service expose sur Internet. Il sert l'interface a la racine et
+  # transmet `/api` au service applicatif : une seule adresse, un seul port,
+  # et une image frontend qui reste portable d'un hote a l'autre.
+  proxy:
+    image: nginx:1.27-alpine
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./deploiement/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - frontend
+      - backend
 
 volumes:
   pgdata:

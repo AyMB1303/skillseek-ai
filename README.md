@@ -8,6 +8,14 @@
 ![Next.js](https://img.shields.io/badge/next.js-14.2-black)
 ![Licence](https://img.shields.io/badge/licence-usage%20pédagogique-lightgrey)
 
+[![Ouvrir dans GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/AyMB1303/skillseek-ai)
+
+**Essayer sans rien installer :** le bouton ci-dessus lève la plateforme
+entière dans le navigateur — base de données, API et interface — avec un jeu
+de démonstration déjà chargé. Comptez une dizaine de minutes au premier
+démarrage, le temps de construire les images. Ouvrez ensuite le port 3000
+depuis l'onglet « Ports ».
+
 Un recruteur reçoit deux cents candidatures pour un poste. Les outils courants
 lui rendent un classement sans lui dire pourquoi. SkillSeek AI fait l'inverse :
 il lit chaque CV, le confronte à l'offre, et **restitue le détail du calcul** —
@@ -72,7 +80,7 @@ d'aucun contournement.
 
 ---
 
-## Démarrage
+## Démarrage local
 
 ```bash
 git clone https://github.com/AyMB1303/skillseek-ai.git

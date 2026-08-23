@@ -22,7 +22,18 @@ WORKDIR /app
 
 # L'adresse de l'API est inscrite dans le bundle navigateur au moment de la
 # construction : elle doit donc arriver ici, et non au demarrage.
-ARG NEXT_PUBLIC_API_URL=http://localhost:5000/api
+#
+# La valeur par defaut est un chemin RELATIF, et c'est deliberе. Une adresse
+# absolue graverait un hote precis dans l'image, qui ne fonctionnerait alors
+# que sur cette machine — l'image cesserait d'etre portable, ce qui viderait
+# de son sens la publication au registre. Avec `/api`, le navigateur appelle
+# l'hote qui lui a servi la page, quel qu'il soit, a condition qu'un proxy
+# route ce chemin vers le service applicatif (voir deploiement/nginx.conf).
+#
+# Le fichier `docker-compose.yml` transmet explicitement `http://localhost:5000/api`
+# pour la construction locale, ou aucun proxy n'intervient : la valeur passee
+# l'emporte sur ce defaut.
+ARG NEXT_PUBLIC_API_URL=/api
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 ENV NEXT_TELEMETRY_DISABLED=1
 

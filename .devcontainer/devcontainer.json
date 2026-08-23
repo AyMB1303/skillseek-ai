@@ -1,0 +1,43 @@
+{
+  "name": "SkillSeek AI",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
+
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+
+  "hostRequirements": {
+    "cpus": 4,
+    "memory": "8gb",
+    "storage": "32gb"
+  },
+
+  "forwardPorts": [3000, 5000],
+
+  "portsAttributes": {
+    "3000": {
+      "label": "SkillSeek — interface",
+      "onAutoForward": "openBrowser",
+      "visibility": "public"
+    },
+    "5000": {
+      "label": "SkillSeek — API",
+      "onAutoForward": "silent",
+      "visibility": "public"
+    }
+  },
+
+  "postCreateCommand": "bash .devcontainer/demarrer.sh",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "dbaeumer.vscode-eslint",
+        "ms-azuretools.vscode-docker"
+      ]
+    }
+  },
+
+  "remoteUser": "vscode"
+}
