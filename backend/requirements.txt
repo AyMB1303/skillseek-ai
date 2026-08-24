@@ -31,4 +31,4 @@ joblib==1.4.2
 
 # --- Qualite et tests ---
 pytest==8.2.2
-flake8==7.1.0
+flake8==7.3.0
