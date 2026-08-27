@@ -1,19 +1,32 @@
-# Déploiement sur Azure — procédure complète
+# Déploiement sur Azure — session de validation
 
-Objectif : mettre SkillSeek AI en ligne sur une machine Azure, et activer le
-déploiement automatique depuis GitHub.
+Objectif : mettre SkillSeek AI en ligne le temps d'une session, **prouver que
+la chaîne de déploiement fonctionne de bout en bout**, prendre les captures qui
+en attestent, puis libérer les ressources.
 
-**Durée : 2 à 3 heures.** Six étapes. Ne saute aucune, et va jusqu'au bout
-d'une étape avant d'attaquer la suivante.
+**Durée : 2 à 3 heures. Coût : environ 1 $** de crédit académique.
+
+La plateforme n'a pas vocation à rester en ligne. Ce qui est démontré ici, ce
+n'est pas l'hébergement — c'est que le commit va jusqu'au service en
+fonctionnement, sans intervention manuelle.
 
 Remplace partout `<IP>` par l'adresse publique de ta machine.
 
 ---
 
+## Avant de commencer
+
+Une seule règle sur le choix de la machine : **prends la première taille que la
+validation Azure accepte.** Le prix mensuel affiché n'a aucune importance — sur
+trois heures, une machine à 78 $/mois coûte 32 centimes. Ne perds pas de temps
+à chercher la moins chère.
+
+---
+
 ## Étape 0 — Publier les images
 
-Le serveur ne construit rien : il **télécharge** les images produites par la
-chaîne d'intégration. Or celles-ci ne sont publiées que sur `main`.
+Le serveur ne construit rien, il télécharge. Or les images ne sont publiées au
+registre que depuis `main`, et `dev` a six commits d'avance.
 
 ```bash
 git checkout main
@@ -21,11 +34,15 @@ git merge dev
 git push origin main
 ```
 
-Va dans l'onglet **Actions** et attends que l'exécution se termine — une
-quinzaine de minutes, la construction du backend étant longue.
+Onglet **Actions** → attends la fin de l'exécution. Une quinzaine de minutes,
+la construction du backend étant longue.
 
 Vérifie ensuite dans **ton profil GitHub → Packages** que `backend` et
 `frontend` apparaissent.
+
+```bash
+git checkout dev      # revenir sur la branche de travail
+```
 
 ---
 
@@ -35,20 +52,30 @@ Portail Azure → **Créer une ressource → Machine virtuelle**.
 
 | Réglage | Valeur |
 |---|---|
-| Image | Ubuntu Server 24.04 LTS |
-| Taille | **B2s** (2 vCPU, 4 Go) |
-| Région | France Central ou West Europe |
+| Groupe de ressources | **`SkillSeek-demo`** — nom dédié, il sera supprimé en entier à l'étape 7 |
+| **Region** | **`(Europe) Germany West Central`** |
+| Image | **Ubuntu Server 24.04 LTS** — surtout pas « Pro », qui est payant |
+| **Size** | **`Standard_D2s_v7`** — 2 vCPU, 8 Go, x86 |
+| Availability options | *No infrastructure redundancy required* |
+| Security type | `Standard` |
 | Authentification | Clé publique SSH, générer une nouvelle paire |
 | Nom d'utilisateur | `azureuser` |
 | Ports entrants | **22 (SSH) et 80 (HTTP)** |
-| Disque | Standard SSD, 30 Go |
+| Disque | Standard SSD |
 
-Azure fait télécharger la **clé privée** à la création. Elle n'est
-téléchargeable qu'une fois. Range-la, ne la partage avec personne.
+> **La région n'est pas négociable.** L'abonnement porte une politique
+> « Allowed resource deployment regions » qui n'en autorise que cinq :
+> `polandcentral`, `germanywestcentral`, `switzerlandnorth`, `swedencentral`,
+> `austriaeast`. Toute autre région est refusée à la validation, sans que le
+> portail le signale au moment du choix. Germany West Central est la plus
+> proche du Maroc.
+>
+> **Éviter toute taille contenant un `p`** — `D2ps_v6`, `D2pds_v6` et
+> semblables sont des machines **ARM**. Les images du projet sont construites
+> pour x86 et n'y démarreraient pas.
 
-> **Pourquoi seulement 22 et 80 ?** Un proxy publie l'interface et l'API sur
-> le port 80. Ouvrir 3000 et 5000 offrirait un second chemin vers les services,
-> échappant aux limites de taille et de délai posées par le proxy.
+Azure fait télécharger la **clé privée** à la création — une seule fois. Range-la,
+ne la partage avec personne.
 
 Note l'**adresse IP publique** affichée après la création.
 
@@ -56,56 +83,41 @@ Note l'**adresse IP publique** affichée après la création.
 
 ## Étape 2 — Préparer le serveur
 
-Depuis ton poste :
-
 ```bash
 ssh -i chemin/vers/cle.pem azureuser@<IP>
 ```
 
-Puis, sur le serveur :
+Sur le serveur :
 
 ```bash
-# Docker, depuis le script officiel
 curl -fsSL https://get.docker.com | sudo sh
-
-# Pouvoir lancer docker sans sudo
 sudo usermod -aG docker azureuser
-
-# Le dossier de déploiement
 sudo mkdir -p /opt/skillseek
 sudo chown azureuser:azureuser /opt/skillseek
 ```
 
 **Déconnecte-toi et reconnecte-toi** — l'appartenance au groupe `docker` ne
-prend effet qu'à l'ouverture de session suivante.
+prend effet qu'à la session suivante.
 
 ```bash
 exit
 ssh -i chemin/vers/cle.pem azureuser@<IP>
-docker run --rm hello-world     # doit réussir sans sudo
+docker run --rm hello-world      # doit réussir sans sudo
 ```
 
 ---
 
 ## Étape 3 — Rendre les images publiques
 
-Par défaut les paquets GHCR sont privés, et le serveur ne pourrait pas les
-récupérer.
+Sinon le serveur ne pourra pas les télécharger.
 
-Pour **chacune** des deux images (`backend` et `frontend`) :
-
-GitHub → ton profil → **Packages** → le paquet → **Package settings** →
-*Danger Zone* → **Change visibility** → **Public**.
-
-> Alternative si tu préfères les garder privées : créer un jeton d'accès
-> personnel avec la portée `read:packages` et faire `docker login ghcr.io`
-> sur le serveur. Plus sûr, mais un secret de plus à gérer. Pour un projet
-> pédagogique dont le code est déjà public, la visibilité publique est
-> cohérente.
+Pour **chacune** des deux images : GitHub → ton profil → **Packages** → le
+paquet → **Package settings** → *Danger Zone* → **Change visibility** →
+**Public**.
 
 ---
 
-## Étape 4 — Les fichiers sur le serveur
+## Étape 4 — Premier démarrage
 
 Sur le serveur :
 
@@ -113,27 +125,24 @@ Sur le serveur :
 cd /opt/skillseek
 git clone --depth 1 https://github.com/AyMB1303/skillseek-ai.git depot
 cp depot/docker-compose.prod.yml .
-mkdir -p deploiement && cp depot/deploiement/nginx.conf deploiement/
-mkdir -p models
+mkdir -p deploiement models
+cp depot/deploiement/nginx.conf deploiement/
 rm -rf depot
+
+openssl rand -hex 32      # trois fois, note les trois valeurs
+nano .env
 ```
 
-Génère trois secrets **neufs** :
-
-```bash
-openssl rand -hex 32   # à faire trois fois
-```
-
-Crée `/opt/skillseek/.env` avec `nano .env` :
+Contenu de `.env` :
 
 ```bash
 POSTGRES_USER=skillseek
-POSTGRES_PASSWORD=<premier secret>
+POSTGRES_PASSWORD=<secret 1>
 POSTGRES_DB=skillseek
-DATABASE_URL=postgresql://skillseek:<premier secret>@db:5432/skillseek
+DATABASE_URL=postgresql://skillseek:<secret 1>@db:5432/skillseek
 
-SECRET_KEY=<deuxième secret>
-JWT_SECRET_KEY=<troisième secret>
+SECRET_KEY=<secret 2>
+JWT_SECRET_KEY=<secret 3>
 FLASK_ENV=production
 
 FRONTEND_ORIGIN=http://<IP>
@@ -145,15 +154,9 @@ LOGIN_MAX_ECHECS=5
 LOGIN_VERROU_MINUTES=10
 ```
 
-> **Jamais les valeurs de `.env.example`.** Elles sont publiques dans ton
-> dépôt : les réutiliser sur une machine exposée reviendrait à publier tes
-> clés de session.
+> **Jamais les valeurs de `.env.example`** — elles sont publiques dans le dépôt.
 
-> `NEXT_PUBLIC_API_URL` n'y figure pas, et c'est normal : l'image frontend
-> embarque le chemin relatif `/api`, que le proxy route vers le service
-> applicatif.
-
-Premier démarrage :
+Démarrage :
 
 ```bash
 docker compose -f docker-compose.prod.yml pull
@@ -163,9 +166,9 @@ docker compose -f docker-compose.prod.yml exec -T backend flask seed
 docker compose -f docker-compose.prod.yml exec -T backend flask demo --reset
 ```
 
-Ouvre **http://\<IP\>** dans ton navigateur. La plateforme doit répondre.
+Ouvre **http://\<IP\>**. La plateforme doit répondre.
 
-Si elle ne répond pas :
+En cas de problème :
 
 ```bash
 docker compose -f docker-compose.prod.yml ps
@@ -175,7 +178,10 @@ docker compose -f docker-compose.prod.yml logs proxy --tail 20
 
 ---
 
-## Étape 5 — Activer le déploiement automatique
+## Étape 5 — Déclencher le déploiement automatique
+
+C'est cette étape qui produit la preuve la plus importante : non pas qu'un
+serveur existe, mais que **la chaîne y déploie toute seule**.
 
 Dépôt GitHub → **Settings → Secrets and variables → Actions → New repository
 secret**. Quatre secrets :
@@ -187,42 +193,58 @@ secret**. Quatre secrets :
 | `SSH_CLE_PRIVEE` | le **contenu entier** du fichier de clé privée, lignes `BEGIN` et `END` comprises |
 | `CHEMIN_DEPLOIEMENT` | `/opt/skillseek` |
 
-Puis : onglet **Actions → Déploiement → Run workflow**, version `latest`,
-cible `staging`.
+Puis **Actions → Déploiement → Run workflow**, version `latest`, cible
+`staging`.
 
-Le workflow se connecte en SSH, récupère les images, applique les migrations,
-interroge `/api/ready`, et **revient tout seul à la version précédente** si le
-service ne répond pas.
-
----
-
-## Étape 6 — Éteindre
-
-**Toujours par le portail Azure**, bouton *Stop*. L'état doit afficher
-**« Stopped (deallocated) »**.
-
-`sudo shutdown` depuis SSH laisse la machine en *Stopped* tout court : Azure
-te réserve les ressources et continue de les facturer.
-
-| | Coût mensuel |
-|---|---|
-| B2s en fonctionnement continu | ~30 $ |
-| B2s arrêtée (deallocated) | ~2–3 $, le disque seul |
-
-Avec 100 $ de crédit et un usage limité aux démonstrations, la machine tient
-jusqu'à l'expiration du crédit.
+Le workflow se connecte, récupère les images, applique les migrations,
+interroge `/api/ready`, et reviendrait tout seul à la version précédente si le
+service ne répondait pas.
 
 ---
 
-## Avant la soutenance
+## Étape 6 — Les captures
 
-Rallume la machine la veille, pas le jour même : l'adresse IP publique change
-à chaque redémarrage si elle est dynamique, et le secret `SSH_HOTE` doit alors
-être corrigé.
+**C'est le vrai livrable de cette session.** Prends-les toutes avant de
+supprimer quoi que ce soit.
 
-Vérifie dans l'ordre : `http://<IP>` répond, la connexion fonctionne avec les
-trois comptes, et une analyse de CV aboutit.
+1. **La plateforme en ligne, URL visible dans la barre d'adresse.** Connecté en
+   recruteur, sur le détail d'une candidature analysée. Une seule image qui
+   montre à la fois l'adresse publique et le produit qui fonctionne.
+2. **Le workflow « Déploiement » au vert**, étapes déroulées. La preuve de
+   l'automatisation.
+3. **`docker compose -f docker-compose.prod.yml ps`** sur le serveur — les
+   quatre conteneurs en vie.
+4. **La page Azure de la machine**, comme preuve de l'infrastructure.
+5. **`curl http://<IP>/api/ready`** depuis ton poste — les dépendances à `true`,
+   interrogées depuis l'extérieur.
 
-**Prends une capture d'écran de la plateforme en ligne avec son URL visible.**
-Elle prouve que la chaîne va du commit jusqu'au service en fonctionnement —
-c'est la preuve que ton rapport ne pouvait pas fournir jusqu'ici.
+Range-les dans `docs/captures/`.
+
+---
+
+## Étape 7 — Tout supprimer
+
+Portail Azure → **Groupes de ressources** → `SkillSeek-demo` → **Supprimer le
+groupe de ressources**.
+
+Supprimer le groupe entier emporte la machine, le disque, l'adresse IP, le
+réseau et le groupe de sécurité d'un seul coup. Éteindre seulement la machine
+laisserait le disque facturé à environ 2,40 $ par mois.
+
+Vérifie ensuite dans **Cost Management** que la consommation s'est arrêtée.
+
+---
+
+## La formulation pour le rapport
+
+Ne jamais écrire que la plateforme est « en production » — elle ne le sera plus
+quand le jury lira.
+
+> Le déploiement a été réalisé et vérifié sur une machine Azure : la chaîne se
+> connecte au serveur, récupère les images publiées au registre, applique les
+> migrations et contrôle la disponibilité du service. L'instance a été libérée
+> après validation, le crédit académique disponible étant limité.
+
+Exact, appuyé par les captures, et cohérent avec le reste du rapport. Libérer
+une ressource inutilisée après validation est une décision d'ingénieur, pas un
+aveu de faiblesse.
