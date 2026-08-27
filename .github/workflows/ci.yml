@@ -44,7 +44,7 @@ jobs:
       run:
         working-directory: backend
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Installer Python
         uses: actions/setup-python@v5
@@ -73,7 +73,7 @@ jobs:
       run:
         working-directory: frontend
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Installer Node
         uses: actions/setup-node@v4
@@ -98,7 +98,7 @@ jobs:
     name: Dépendances — vulnérabilités connues
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Installer Python
         uses: actions/setup-python@v5
@@ -137,7 +137,7 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Analyser le système de fichiers
         # `@master` plutôt qu'une version figée : c'est la référence
@@ -176,7 +176,7 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Installer Python
         uses: actions/setup-python@v5
@@ -260,7 +260,7 @@ jobs:
           - service: frontend
             contexte: ./frontend
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Préparer Buildx
         uses: docker/setup-buildx-action@v3
@@ -394,7 +394,7 @@ jobs:
     env:
       COMPOSE_FILE: docker-compose.yml
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Fichier d'environnement
         # Valeurs de test : aucun secret réel ne transite par la chaîne.
