@@ -1,130 +1,131 @@
-# Déploiement sur un serveur Linux.
+# Déploiement sur Azure Container Instances.
 #
-# ⚠ INACTIF TANT QUE LES SECRETS NE SONT PAS RENSEIGNÉS.
+# ⚠ INACTIF TANT QUE LE SECRET `AZURE_CREDENTIALS` N'EST PAS RENSEIGNÉ.
 #
-# Ce fichier décrit un déploiement réel, pas une maquette : il se connecte en
-# SSH, récupère les images depuis le registre, applique les migrations et
-# vérifie que le service répond. Mais il ne peut rien faire sans serveur, et
-# il refuse de s'exécuter à vide plutôt que de faire semblant de réussir.
+# Pourquoi des conteneurs et non une machine virtuelle : l'abonnement
+# académique utilisé n'accorde aucun quota de processeurs sur les familles de
+# machines proposées dans les régions que sa politique autorise. Le service
+# Container Instances relève d'un quota distinct, lui disponible. Le projet
+# étant déjà conteneurisé, c'est une transposition et non un contournement.
 #
-# Pour l'activer, définir dans Settings → Secrets and variables → Actions :
+# Pour l'activer :
 #
-#   SSH_HOTE          adresse du serveur
-#   SSH_UTILISATEUR   compte de déploiement (pas root)
-#   SSH_CLE_PRIVEE    clé privée, sans phrase de passe
-#   CHEMIN_DEPLOIEMENT  répertoire contenant .env et docker-compose.prod.yml
+#   az ad sp create-for-rbac --name skillseek-deploy \
+#     --role Contributor --scopes /subscriptions/<abonnement> --json-auth
 #
-# Le serveur doit disposer de Docker, et le compte de déploiement doit
-# appartenir au groupe `docker`.
+# puis coller le bloc JSON obtenu dans Settings → Secrets and variables →
+# Actions → `AZURE_CREDENTIALS`.
 
 name: Déploiement
 
 on:
   # Déclenchement manuel : on choisit la version à mettre en ligne. C'est ce
-  # qui rend le retour arrière possible — remettre en ligne une étiquette
+  # qui rend le retour arrière trivial — remettre en ligne une étiquette
   # précédente est exactement la même opération qu'un déploiement.
   workflow_dispatch:
     inputs:
-      version:
-        description: "Étiquette d'image (v1.2.0, ou empreinte de commit)"
+      etiquette:
+        description: "Étiquette d'image (latest, v1.0.0, sha-abc1234)"
         required: true
         default: latest
-      environnement:
-        description: "Cible"
-        required: true
-        default: staging
-        type: choice
-        options: [staging, production]
 
-  # Automatique vers la pré-production dès qu'une version est étiquetée.
+  # Automatique dès qu'une version est étiquetée. La chaîne d'intégration
+  # publie les images portant cette même étiquette : le déploiement suit donc
+  # une version identifiable, et non un état mouvant de la branche.
   push:
     tags: ["v*"]
 
+concurrency:
+  # Deux déploiements simultanés sur le même groupe de conteneurs se
+  # marcheraient dessus. Le second attend plutôt que d'écraser.
+  group: deploiement-azure
+  cancel-in-progress: false
+
+env:
+  GROUPE: SkillSeek-demo
+  REGION: germanywestcentral
+  NOM: skillseek
+
 jobs:
   deployer:
-    name: Déployer ${{ inputs.version || github.ref_name }}
+    name: Déployer ${{ inputs.etiquette || github.ref_name }}
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environnement || 'staging' }}
+    environment: demonstration
+    permissions:
+      contents: read
+
     steps:
       - name: Vérifier que la cible est configurée
-        # Sans cette garde, le job échouerait plus loin sur une erreur SSH
-        # incompréhensible. Mieux vaut dire tout de suite ce qui manque.
+        # Sans cette garde, le job échouerait plus loin sur une erreur
+        # d'authentification illisible. Mieux vaut dire tout de suite ce qui
+        # manque.
+        env:
+          ACCES: ${{ secrets.AZURE_CREDENTIALS }}
         run: |
-          if [ -z "${{ secrets.SSH_HOTE }}" ]; then
-            echo "::error::Aucun serveur configuré. Renseignez les secrets SSH_* "
-            echo "::error::(voir l'en-tête de ce fichier et docs/DEVOPS.md)."
+          if [ -z "$ACCES" ]; then
+            echo "::error::Aucun accès Azure configuré. Renseignez le secret"
+            echo "::error::AZURE_CREDENTIALS (voir l'en-tête de ce fichier)."
             exit 1
           fi
 
       - uses: actions/checkout@v4
 
-      - name: Installer la clé de déploiement
-        uses: webfactory/ssh-agent@v0.9.0
+      - name: S'authentifier auprès d'Azure
+        uses: azure/login@v2
         with:
-          ssh-private-key: ${{ secrets.SSH_CLE_PRIVEE }}
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Déployer
+      - name: Groupe de ressources
+        # Idempotent : la commande réussit que le groupe existe ou non.
+        run: az group create --name "$GROUPE" --location "$REGION" --output none
+
+      - name: Libérer le groupe précédent
+        # Un groupe de conteneurs ne se met pas à jour en place : le recréer
+        # est la seule opération fiable. La suppression est tolérante à
+        # l'absence, ce qui rend le workflow rejouable autant de fois que
+        # nécessaire.
+        run: az container delete -g "$GROUPE" -n "$NOM" --yes --output none 2>/dev/null || true
+
+      - name: Déployer le groupe de conteneurs
         env:
-          HOTE: ${{ secrets.SSH_HOTE }}
-          UTILISATEUR: ${{ secrets.SSH_UTILISATEUR }}
-          CHEMIN: ${{ secrets.CHEMIN_DEPLOIEMENT }}
-          VERSION: ${{ inputs.version || github.ref_name }}
+          ETIQUETTE: ${{ inputs.etiquette || github.ref_name }}
+          DEPOT: aymb1303/skillseek-ai
+        run: bash deploiement/aci/deployer.sh
+
+      - name: Relever l'adresse publique
+        id: adresse
         run: |
-          ssh -o StrictHostKeyChecking=accept-new "$UTILISATEUR@$HOTE" bash -s <<EOF
-          set -euo pipefail
-          cd "$CHEMIN"
-
-          # La version précédente est notée AVANT de basculer : c'est elle
-          # qu'on remettra en ligne si la nouvelle ne répond pas.
-          echo "\$(grep '^IMAGE_TAG=' .env || echo IMAGE_TAG=latest)" > .version-precedente
-          cat .version-precedente
-
-          sed -i "s|^IMAGE_TAG=.*|IMAGE_TAG=$VERSION|" .env || echo "IMAGE_TAG=$VERSION" >> .env
-
-          docker compose -f docker-compose.prod.yml pull
-          docker compose -f docker-compose.prod.yml up -d
-
-          # Les migrations passent APRÈS le démarrage du conteneur mais avant
-          # la vérification : une migration qui échoue doit faire échouer le
-          # déploiement, pas laisser une application sur un schéma incohérent.
-          docker compose -f docker-compose.prod.yml exec -T backend flask db upgrade
-          EOF
+          fqdn=$(az container show -g "$GROUPE" -n "$NOM" --query ipAddress.fqdn -o tsv)
+          echo "fqdn=$fqdn" >> "$GITHUB_OUTPUT"
+          {
+            echo "## Déploiement"
+            echo ""
+            echo "**Adresse :** http://$fqdn"
+            echo ""
+            echo "**Version :** \`${{ inputs.etiquette || github.ref_name }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Vérifier que le service répond
-        env:
-          HOTE: ${{ secrets.SSH_HOTE }}
-          UTILISATEUR: ${{ secrets.SSH_UTILISATEUR }}
-          CHEMIN: ${{ secrets.CHEMIN_DEPLOIEMENT }}
+        # Le contrôle est fait depuis l'extérieur, comme le ferait un client.
+        # Le délai est long : au premier démarrage le service applique les
+        # migrations et charge le jeu de démonstration avant de répondre.
         run: |
-          ssh "$UTILISATEUR@$HOTE" bash -s <<'EOF'
-          set -euo pipefail
-          for i in $(seq 1 20); do
-            if curl -fsS http://127.0.0.1:5000/api/ready; then
-              echo "Déploiement vérifié"; exit 0
+          for _ in $(seq 1 40); do
+            if curl -fsS "http://${{ steps.adresse.outputs.fqdn }}/api/ready"; then
+              echo ""
+              echo "Déploiement vérifié"
+              exit 0
             fi
-            sleep 6
+            sleep 15
           done
-          echo "Le service ne répond pas après déploiement"
+          echo "::error::Le service n'a pas répondu dans le délai imparti."
+          az container logs -g "$GROUPE" -n "$NOM" --container-name backend --tail 60
           exit 1
-          EOF
 
-      - name: Revenir à la version précédente
-        # Le retour arrière est automatique et n'exige aucune décision
-        # humaine dans l'urgence : les images précédentes sont toujours dans
-        # le registre, remettre l'étiquette suffit.
+      - name: Journaux en cas d'échec
         if: failure()
-        env:
-          HOTE: ${{ secrets.SSH_HOTE }}
-          UTILISATEUR: ${{ secrets.SSH_UTILISATEUR }}
-          CHEMIN: ${{ secrets.CHEMIN_DEPLOIEMENT }}
         run: |
-          ssh "$UTILISATEUR@$HOTE" bash -s <<'EOF'
-          set -euo pipefail
-          cd "$CHEMIN"
-          if [ -f .version-precedente ]; then
-            PRECEDENTE=$(cut -d= -f2 .version-precedente)
-            echo "Retour arrière vers $PRECEDENTE"
-            sed -i "s|^IMAGE_TAG=.*|IMAGE_TAG=$PRECEDENTE|" .env
-            docker compose -f docker-compose.prod.yml up -d
-          fi
-          EOF
+          az container show -g "$GROUPE" -n "$NOM" \
+            --query "containers[].{conteneur:name, etat:instanceView.currentState.state}" -o table || true
+          az container logs -g "$GROUPE" -n "$NOM" --container-name proxy --tail 30 || true
+          az container logs -g "$GROUPE" -n "$NOM" --container-name db --tail 30 || true

@@ -268,7 +268,10 @@ jobs:
       - name: S'authentifier au registre
         # Uniquement lorsqu'on publie : une pull request venue d'un fork n'a
         # pas les droits d'écriture, et la construction seule suffit à valider.
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        #
+        # Les étiquettes de version publient aussi : sans cela, poser `v1.0.0`
+        # produirait un déploiement pointant sur une image inexistante.
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRE }}
@@ -353,11 +356,11 @@ jobs:
           retention-days: 90
 
       - name: Publier au registre
-        # Seconde passe, réservée à `main`. Tout est en cache : elle ne
-        # reconstruit rien, elle pousse. C'est ici que l'inventaire et
-        # l'attestation d'origine sont attachés à l'image, l'exportateur du
-        # registre sachant les porter.
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        # Seconde passe, réservée à `main` et aux étiquettes de version. Tout
+        # est en cache : elle ne reconstruit rien, elle pousse. C'est ici que
+        # l'inventaire et l'attestation d'origine sont attachés à l'image,
+        # l'exportateur du registre sachant les porter.
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
         uses: docker/build-push-action@v6
         with:
           context: ${{ matrix.contexte }}
