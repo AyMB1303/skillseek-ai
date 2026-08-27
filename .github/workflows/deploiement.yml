@@ -41,6 +41,11 @@ concurrency:
   group: deploiement-azure
   cancel-in-progress: false
 
+# Moindre privilège : ce workflow lit le dépôt et agit sur Azure. Il n'a
+# aucune raison de pouvoir écrire quoi que ce soit sur GitHub.
+permissions:
+  contents: read
+
 env:
   GROUPE: SkillSeek-demo
   REGION: germanywestcentral

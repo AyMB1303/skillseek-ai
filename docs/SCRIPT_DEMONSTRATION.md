@@ -180,7 +180,7 @@ montrez qu'il ne voit **aucune** candidature de Sarah Lamrani.
 
 Quittez le navigateur applicatif pour GitHub.
 
-**Actions** → une exécution verte. Déroulez les six travaux : lint et tests
+**Actions** → une exécution verte. Déroulez les sept travaux : lint et tests
 backend, lint et build frontend, audit des dépendances, analyse Trivy,
 construction des deux images, démarrage de la pile complète. Ouvrez le journal
 des tests pour montrer le compte réel.
@@ -203,16 +203,34 @@ docker compose ps
 irm http://localhost:5000/api/ready
 ```
 
-Et la phrase de clôture, à dire telle quelle : *« intégration et livraison
-continues automatisées ; le déploiement vers un serveur est prêt mais non
-activé, faute d'infrastructure dans le cadre du stage. »*
+**Onglet Déploiement** → l'exécution déclenchée par l'étiquette `v1.0.0`.
+Déroulez ses étapes et arrêtez-vous sur deux d'entre elles.
+
+*« Attendre que l'image soit publiée »* — sept minutes et demie. *« Poser une
+étiquette lance deux chaînes en même temps, sans que rien ne les ordonne. Le
+déploiement interroge donc le registre jusqu'à ce que l'artefact y soit :
+ce qui compte n'est pas qu'une construction se soit terminée quelque part,
+c'est que l'image existe. »*
+
+*« Vérifier que le service répond »* — ouvrez le journal : des erreurs 502
+pendant que le service applique ses migrations, puis `status: ready`, puis
+`Déploiement vérifié`. **La phrase à placer :** *« la chaîne ne se déclare pas
+satisfaite parce qu'une commande a rendu la main, mais parce que le service a
+répondu depuis l'extérieur. »*
+
+Et la phrase de clôture, à dire telle quelle : *« intégration, livraison et
+déploiement automatisés : une étiquette de version suffit à construire,
+publier et mettre en ligne. L'instance est libérée après validation, le crédit
+académique étant limité. »*
 
 ---
 
 ## Ce qu'il ne faut pas faire
 
-**Ne pas prétendre au déploiement continu.** Vous avez de la livraison
-continue. La distinction est nette et un jury la connaît.
+**Ne pas dire que la plateforme est « en production ».** Elle ne l'est pas :
+l'instance est levée pour une session puis libérée. Ce qui est automatisé,
+c'est la chaîne — construire, publier, déployer, vérifier. Dire « déployé et
+vérifié » est exact ; dire « en production » ne l'est pas.
 
 **Ne pas présenter le modèle d'apprentissage comme le cœur du système.** C'est
 un composant complémentaire, borné à ±8 points, incapable de contourner une

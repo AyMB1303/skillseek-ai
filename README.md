@@ -156,19 +156,41 @@ avec leur inventaire logiciel, et démarrage de la pile complète.
 Les images sont étiquetées par l'empreinte du commit qui les a produites :
 chaque état du code correspond à un artefact déployable et identifiable.
 
+### Déploiement
+
+Poser une étiquette de version déclenche la chaîne complète, sans aucune
+commande manuelle :
+
+```bash
+git tag v1.0.0 && git push origin v1.0.0
+```
+
+Les images sont construites et publiées, puis un second workflow attend leur
+disponibilité au registre, crée le groupe de conteneurs sur **Azure Container
+Instances**, et **interroge `/api/ready` depuis l'extérieur**. L'exécution n'est
+déclarée réussie que si le service répond — pas parce qu'une commande a rendu
+la main.
+
+Le recours aux conteneurs plutôt qu'à une machine virtuelle découle d'une
+contrainte de l'abonnement académique utilisé, dont la politique de régions et
+les quotas de processeurs n'autorisaient aucune instance. Le détail figure
+dans [`docs/DEPLOIEMENT_AZURE.md`](docs/DEPLOIEMENT_AZURE.md).
+
+L'instance de démonstration est libérée après validation : le crédit
+disponible est limité, et une ressource inutilisée n'a pas à tourner.
+
 ---
 
 ## État du projet
 
-Le périmètre fonctionnel est **complet**. Ce qui manque relève de
-l'exploitation, et figure ici sans être déguisé en perspective :
+Le périmètre fonctionnel est **complet**. Ce qui manque figure ici sans être
+déguisé en perspective :
 
-- **Déploiement non activé** — la procédure est écrite et versionnée, mais
-  aucune infrastructure n'a été mise à disposition dans le cadre du stage. Le
-  projet dispose donc d'une *livraison* continue, non d'un *déploiement*
-  continu.
 - **Pas de tests de bout en bout** en navigateur. Les parcours des trois profils
-  sont vérifiés manuellement.
+  sont vérifiés manuellement et documentés par un script d'enregistrement.
+- **Pas de métrologie centralisée** — le chronométrage est conservé avec chaque
+  analyse, mais il n'existe ni collecte ni système d'alerte. Sans trafic réel,
+  l'intérêt en resterait théorique.
 - **Audit de biais de portée limitée** — au plus deux points de variation
   mesurés, imputables à la similarité sémantique qui encode le document entier,
   identité comprise. Négligeable, mais réel : la formule « sans biais » serait
@@ -178,11 +200,14 @@ l'exploitation, et figure ici sans être déguisé en perspective :
 
 | Document | Contenu |
 |---|---|
+| [`docs/ANALYSE_ATS.md`](docs/ANALYSE_ATS.md) | lecture des CV, reconstitution du profil structuré |
+| [`docs/ASSISTANT_RAG.md`](docs/ASSISTANT_RAG.md) | assistant conversationnel, bases de connaissances |
+| [`docs/CI_CD.md`](docs/CI_CD.md) | détail des sept travaux d'intégration |
+| [`docs/DEPLOIEMENT_AZURE.md`](docs/DEPLOIEMENT_AZURE.md) | déploiement, contraintes de l'abonnement |
 | [`docs/DEVOPS.md`](docs/DEVOPS.md) | conteneurisation, images, exploitation |
-| [`docs/CI_CD.md`](docs/CI_CD.md) | détail des travaux d'intégration |
 | [`docs/SCRIPT_DEMONSTRATION.md`](docs/SCRIPT_DEMONSTRATION.md) | déroulé d'une démonstration |
-| `docs/Rapport_Avancement_Sprint*.pdf` | rapports d'avancement des quatre sprints |
 | [`bi/GUIDE_POWER_BI.md`](bi/GUIDE_POWER_BI.md) | vues décisionnelles |
+| `docs/Rapport_Avancement_Sprint*.pdf` | rapports d'avancement des quatre sprints |
 
 ---
 

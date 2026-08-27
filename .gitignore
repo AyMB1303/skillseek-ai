@@ -60,8 +60,22 @@ backend/instance/
 # --- Volumineux et régénérable --------------------------------------------
 # Corpus d'apprentissage : retéléchargeable depuis sa source.
 data/*.csv
-# Modèles entraînés : reproduits par `python entrainer_modele.py`.
+# Modèles entraînés à la racine : espace de travail, reproduits par
+# `python entrainer_modele.py`. Rien n'a besoin d'en garder l'historique.
 models/*.joblib
+
+# `backend/models/` échappe volontairement à cette règle, et n'est donc PAS
+# ignoré. Ce dossier est dans le contexte de construction de l'image : le
+# modèle qui s'y trouve est embarqué, ce qui rend l'image autonome.
+#
+# Sans cela, l'instance déployée tournait sans le modèle — le fichier
+# n'existait que sur le poste de développement, où le montage de volume du
+# Compose le rendait visible. La sonde de disponibilité l'annonçait
+# honnêtement (`modele_appris: false`), mais l'ajustement borné de ±8 points
+# ne s'appliquait pas en ligne.
+#
+# Douze mégaoctets versionnés est le prix d'une image qui contient tout ce
+# qu'il lui faut pour fonctionner, où qu'elle tourne.
 models/cache/
 models/*.json
 # Exports décisionnels : reproduits par `flask bi-export`, et porteurs de

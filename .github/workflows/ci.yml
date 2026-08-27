@@ -33,6 +33,16 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Moindre privilège par défaut : le jeton fourni à chaque exécution ne peut
+# que lire le dépôt. Les trois travaux qui ont besoin de davantage — publier
+# au registre, alimenter l'onglet Security — le déclarent eux-mêmes.
+#
+# Sans cette ligne, les travaux héritent du réglage du dépôt, souvent en
+# écriture. Un travail de lint n'a aucune raison de pouvoir modifier le code,
+# et cette chaîne s'exécute aussi sur des propositions de contribution.
+permissions:
+  contents: read
+
 env:
   REGISTRE: ghcr.io
 
@@ -144,15 +154,17 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Analyser le système de fichiers
-        # `@master` plutôt qu'une version figée : c'est la référence
-        # documentée par Trivy, et la seule qui résolve de façon fiable.
-        # Épingler une action est meilleure pratique — à faire dès qu'une
-        # version publiée aura été vérifiée dans la liste des étiquettes.
+        # L'action est ancrée sur l'empreinte du commit, pas sur une branche.
+        # `@master` — la référence donnée par la documentation de Trivy —
+        # exécuterait dans cette chaîne le contenu que le mainteneur y pousse,
+        # quel qu'il soit et quand il veut. Une empreinte ne bouge pas ; c'est
+        # le seul ancrage qui donne une garantie sur ce qui tourne.
+        # Dependabot proposera les montées de version.
         #
         # Cherche les dépendances vulnérables ET les secrets écrits en dur.
         # Le second point compte autant que le premier : une clé oubliée dans
         # un fichier de configuration est la faille la plus banale qui soit.
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           scan-type: fs
           scan-ref: .
@@ -315,7 +327,7 @@ jobs:
           cache-to: type=gha,mode=max,scope=${{ matrix.service }}
 
       - name: Analyser l'image (Trivy)
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           scan-type: image
           image-ref: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
