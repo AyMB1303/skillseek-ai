@@ -1,32 +1,46 @@
 # Déploiement sur Azure — session de validation
 
-Objectif : mettre SkillSeek AI en ligne le temps d'une session, **prouver que
-la chaîne de déploiement fonctionne de bout en bout**, prendre les captures qui
-en attestent, puis libérer les ressources.
+Mettre SkillSeek AI en ligne le temps d'une session, prouver que la chaîne va
+du commit au service en fonctionnement, prendre les captures qui l'attestent,
+puis libérer les ressources.
 
-**Durée : 2 à 3 heures. Coût : environ 1 $** de crédit académique.
-
-La plateforme n'a pas vocation à rester en ligne. Ce qui est démontré ici, ce
-n'est pas l'hébergement — c'est que le commit va jusqu'au service en
-fonctionnement, sans intervention manuelle.
-
-Remplace partout `<IP>` par l'adresse publique de ta machine.
+**Durée : 1 heure. Coût : environ 0,30 $** de crédit académique.
 
 ---
 
-## Avant de commencer
+## Pourquoi des conteneurs et non une machine virtuelle
 
-Une seule règle sur le choix de la machine : **prends la première taille que la
-validation Azure accepte.** Le prix mensuel affiché n'a aucune importance — sur
-trois heures, une machine à 78 $/mois coûte 32 centimes. Ne perds pas de temps
-à chercher la moins chère.
+L'abonnement *Azure for Students* porte deux restrictions qui, combinées,
+interdisent toute machine virtuelle :
+
+**Une politique de régions.** Cinq régions sont autorisées — `polandcentral`,
+`germanywestcentral`, `switzerlandnorth`, `swedencentral`, `austriaeast`.
+Le portail propose pourtant toutes les autres, et ne signale le refus qu'à la
+validation finale. La liste se lit ainsi :
+
+```bash
+az policy assignment list --query "[].{nom:displayName, params:parameters}" -o json
+```
+
+**Un quota de processeurs nul sur les familles proposées.** Dans
+`germanywestcentral`, les familles offertes sont `Dsv7`, `Ddsv7`, `Dlsv7` —
+toutes à une limite de zéro. À l'inverse, les familles disposant d'un quota
+(`Bsv2`, `DSv3`, `Dv3`) n'y sont pas proposées. Vérification :
+
+```bash
+az vm list-usage --location germanywestcentral -o table
+```
+
+**Azure Container Instances relève d'un quota distinct**, lui disponible. Et le
+projet étant déjà entièrement conteneurisé, c'est une transposition directe
+plutôt qu'un contournement.
 
 ---
 
-## Étape 0 — Publier les images
+## Préalables
 
-Le serveur ne construit rien, il télécharge. Or les images ne sont publiées au
-registre que depuis `main`, et `dev` a six commits d'avance.
+**Les images doivent être publiées et publiques.** Elles ne sont produites que
+depuis `main` :
 
 ```bash
 git checkout main
@@ -34,217 +48,169 @@ git merge dev
 git push origin main
 ```
 
-Onglet **Actions** → attends la fin de l'exécution. Une quinzaine de minutes,
-la construction du backend étant longue.
-
-Vérifie ensuite dans **ton profil GitHub → Packages** que `backend` et
-`frontend` apparaissent.
-
-```bash
-git checkout dev      # revenir sur la branche de travail
-```
-
----
-
-## Étape 1 — Créer la machine
-
-Portail Azure → **Créer une ressource → Machine virtuelle**.
-
-| Réglage | Valeur |
-|---|---|
-| Groupe de ressources | **`SkillSeek-demo`** — nom dédié, il sera supprimé en entier à l'étape 7 |
-| **Region** | **`(Europe) Germany West Central`** |
-| Image | **Ubuntu Server 24.04 LTS** — surtout pas « Pro », qui est payant |
-| **Size** | **`Standard_D2s_v7`** — 2 vCPU, 8 Go, x86 |
-| Availability options | *No infrastructure redundancy required* |
-| Security type | `Standard` |
-| Authentification | Clé publique SSH, générer une nouvelle paire |
-| Nom d'utilisateur | `azureuser` |
-| Ports entrants | **22 (SSH) et 80 (HTTP)** |
-| Disque | Standard SSD |
-
-> **La région n'est pas négociable.** L'abonnement porte une politique
-> « Allowed resource deployment regions » qui n'en autorise que cinq :
-> `polandcentral`, `germanywestcentral`, `switzerlandnorth`, `swedencentral`,
-> `austriaeast`. Toute autre région est refusée à la validation, sans que le
-> portail le signale au moment du choix. Germany West Central est la plus
-> proche du Maroc.
->
-> **Éviter toute taille contenant un `p`** — `D2ps_v6`, `D2pds_v6` et
-> semblables sont des machines **ARM**. Les images du projet sont construites
-> pour x86 et n'y démarreraient pas.
-
-Azure fait télécharger la **clé privée** à la création — une seule fois. Range-la,
-ne la partage avec personne.
-
-Note l'**adresse IP publique** affichée après la création.
-
----
-
-## Étape 2 — Préparer le serveur
-
-```bash
-ssh -i chemin/vers/cle.pem azureuser@<IP>
-```
-
-Sur le serveur :
-
-```bash
-curl -fsSL https://get.docker.com | sudo sh
-sudo usermod -aG docker azureuser
-sudo mkdir -p /opt/skillseek
-sudo chown azureuser:azureuser /opt/skillseek
-```
-
-**Déconnecte-toi et reconnecte-toi** — l'appartenance au groupe `docker` ne
-prend effet qu'à la session suivante.
-
-```bash
-exit
-ssh -i chemin/vers/cle.pem azureuser@<IP>
-docker run --rm hello-world      # doit réussir sans sudo
-```
-
----
-
-## Étape 3 — Rendre les images publiques
-
-Sinon le serveur ne pourra pas les télécharger.
-
-Pour **chacune** des deux images : GitHub → ton profil → **Packages** → le
-paquet → **Package settings** → *Danger Zone* → **Change visibility** →
+Puis, dans **github.com/AyMB1303?tab=packages**, pour `backend` **et**
+`frontend` : *Package settings* → *Danger Zone* → **Change visibility** →
 **Public**.
 
----
-
-## Étape 4 — Premier démarrage
-
-Sur le serveur :
+**Enregistrer le service**, une seule fois par abonnement :
 
 ```bash
-cd /opt/skillseek
-git clone --depth 1 https://github.com/AyMB1303/skillseek-ai.git depot
-cp depot/docker-compose.prod.yml .
-mkdir -p deploiement models
-cp depot/deploiement/nginx.conf deploiement/
-rm -rf depot
-
-openssl rand -hex 32      # trois fois, note les trois valeurs
-nano .env
+az provider register --namespace Microsoft.ContainerInstance
+az provider show --namespace Microsoft.ContainerInstance --query registrationState -o tsv
 ```
 
-Contenu de `.env` :
-
-```bash
-POSTGRES_USER=skillseek
-POSTGRES_PASSWORD=<secret 1>
-POSTGRES_DB=skillseek
-DATABASE_URL=postgresql://skillseek:<secret 1>@db:5432/skillseek
-
-SECRET_KEY=<secret 2>
-JWT_SECRET_KEY=<secret 3>
-FLASK_ENV=production
-
-FRONTEND_ORIGIN=http://<IP>
-
-GITHUB_REPOSITORY=AyMB1303/skillseek-ai
-IMAGE_TAG=latest
-
-LOGIN_MAX_ECHECS=5
-LOGIN_VERROU_MINUTES=10
-```
-
-> **Jamais les valeurs de `.env.example`** — elles sont publiques dans le dépôt.
-
-Démarrage :
-
-```bash
-docker compose -f docker-compose.prod.yml pull
-docker compose -f docker-compose.prod.yml up -d
-docker compose -f docker-compose.prod.yml exec -T backend flask db upgrade
-docker compose -f docker-compose.prod.yml exec -T backend flask seed
-docker compose -f docker-compose.prod.yml exec -T backend flask demo --reset
-```
-
-Ouvre **http://\<IP\>**. La plateforme doit répondre.
-
-En cas de problème :
-
-```bash
-docker compose -f docker-compose.prod.yml ps
-docker compose -f docker-compose.prod.yml logs backend --tail 50
-docker compose -f docker-compose.prod.yml logs proxy --tail 20
-```
+Attendre l'état `Registered`.
 
 ---
 
-## Étape 5 — Déclencher le déploiement automatique
+## Étape 1 — Déployer
 
-C'est cette étape qui produit la preuve la plus importante : non pas qu'un
-serveur existe, mais que **la chaîne y déploie toute seule**.
+Dans le **Cloud Shell** du portail Azure, en Bash :
 
-Dépôt GitHub → **Settings → Secrets and variables → Actions → New repository
-secret**. Quatre secrets :
+```bash
+az group create --name SkillSeek-demo --location germanywestcentral
+git clone --depth 1 https://github.com/AyMB1303/skillseek-ai.git
+cd skillseek-ai
+bash deploiement/aci/deployer.sh
+```
 
-| Nom | Valeur |
-|---|---|
-| `SSH_HOTE` | `<IP>` |
-| `SSH_UTILISATEUR` | `azureuser` |
-| `SSH_CLE_PRIVEE` | le **contenu entier** du fichier de clé privée, lignes `BEGIN` et `END` comprises |
-| `CHEMIN_DEPLOIEMENT` | `/opt/skillseek` |
+Le script génère trois secrets neufs, encode la configuration du proxy, compose
+la description du groupe et lance la création. Cinq à dix minutes : Azure
+télécharge 3,7 Go d'image applicative.
 
-Puis **Actions → Déploiement → Run workflow**, version `latest`, cible
-`staging`.
+> 📸 **Capture 1** — la sortie du Cloud Shell à la fin du script, avec le cadre
+> qui affiche l'adresse publique.
 
-Le workflow se connecte, récupère les images, applique les migrations,
-interroge `/api/ready`, et reviendrait tout seul à la version précédente si le
-service ne répondait pas.
+Note l'adresse, de la forme `skillseek-xxxxxx.germanywestcentral.azurecontainer.io`.
 
 ---
 
-## Étape 6 — Les captures
+## Étape 2 — Suivre le démarrage
 
-**C'est le vrai livrable de cette session.** Prends-les toutes avant de
-supprimer quoi que ce soit.
+Quand la commande rend la main, **la plateforme ne répond pas encore**. Le
+service applicatif attend la base, applique les onze migrations, installe rôles
+et permissions, puis charge le jeu de démonstration.
 
-1. **La plateforme en ligne, URL visible dans la barre d'adresse.** Connecté en
-   recruteur, sur le détail d'une candidature analysée. Une seule image qui
-   montre à la fois l'adresse publique et le produit qui fonctionne.
-2. **Le workflow « Déploiement » au vert**, étapes déroulées. La preuve de
-   l'automatisation.
-3. **`docker compose -f docker-compose.prod.yml ps`** sur le serveur — les
-   quatre conteneurs en vie.
-4. **La page Azure de la machine**, comme preuve de l'infrastructure.
-5. **`curl http://<IP>/api/ready`** depuis ton poste — les dépendances à `true`,
-   interrogées depuis l'extérieur.
+```bash
+az container logs -g SkillSeek-demo -n skillseek --container-name backend --follow
+```
 
-Range-les dans `docs/captures/`.
+Attendre de voir défiler les migrations Alembic, puis `Jeu de démonstration en
+place` et son décompte, puis la ligne de démarrage de Flask. Trois à cinq
+minutes.
+
+> 📸 **Capture 2** — ces journaux, montrant les migrations et
+> `74 candidatures déposées`. C'est elle qui prouve que la chaîne complète
+> s'exécute sur le serveur, et pas seulement que des conteneurs tournent.
+
+Quitter le suivi avec `Ctrl+C`.
 
 ---
 
-## Étape 7 — Tout supprimer
+## Étape 3 — Vérifier
 
-Portail Azure → **Groupes de ressources** → `SkillSeek-demo` → **Supprimer le
-groupe de ressources**.
+```bash
+az container show -g SkillSeek-demo -n skillseek \
+  --query "{etat:instanceView.state, adresse:ipAddress.fqdn, ip:ipAddress.ip}" -o table
+```
 
-Supprimer le groupe entier emporte la machine, le disque, l'adresse IP, le
-réseau et le groupe de sécurité d'un seul coup. Éteindre seulement la machine
-laisserait le disque facturé à environ 2,40 $ par mois.
+```bash
+az container show -g SkillSeek-demo -n skillseek \
+  --query "containers[].{conteneur:name, etat:instanceView.currentState.state, cpu:resources.requests.cpu, memoire:resources.requests.memoryInGB}" -o table
+```
 
-Vérifie ensuite dans **Cost Management** que la consommation s'est arrêtée.
+La seconde commande liste les quatre conteneurs et leur état.
+
+> 📸 **Capture 3** — cette sortie : quatre conteneurs `Running`, avec leurs
+> ressources. L'équivalent d'un `docker compose ps` en production.
+
+Puis, **depuis ton poste** et non depuis le Cloud Shell :
+
+```
+curl http://<adresse>/api/ready
+```
+
+> 📸 **Capture 4** — la réponse, dépendances à `true`, interrogée depuis
+> l'extérieur.
+
+Et dans le portail : **Resource groups** → `SkillSeek-demo` → le groupe de
+conteneurs.
+
+> 📸 **Capture 5** — la page Azure du groupe, état *Running*.
+
+---
+
+## Étape 4 — La plateforme en ligne
+
+Ouvre `http://<adresse>` dans ton navigateur.
+
+> 📸 **Capture 6 — la plus importante.** Connecté en recruteur
+> (`s.lamrani@bcskills.ma` / `Demo@1234`), sur le **détail d'une candidature
+> analysée** : le score, les cinq composantes, les compétences mises en
+> correspondance. **L'adresse publique doit être lisible dans la barre du
+> navigateur.** Une seule image qui montre l'URL et le produit qui fonctionne.
+
+> 📸 **Captures 7 à 9** — à la même adresse : l'analyse décisionnelle, le
+> journal d'audit, l'assistant. Elles montrent que ce n'est pas une page
+> d'accueil isolée mais la plateforme entière.
+
+Range le tout dans `docs/captures/`.
+
+**Comptes :**
+
+| Rôle | Identifiant | Mot de passe |
+|---|---|---|
+| Candidat | `y.tazi@example.ma` | `Demo@1234` |
+| Recruteur | `s.lamrani@bcskills.ma` | `Demo@1234` |
+| Administrateur | `admin@skillseek.local` | `Admin@1234` |
+
+---
+
+## Étape 5 — Libérer
+
+**Une fois toutes les captures prises, et pas avant.**
+
+```bash
+az group delete --name SkillSeek-demo --yes
+```
+
+Supprimer le groupe emporte les conteneurs, l'adresse publique et le réseau
+d'un seul coup. Vérifier ensuite dans **Cost Management** que la consommation
+s'arrête.
+
+---
+
+## En cas de problème
+
+**Le téléchargement de l'image échoue** — les paquets GHCR ne sont pas publics.
+Reprendre les préalables.
+
+**Le backend redémarre en boucle** — lire ses journaux. La cause la plus
+probable est une base qui n'a pas eu le temps de démarrer ; le script attend
+pourtant jusqu'à trois minutes.
+
+**La page s'affiche mais reste vide** — le proxy joint le service applicatif
+sur `127.0.0.1:5000`. Vérifier les journaux du conteneur `proxy`.
+
+```bash
+az container logs -g SkillSeek-demo -n skillseek --container-name proxy
+az container logs -g SkillSeek-demo -n skillseek --container-name db
+```
 
 ---
 
 ## La formulation pour le rapport
 
 Ne jamais écrire que la plateforme est « en production » — elle ne le sera plus
-quand le jury lira.
+quand le jury lira. Et ne pas revendiquer un déploiement continu : le
+déploiement est ici **déclenché manuellement**, depuis un script versionné.
 
-> Le déploiement a été réalisé et vérifié sur une machine Azure : la chaîne se
-> connecte au serveur, récupère les images publiées au registre, applique les
-> migrations et contrôle la disponibilité du service. L'instance a été libérée
-> après validation, le crédit académique disponible étant limité.
+> Le déploiement a été réalisé et vérifié sur Azure Container Instances : les
+> images produites par la chaîne d'intégration ont été récupérées depuis le
+> registre, les migrations appliquées et la disponibilité du service contrôlée
+> depuis l'extérieur. Le recours aux conteneurs plutôt qu'à une machine
+> virtuelle découle d'une contrainte de l'abonnement académique, dont la
+> politique de régions et les quotas de processeurs interdisaient toute
+> instance. Les ressources ont été libérées après validation.
 
-Exact, appuyé par les captures, et cohérent avec le reste du rapport. Libérer
-une ressource inutilisée après validation est une décision d'ingénieur, pas un
-aveu de faiblesse.
+Exact, appuyé par les captures, et cohérent avec le reste du rapport.

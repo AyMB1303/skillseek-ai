@@ -91,8 +91,13 @@ jobs:
         env:
           DEPOT: aymb1303/skillseek-ai
           ETIQUETTE: ${{ inputs.etiquette || github.ref_name }}
+        #
+        # Trente minutes de patience : le travail de construction des images
+        # n'attaque le backend qu'après les cinq travaux de vérification, et
+        # cette image pèse 3,7 Go. Vingt minutes se sont révélées trop justes
+        # à l'usage.
         run: |
-          for _ in $(seq 1 60); do
+          for _ in $(seq 1 90); do
             if docker manifest inspect "ghcr.io/${DEPOT}/backend:${ETIQUETTE}" >/dev/null 2>&1; then
               echo "Image backend:${ETIQUETTE} disponible au registre."
               exit 0
@@ -144,7 +149,7 @@ jobs:
             sleep 15
           done
           echo "::error::Le service n'a pas répondu dans le délai imparti."
-          az container logs -g "$GROUPE" -n "$NOM" --container-name backend --tail 60
+          az container logs -g "$GROUPE" -n "$NOM" --container-name backend
           exit 1
 
       - name: Journaux en cas d'échec
@@ -152,5 +157,5 @@ jobs:
         run: |
           az container show -g "$GROUPE" -n "$NOM" \
             --query "containers[].{conteneur:name, etat:instanceView.currentState.state}" -o table || true
-          az container logs -g "$GROUPE" -n "$NOM" --container-name proxy --tail 30 || true
-          az container logs -g "$GROUPE" -n "$NOM" --container-name db --tail 30 || true
+          az container logs -g "$GROUPE" -n "$NOM" --container-name proxy || true
+          az container logs -g "$GROUPE" -n "$NOM" --container-name db || true

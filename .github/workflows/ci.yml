@@ -20,6 +20,10 @@ name: CI/CD
 on:
   push:
     branches: [main, dev]
+    # Les étiquettes de version déclenchent aussi la chaîne : sans cette
+    # ligne, poser `v1.0.0` ne construirait rien, et le déploiement qui suit
+    # attendrait une image que personne n'a demandée.
+    tags: ["v*"]
   pull_request:
     branches: [main, dev]
 
