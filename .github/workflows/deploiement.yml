@@ -79,6 +79,31 @@ jobs:
         # Idempotent : la commande réussit que le groupe existe ou non.
         run: az group create --name "$GROUPE" --location "$REGION" --output none
 
+      - name: Attendre que l'image soit publiée
+        # Poser une étiquette déclenche DEUX workflows simultanément : celui
+        # qui construit et publie les images, et celui-ci. Rien ne les
+        # ordonne, et le déploiement gagnerait la course — pour échouer sur
+        # une image qui n'existe pas encore.
+        #
+        # L'interrogation porte sur le registre lui-même plutôt que sur
+        # l'état de l'autre workflow : ce qui compte n'est pas qu'une
+        # construction se soit terminée, c'est que l'artefact soit là.
+        env:
+          DEPOT: aymb1303/skillseek-ai
+          ETIQUETTE: ${{ inputs.etiquette || github.ref_name }}
+        run: |
+          for _ in $(seq 1 60); do
+            if docker manifest inspect "ghcr.io/${DEPOT}/backend:${ETIQUETTE}" >/dev/null 2>&1; then
+              echo "Image backend:${ETIQUETTE} disponible au registre."
+              exit 0
+            fi
+            echo "En attente de backend:${ETIQUETTE}…"
+            sleep 20
+          done
+          echo "::error::L'image backend:${ETIQUETTE} n'a pas été publiée dans le délai imparti."
+          echo "::error::Vérifiez que la chaîne d'intégration a réussi et que le paquet est public."
+          exit 1
+
       - name: Libérer le groupe précédent
         # Un groupe de conteneurs ne se met pas à jour en place : le recréer
         # est la seule opération fiable. La suppression est tolérante à
