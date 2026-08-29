@@ -1,0 +1,73 @@
+# Analyse sémantique du code par CodeQL.
+#
+# Ce que cet outil apporte que les deux autres n'ont pas.
+#
+# Bandit et Semgrep raisonnent motif par motif : ils lisent une ligne, la
+# reconnaissent comme dangereuse, la signalent. C'est efficace et rapide, mais
+# aveugle dès que le danger se construit sur plusieurs fonctions.
+#
+# CodeQL suit le **chemin des données**. Il sait dire qu'une valeur entrée par
+# un utilisateur dans une route traverse trois appels puis atteint une requête
+# SQL, un chemin de fichier ou une commande système — même si aucune de ces
+# lignes, prise isolément, ne paraît suspecte. C'est exactement la forme que
+# prennent les vulnérabilités réelles.
+#
+# Gratuit sur les dépôts publics. Les constats rejoignent l'onglet Security,
+# aux côtés de ceux de Trivy, Bandit et Semgrep.
+
+name: CodeQL
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Une analyse hebdomadaire, indépendamment de l'activité. Les règles de
+    # CodeQL évoluent : du code inchangé peut devenir vulnérable le jour où
+    # une nouvelle classe de faille est décrite. Sans exécution périodique,
+    # ce projet ne l'apprendrait jamais.
+    - cron: "0 4 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  analyse:
+    name: Analyser ${{ matrix.langage }}
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      security-events: write
+      # CodeQL lit les métadonnées d'exécution pour rattacher ses constats au
+      # bon commit et à la bonne branche.
+      actions: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - langage: python
+            source: backend
+          - langage: javascript-typescript
+            source: frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Préparer CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.langage }}
+          # `security-and-quality` ajoute aux règles de sécurité celles de
+          # maintenabilité : code inatteignable, comparaison toujours vraie,
+          # ressource non fermée. Le jeu par défaut ne couvre que la sécurité.
+          queries: security-and-quality
+
+      # Ni Python ni JavaScript ne demandent de compilation : CodeQL construit
+      # sa base de données directement depuis les sources.
+      - name: Analyser
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/langage:${{ matrix.langage }}"

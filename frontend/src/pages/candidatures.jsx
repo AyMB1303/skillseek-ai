@@ -1,4 +1,4 @@
-/** Candidatures classées : onglets RG-01, tri, drawer d'explicabilité, actions. */
+                                                            /** Candidatures classées : onglets RG-01, tri, drawer d'explicabilité, actions. */
 import { useEffect, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";

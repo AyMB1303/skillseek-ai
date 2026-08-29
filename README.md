@@ -3,6 +3,7 @@
 **Plateforme de présélection de candidatures dont chaque note est justifiable.**
 
 [![CI/CD](https://github.com/AyMB1303/skillseek-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/AyMB1303/skillseek-ai/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/AyMB1303/skillseek-ai/actions/workflows/codeql.yml/badge.svg)](https://github.com/AyMB1303/skillseek-ai/actions/workflows/codeql.yml)
 ![Tests](https://img.shields.io/badge/tests-192%20reussis-brightgreen)
 ![Python](https://img.shields.io/badge/python-3.12-blue)
 ![Next.js](https://img.shields.io/badge/next.js-14.2-black)
@@ -143,7 +144,7 @@ permet de tester le moteur de notation sans démarrer de serveur web.
 Flask 3 · SQLAlchemy · PostgreSQL 16 · Alembic · JWT · bcrypt
 Next.js 14 · React 18 · Tailwind CSS
 spaCy · sentence-transformers · scikit-learn · Tesseract OCR
-Docker · GitHub Actions · Trivy · Bandit · Semgrep
+Docker · GitHub Actions · Trivy · Bandit · Semgrep · CodeQL
 
 ### Chaîne d'intégration continue
 
@@ -155,6 +156,14 @@ avec leur inventaire logiciel, et démarrage de la pile complète.
 
 Les images sont étiquetées par l'empreinte du commit qui les a produites :
 chaque état du code correspond à un artefact déployable et identifiable.
+
+**Quatre analyseurs, quatre angles différents.** Trivy inspecte les
+dépendances et les images ; Bandit lit l'arbre syntaxique Python ; Semgrep
+couvre les deux écosystèmes par motifs ; **CodeQL suit le chemin des données**
+— il repère qu'une valeur entrée par un utilisateur atteint une requête ou un
+chemin de fichier après avoir traversé plusieurs fonctions, ce qu'aucune
+analyse ligne par ligne ne peut voir. Il s'exécute aussi une fois par semaine
+sans changement de code, les règles évoluant indépendamment du projet.
 
 ### Déploiement
 
