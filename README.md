@@ -4,6 +4,8 @@
 
 [![CI/CD](https://github.com/AyMB1303/skillseek-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/AyMB1303/skillseek-ai/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/AyMB1303/skillseek-ai/actions/workflows/codeql.yml/badge.svg)](https://github.com/AyMB1303/skillseek-ai/actions/workflows/codeql.yml)
+[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=AyMB1303_skillseek-ai&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=AyMB1303_skillseek-ai)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=AyMB1303_skillseek-ai&metric=coverage)](https://sonarcloud.io/summary/new_code?id=AyMB1303_skillseek-ai)
 ![Tests](https://img.shields.io/badge/tests-192%20reussis-brightgreen)
 ![Python](https://img.shields.io/badge/python-3.12-blue)
 ![Next.js](https://img.shields.io/badge/next.js-14.2-black)
