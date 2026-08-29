@@ -178,8 +178,13 @@ export default function VisiteGuidee({ etapes, onFermer }) {
 
 function Voile({ style, onClick }) {
   return (
+    // Le voile est décoratif : il assombrit ce qui n'est pas désigné. Il est
+    // retiré de l'arbre d'accessibilité, car le clic dessus n'est qu'un
+    // raccourci à la souris — la visite se pilote depuis les boutons de la
+    // bulle, seuls chemins garantis au clavier.
     <div
       onClick={onClick}
+      aria-hidden="true"
       className="absolute bg-fond/70 backdrop-blur-[2px] transition-[top,left,width,height] duration-200"
       style={style}
     />

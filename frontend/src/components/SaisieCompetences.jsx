@@ -114,8 +114,16 @@ export default function SaisieCompetences({
   return (
     <div className="relative">
       {/* Le cadre entier se comporte comme un champ : les étiquettes occupent
-          la ligne et la zone de frappe se décale à leur suite. */}
+          la ligne et la zone de frappe se décale à leur suite.
+
+          role="presentation" dit ce qui est vrai : ce cadre n'a pas de
+          sémantique propre. Le contrôle réel est le champ de saisie qu'il
+          entoure, lequel reste seul étiqueté et atteignable au clavier. Le
+          clic sur le cadre n'est qu'un confort à la souris — il donne le
+          focus au champ — et n'ouvre aucune action qui ne soit accessible
+          autrement. */}
       <div
+        role="presentation"
         onClick={() => champRef.current?.focus()}
         className={`champ flex flex-wrap items-center gap-1.5 min-h-[44px] cursor-text py-2 ${
           focus ? "border-accent" : ""

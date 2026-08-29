@@ -443,7 +443,18 @@ def _controler_redaction(texte, chemin):
             indices.append("phrases de longueur anormalement régulière")
 
     # --- Absence totale de donnees concretes ---
-    if len(texte or "") > 800 and not re.search(r"\d+\s*(%|k€|MAD|clients?|projets?)", texte or ""):
+    #
+    # Quantificateurs bornes et groupe non capturant. Ecrit « \d+\s* », le
+    # motif etait quadratique : sur une suite de chiffres suivie d'espaces, le
+    # moteur reessayait chaque decoupage depuis chaque position avant de
+    # conclure a l'echec. Le controle s'applique a des textes de plus de 800
+    # caracteres issus de fichiers televerses, ou la depense se paie.
+    # La classe « \s » est conservee plutot que « [ \t] » : la typographie
+    # francaise place une espace insecable devant le signe pour cent, et les
+    # PDF la restituent telle quelle.
+    if len(texte or "") > 800 and not re.search(
+        r"\d{1,12}\s{0,4}(?:%|k€|MAD|clients?|projets?)", texte or ""
+    ):
         indices.append("aucun résultat chiffré")
 
     # --- Producteur du fichier ---

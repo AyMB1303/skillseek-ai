@@ -220,9 +220,15 @@ function Distribution({ donnees }) {
       </div>
 
       <p className="text-[11px] text-txt2 mt-4 pt-3 border-t border-bordure">
+        {/* Les espaces sont explicites : entre un élément et le texte qui le
+            suit, un simple retour à la ligne en JSX produit une espace, mais
+            rien ne dit au lecteur si elle est voulue. */}
         <span className="inline-block w-2.5 h-2.5 rounded-sm bg-accent align-middle mr-1.5" />
+        {" "}
         Au-dessus du seuil de présélection
+        {" "}
         <span className="inline-block w-2.5 h-2.5 rounded-sm bg-bordure align-middle ml-4 mr-1.5" />
+        {" "}
         Écartées du classement, consultables et repêchables
       </p>
     </section>

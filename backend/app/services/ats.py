@@ -106,7 +106,13 @@ def decouper_en_sections(texte):
 # Identité et coordonnées
 # --------------------------------------------------------------------------
 
-MOTIF_EMAIL = r"[\w.+-]+@[\w-]+\.[\w.-]+"
+# Les quantificateurs sont bornes, et non libres. Un CV est un texte fourni
+# par un tiers : avec « [\w.+-]+ », une ligne faite de mots et de points sans
+# arobase oblige le moteur a reexaminer la meme suite depuis chaque position,
+# soit un cout quadratique en longueur de ligne. Les bornes retenues sont
+# celles de la RFC 5321 : 64 caracteres pour la partie locale, 63 par etiquette
+# de domaine. Aucune adresse legitime n'est perdue.
+MOTIF_EMAIL = r"[\w.+-]{1,64}@[\w-]{1,63}(?:\.[\w-]{1,63}){1,4}"
 # Formats rencontres : +212 6 12 34 56 78, 06.12.34.56.78, (0) 612-345-678
 MOTIF_TELEPHONE = r"(?:\+\d{1,3}[\s.-]?)?(?:\(?\d\)?[\s.-]?)?(?:\d[\s.-]?){8,13}\d"
 MOTIF_LINKEDIN = r"(?:linkedin\.com/in/|linkedin\s*:\s*)([\w\-À-ÿ]+)"
@@ -178,8 +184,13 @@ MOTIF_PERIODE = re.compile(
     re.IGNORECASE,
 )
 
-# Separateurs frequents entre intitule de poste et employeur
-SEPARATEURS_POSTE = r"\s+(?:chez|at|@|au sein de|-|–|—|\||,)\s+"
+# Separateurs frequents entre intitule de poste et employeur.
+#
+# Le motif attend des espaces simples : la ligne est normalisee juste avant le
+# decoupage. Ecrit « \s+…\s+ », il devenait quadratique sur les suites
+# d'espaces d'alignement que produit l'extraction d'un PDF, le moteur essayant
+# chaque coupure possible de la suite avant de conclure a l'echec.
+SEPARATEURS_POSTE = r" (?:chez|at|@|au sein de|-|–|—|\||,) "
 
 MOTS_POSTE = (
     "developpeur|developpeuse|ingenieur|ingenieure|consultant|consultante|analyste|"
@@ -265,7 +276,10 @@ def extraire_experiences(section):
     # Identification de l'intitule et de l'employeur dans chaque entree
     for entree in entrees:
         for candidat in entree["summary"][:3]:
-            nettoye = candidat.strip(" •-–—*\t")
+            # Espaces internes ramenes a un seul : SEPARATEURS_POSTE attend
+            # des espaces simples, et l'extraction d'un PDF laisse souvent des
+            # suites d'espaces d'alignement au milieu d'une ligne.
+            nettoye = re.sub(r"\s+", " ", candidat.strip(" •-–—*\t"))
             if re.search(MOTS_POSTE, _sans_accents(nettoye.lower())):
                 morceaux = re.split(SEPARATEURS_POSTE, nettoye, maxsplit=1)
                 entree["position"] = morceaux[0].strip()
@@ -392,8 +406,14 @@ def extraire_certifications(section):
             continue
         organisme = re.search(ORGANISMES, _sans_accents(brute.lower()))
         annee = re.search(r"(?:19|20)\d{2}", brute)
+        # L'annee entre parentheses est retiree du libelle, puis les espaces
+        # laisses par ce retrait sont refermes. En deux passes plutot qu'un
+        # seul motif encadre de « \s* » : place en tete, ce quantificateur
+        # libre faisait reexaminer chaque suite d'espaces depuis toutes ses
+        # positions, pour un cout quadratique en longueur de ligne.
+        sans_annee = re.sub(r"\((?:19|20)\d{2}\)", " ", brute)
         certifications.append({
-            "name": re.sub(r"\s*\((?:19|20)\d{2}\)\s*", " ", brute)[:120].strip(),
+            "name": re.sub(r"\s{2,}", " ", sans_annee).strip()[:120],
             "issuer": organisme.group() if organisme else None,
             "date": annee.group() if annee else None,
         })

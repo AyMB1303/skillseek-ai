@@ -125,7 +125,7 @@ export default function Journal() {
                         {" · "}
                         {Object.entries(e.detail)
                           .filter(([, v]) => v !== null && v !== undefined)
-                          .map(([k, v]) => `${k.replace(/_/g, " ")} : ${v}`)
+                          .map(([k, v]) => `${k.replaceAll("_", " ")} : ${v}`)
                           .join(" · ")}
                       </>
                     )}

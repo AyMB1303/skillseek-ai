@@ -237,7 +237,7 @@ function Signalement({ signalement: s, onTrancher, rang = 0 }) {
             {Object.entries(details).map(([cle, valeur]) => (
               <div key={cle} className="flex gap-2 text-[11.5px]">
                 <dt className="text-txt2 shrink-0 min-w-[9rem]">
-                  {cle.replace(/_/g, " ")}
+                  {cle.replaceAll("_", " ")}
                 </dt>
                 <dd className="text-txt">
                   {Array.isArray(valeur) ? valeur.join(", ") : String(valeur)}

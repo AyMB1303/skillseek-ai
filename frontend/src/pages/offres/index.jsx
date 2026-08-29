@@ -32,7 +32,13 @@ export default function Offres() {
   }, [garde, charger]);
 
   const competences = useMemo(
-    () => [...new Set(offres.flatMap((o) => o.required_skills || []))].sort(),
+    // Tri selon l'alphabet français : le tri par défaut compare les
+    // caractères Unicode bruts et rangerait les compétences accentuées
+    // après toutes les autres.
+    () =>
+      [...new Set(offres.flatMap((o) => o.required_skills || []))].sort((a, b) =>
+        a.localeCompare(b, "fr")
+      ),
     [offres]
   );
 

@@ -86,7 +86,11 @@ export default function Candidatures() {
     candidatures.forEach((c) =>
       (c.score_details?.profil_ats?.skills || []).forEach((s) => toutes.add(s))
     );
-    return [...toutes].sort();
+    // `localeCompare` et non le tri par défaut : celui-ci compare les
+    // caractères Unicode bruts, ce qui range « électricité » après « zsh ».
+    // Sur une liste de compétences lue par un recruteur, l'ordre doit être
+    // celui de l'alphabet français.
+    return [...toutes].sort((a, b) => a.localeCompare(b, "fr"));
   }, [candidatures]);
 
   const affichees = useMemo(() => {
@@ -156,7 +160,7 @@ export default function Candidatures() {
     <Layout titre="Candidatures" compteurCandidatures={candidatures.length}>
       {/* Filtre venu de « Mes offres » : dit toujours ce qu'on regarde, et
           comment en sortir. Un filtre invisible fait croire à une base vide. */}
-      {offreFiltree && (
+      {Boolean(offreFiltree) && (
         <div className="flex flex-wrap items-center gap-2 mb-4 rounded-[10px] border border-accent/30 bg-accent/8 px-3.5 py-2.5">
           <span className="text-[13px]">
             Candidatures pour{" "}
@@ -439,7 +443,8 @@ function CorrespondanceCompetences({ details: d, nonAnalysee }) {
       <div>
         <h3 className="text-xs font-semibold text-txt2 mb-2">
           Exigé par l'offre
-          <span className="font-normal"> ({requises.filter((r) => r.trouvee).length}/{requises.length})</span>
+          {" "}
+          <span className="font-normal">({requises.filter((r) => r.trouvee).length}/{requises.length})</span>
         </h3>
         <div className="flex flex-wrap gap-1.5">
           {requises.map((r, i) => (
@@ -1227,7 +1232,8 @@ function DetailCandidature({ candidature, onStatut, onAnalyse }) {
         <section>
           <h3 className="text-xs font-semibold text-txt2 mb-2.5">
             Détail du calcul
-            <span className="font-normal"> — d'où vient le {candidature.score}</span>
+            {" "}
+            <span className="font-normal">— d'où vient le {candidature.score}</span>
           </h3>
           <div className="space-y-2.5">
             {/* Les composantes se révèlent dans l'ordre où elles s'additionnent :

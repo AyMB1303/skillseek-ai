@@ -59,9 +59,18 @@ export default function AdminRoles() {
   const basculer = (code) =>
     setCochees((c) => (c.includes(code) ? c.filter((x) => x !== code) : [...c, code]));
 
-  const modifie =
-    selection &&
-    JSON.stringify([...cochees].sort()) !== JSON.stringify([...(selection.permissions || [])].sort());
+  // Deux listes de codes désignent-elles le même ensemble de droits ?
+  // Comparer des tableaux triés puis sérialisés donnerait le bon résultat,
+  // mais dirait mal l'intention : ce qui compte ici n'est pas un ordre, c'est
+  // une égalité d'ensembles. La comparaison des tailles précède la vérification
+  // d'inclusion pour rester juste même si un code apparaissait deux fois.
+  const memesDroits = (a, b) => {
+    const gauche = new Set(a);
+    const droite = new Set(b);
+    return gauche.size === droite.size && [...gauche].every((code) => droite.has(code));
+  };
+
+  const modifie = Boolean(selection) && !memesDroits(cochees, selection?.permissions || []);
 
   const enregistrer = async () => {
     setEnvoi(true);
@@ -136,17 +145,22 @@ export default function AdminRoles() {
             <div className="divide-y divide-bordure">
               {permissions.map((p) => {
                 const active = cochees.includes(p.code);
+                // La ligne entière est le contrôle, et non un « label » posé
+                // autour d'un bouton : un élément portant role="switch" n'est
+                // plus étiquetable au sens HTML, si bien que l'association
+                // n'existait pas. Ici l'interrupteur tire son nom accessible
+                // de son propre contenu, la ligne reste cliquable de bout en
+                // bout, et elle devient atteignable au clavier.
                 return (
-                  <label
+                  <button
                     key={p.id}
-                    className="flex items-start gap-3 px-5 py-3.5 cursor-pointer hover:bg-surface2/40 transition-colors"
+                    type="button"
+                    onClick={() => basculer(p.code)}
+                    role="switch"
+                    aria-checked={active}
+                    className="w-full flex items-start gap-3 px-5 py-3.5 text-left cursor-pointer hover:bg-surface2/40 transition-colors"
                   >
-                    <button
-                      type="button"
-                      onClick={() => basculer(p.code)}
-                      role="switch"
-                      aria-checked={active}
-                      aria-label={DESCRIPTIONS[p.code] || p.code}
+                    <span
                       className={`w-10 h-[22px] rounded-full transition-colors relative shrink-0 mt-0.5 ${
                         active ? "bg-accent" : "bg-bordure"
                       }`}
@@ -156,12 +170,16 @@ export default function AdminRoles() {
                           active ? "left-[22px]" : "left-[3px]"
                         }`}
                       />
-                    </button>
-                    <div>
-                      <p className="text-sm font-medium">{DESCRIPTIONS[p.code] || p.code}</p>
-                      <p className="text-[11.5px] text-txt2 mt-0.5 font-mono">{p.code}</p>
-                    </div>
-                  </label>
+                    </span>
+                    <span className="block">
+                      <span className="block text-sm font-medium">
+                        {DESCRIPTIONS[p.code] || p.code}
+                      </span>
+                      <span className="block text-[11.5px] text-txt2 mt-0.5 font-mono">
+                        {p.code}
+                      </span>
+                    </span>
+                  </button>
                 );
               })}
             </div>

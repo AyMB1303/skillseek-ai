@@ -126,8 +126,15 @@ export default function MonProfilPro() {
 
             <form onSubmit={enregistrer} className="carte p-6 space-y-5 entree">
               <div>
-                <label className="etiquette">Vos compétences</label>
+                {/* L'étiquette désigne explicitement le champ de saisie que
+                    SaisieCompetences rend sous cet identifiant. Sans « for »,
+                    elle n'était qu'un texte : un lecteur d'écran annonçait un
+                    champ sans nom. */}
+                <label className="etiquette" htmlFor="competences-profil">
+                  Vos compétences
+                </label>
                 <SaisieCompetences
+                  id="competences-profil"
                   valeurs={profil.skills}
                   onChange={(skills) => setProfil({ ...profil, skills })}
                   placeholder="python, sql, gestion de projet…"
@@ -238,8 +245,9 @@ function Suggestions({ donnees }) {
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="font-semibold text-sm">
           Offres proches de votre profil
+          {" "}
           <span className="font-normal text-txt2">
-            {" "}— {donnees.offres.length} sur {donnees.total_examinees} examinées
+            — {donnees.offres.length} sur {donnees.total_examinees} examinées
           </span>
         </h2>
         <Link href="/offres" className="text-[12.5px] text-accent hover:text-cyan">

@@ -123,14 +123,25 @@ export function Modale({ ouverte, onFermer, titre, children, actions }) {
 
   if (!ouverte) return null;
   return (
-    <div
-      className="fixed inset-0 z-40 bg-black/60 grid place-items-center p-4"
-      onClick={onFermer}
-      role="dialog"
-      aria-modal="true"
-      aria-label={titre}
-    >
-      <div className="carte w-full max-w-lg animate-pop" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 z-40 grid place-items-center p-4">
+      {/* Le fond est décoratif : il est retiré de l'arbre d'accessibilité.
+          Le clic dessus est un raccourci à la souris, jamais le seul moyen de
+          fermer — la touche Échap et le bouton « Fermer » restent les chemins
+          garantis. Séparer le fond du dialogue évite aussi d'avoir à arrêter
+          la propagation du clic, et surtout de poser un gestionnaire de clic
+          sur l'élément qui porte role="dialog", ce qui rendait le dialogue
+          lui-même faussement interactif pour les technologies d'assistance. */}
+      <div
+        className="absolute inset-0 bg-black/60"
+        onClick={onFermer}
+        aria-hidden="true"
+      />
+      <div
+        className="carte w-full max-w-lg animate-pop relative"
+        role="dialog"
+        aria-modal="true"
+        aria-label={titre}
+      >
         <div className="flex items-center justify-between px-5 py-4 border-b border-bordure">
           <h2 className="font-semibold">{titre}</h2>
           <button onClick={onFermer} aria-label="Fermer" className="text-txt2 hover:text-txt text-xl leading-none">
@@ -156,10 +167,12 @@ export function Drawer({ ouvert, onFermer, titre, children }) {
 
   if (!ouvert) return null;
   return (
-    <div className="fixed inset-0 z-40 flex justify-end bg-black/50" onClick={onFermer}>
+    <div className="fixed inset-0 z-40 flex justify-end">
+      {/* Même principe que la modale : fond décoratif, retiré de l'arbre
+          d'accessibilité, et panneau séparé qui porte seul le rôle. */}
+      <div className="absolute inset-0 bg-black/50" onClick={onFermer} aria-hidden="true" />
       <aside
-        className="w-full max-w-md bg-surface2 border-l border-bordure h-full overflow-y-auto animate-slideIn"
-        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-md bg-surface2 border-l border-bordure h-full overflow-y-auto animate-slideIn relative"
         role="dialog"
         aria-label={titre}
       >
