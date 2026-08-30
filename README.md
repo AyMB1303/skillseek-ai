@@ -29,7 +29,7 @@ Le principe qui gouverne le projet : **le système propose, l'humain tranche.**
 Aucune candidature n'est supprimée, toute décision est motivée, et une note
 contestée peut être reconstituée six mois plus tard.
 
-![Détail d'une note et du profil reconstitué](docs/captures/05_detail_score_profil_ats.jpg)
+![Détail d'une note et du profil reconstitué](docs/apercu/05_detail_score_profil_ats.jpg)
 
 ---
 
@@ -216,9 +216,7 @@ déguisé en perspective :
 | [`docs/CI_CD.md`](docs/CI_CD.md) | détail des sept travaux d'intégration |
 | [`docs/DEPLOIEMENT_AZURE.md`](docs/DEPLOIEMENT_AZURE.md) | déploiement, contraintes de l'abonnement |
 | [`docs/DEVOPS.md`](docs/DEVOPS.md) | conteneurisation, images, exploitation |
-| [`docs/SCRIPT_DEMONSTRATION.md`](docs/SCRIPT_DEMONSTRATION.md) | déroulé d'une démonstration |
 | [`bi/GUIDE_POWER_BI.md`](bi/GUIDE_POWER_BI.md) | vues décisionnelles |
-| `docs/Rapport_Avancement_Sprint*.pdf` | rapports d'avancement des quatre sprints |
 
 ---
 

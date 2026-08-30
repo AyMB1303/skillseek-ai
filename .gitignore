@@ -107,3 +107,7 @@ docs/*.fdb_latexmk
 
 # Rapports de couverture de l'interface
 frontend/coverage/
+
+# Dossier de travail scolaire : rapports, captures et figures du PFA.
+# Il vit sur le disque a cote du code, mais n'appartient pas au produit.
+_Ecole/
