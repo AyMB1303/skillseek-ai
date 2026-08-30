@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="800" viewBox="0 0 1120 800">
+  <rect width="1120" height="800" fill="#FFFFFF"/>
+
+  <rect x="6" y="30" width="144" height="52" fill="#D7E5F2"
+        stroke="#000" stroke-width="1.4"/>
+  <text x="78" y="52" text-anchor="middle" font-family="Helvetica"
+        font-size="13" font-weight="bold">Candidat</text>
+  <text x="78" y="70" text-anchor="middle" font-family="Helvetica"
+        font-size="11">acteur</text>
+  <line x1="78" y1="96" x2="78" y2="745" stroke="#000"
+        stroke-width="1" stroke-dasharray="7,5"/>
+
+  <rect x="178" y="30" width="144" height="52" fill="#D7E5F2"
+        stroke="#000" stroke-width="1.4"/>
+  <text x="250" y="52" text-anchor="middle" font-family="Helvetica"
+        font-size="13" font-weight="bold">Interface</text>
+  <text x="250" y="70" text-anchor="middle" font-family="Helvetica"
+        font-size="11">Next.js</text>
+  <line x1="250" y1="96" x2="250" y2="745" stroke="#000"
+        stroke-width="1" stroke-dasharray="7,5"/>
+
+  <rect x="358" y="30" width="144" height="52" fill="#D7E5F2"
+        stroke="#000" stroke-width="1.4"/>
+  <text x="430" y="52" text-anchor="middle" font-family="Helvetica"
+        font-size="13" font-weight="bold">API</text>
+  <text x="430" y="70" text-anchor="middle" font-family="Helvetica"
+        font-size="11">Flask</text>
+  <line x1="430" y1="96" x2="430" y2="745" stroke="#000"
+        stroke-width="1" stroke-dasharray="7,5"/>
+
+  <rect x="550" y="30" width="144" height="52" fill="#D7E5F2"
+        stroke="#000" stroke-width="1.4"/>
+  <text x="622" y="52" text-anchor="middle" font-family="Helvetica"
+        font-size="13" font-weight="bold">Lecture ATS</text>
+  <text x="622" y="70" text-anchor="middle" font-family="Helvetica"
+        font-size="11">spaCy, OCR</text>
+  <line x1="622" y1="96" x2="622" y2="745" stroke="#000"
+        stroke-width="1" stroke-dasharray="7,5"/>
+
+  <rect x="738" y="30" width="144" height="52" fill="#D7E5F2"
+        stroke="#000" stroke-width="1.4"/>
+  <text x="810" y="52" text-anchor="middle" font-family="Helvetica"
+        font-size="13" font-weight="bold">Notation</text>
+  <text x="810" y="70" text-anchor="middle" font-family="Helvetica"
+        font-size="11">scoring.py</text>
+  <line x1="810" y1="96" x2="810" y2="745" stroke="#000"
+        stroke-width="1" stroke-dasharray="7,5"/>
+
+  <rect x="928" y="30" width="144" height="52" fill="#D7E5F2"
+        stroke="#000" stroke-width="1.4"/>
+  <text x="1000" y="52" text-anchor="middle" font-family="Helvetica"
+        font-size="13" font-weight="bold">Base</text>
+  <text x="1000" y="70" text-anchor="middle" font-family="Helvetica"
+        font-size="11">PostgreSQL</text>
+  <line x1="1000" y1="96" x2="1000" y2="745" stroke="#000"
+        stroke-width="1" stroke-dasharray="7,5"/>
+  <rect x="244" y="122" width="12" height="584" fill="#C9E4E2" stroke="#000" stroke-width="1"/>
+  <rect x="424" y="152" width="12" height="516" fill="#C9E4E2" stroke="#000" stroke-width="1"/>
+  <rect x="616" y="238" width="12" height="82" fill="#C9E4E2" stroke="#000" stroke-width="1"/>
+  <rect x="804" y="404" width="12" height="96" fill="#C9E4E2" stroke="#000" stroke-width="1"/>
+  <line x1="84" y1="122" x2="238" y2="122" stroke="#000" stroke-width="1.3"/>
+  <polygon points="238,122 226,117.5 226,126.5" fill="#000"/>
+  <text x="161.0" y="113" text-anchor="middle" font-family="Helvetica" font-size="11.5">1. dépose son CV (PDF)</text>
+  <line x1="256" y1="152" x2="418" y2="152" stroke="#000" stroke-width="1.3"/>
+  <polygon points="418,152 406,147.5 406,156.5" fill="#000"/>
+  <text x="337.0" y="143" text-anchor="middle" font-family="Helvetica" font-size="11.5">2. POST /applications</text>
+  <line x1="436" y1="190" x2="988" y2="190" stroke="#000" stroke-width="1.3"/>
+  <polygon points="988,190 976,185.5 976,194.5" fill="#000"/>
+  <text x="712.0" y="181" text-anchor="middle" font-family="Helvetica" font-size="11.5">3. enregistre le fichier et la candidature</text>
+  <line x1="436" y1="238" x2="610" y2="238" stroke="#000" stroke-width="1.3"/>
+  <polygon points="610,238 598,233.5 598,242.5" fill="#000"/>
+  <text x="523.0" y="229" text-anchor="middle" font-family="Helvetica" font-size="11.5">4. extraire le profil</text>
+  <polyline points="628,262 684,262 684,292 636,292" fill="none" stroke="#000" stroke-width="1.3"/>
+  <polygon points="630,292 642,287.5 642,296.5" fill="#000"/>
+  <text x="694" y="282" font-family="Helvetica" font-size="11">lecture, et OCR si le PDF est une image</text>
+  <line x1="610" y1="320" x2="442" y2="320" stroke="#000" stroke-width="1.3" stroke-dasharray="7,4"/>
+  <polyline points="454,315 442,320 454,325" fill="none" stroke="#000" stroke-width="1.4"/>
+  <text x="526.0" y="311" text-anchor="middle" font-family="Helvetica" font-size="11.5">5. profil structuré</text>
+  <text x="526.0" y="336" text-anchor="middle" font-family="Helvetica" font-size="10.5" font-style="italic">compétences, expérience, diplôme</text>
+  <line x1="436" y1="404" x2="798" y2="404" stroke="#000" stroke-width="1.3"/>
+  <polygon points="798,404 786,399.5 786,408.5" fill="#000"/>
+  <text x="617.0" y="395" text-anchor="middle" font-family="Helvetica" font-size="11.5">6. calculer la note</text>
+  <polyline points="816,428 872,428 872,458 824,458" fill="none" stroke="#000" stroke-width="1.3"/>
+  <polygon points="818,458 830,453.5 830,462.5" fill="#000"/>
+  <text x="882" y="448" font-family="Helvetica" font-size="11">calcul des cinq composantes</text>
+  <line x1="798" y1="500" x2="442" y2="500" stroke="#000" stroke-width="1.3" stroke-dasharray="7,4"/>
+  <polyline points="454,495 442,500 454,505" fill="none" stroke="#000" stroke-width="1.4"/>
+  <text x="620.0" y="491" text-anchor="middle" font-family="Helvetica" font-size="11.5">7. note et détail par composante</text>
+  <text x="620.0" y="516" text-anchor="middle" font-family="Helvetica" font-size="10.5" font-style="italic">35 / 10 / 25 / 20 / 10, puis ±8 au plus</text>
+  <line x1="436" y1="560" x2="988" y2="560" stroke="#000" stroke-width="1.3"/>
+  <polygon points="988,560 976,555.5 976,564.5" fill="#000"/>
+  <text x="712.0" y="551" text-anchor="middle" font-family="Helvetica" font-size="11.5">8. écrit score et score_details</text>
+  <line x1="424" y1="614" x2="262" y2="614" stroke="#000" stroke-width="1.3" stroke-dasharray="7,4"/>
+  <polyline points="274,609 262,614 274,619" fill="none" stroke="#000" stroke-width="1.4"/>
+  <text x="343.0" y="605" text-anchor="middle" font-family="Helvetica" font-size="11.5">9. candidature analysée</text>
+  <line x1="436" y1="668" x2="988" y2="668" stroke="#000" stroke-width="1.3"/>
+  <polygon points="988,668 976,663.5 976,672.5" fill="#000"/>
+  <text x="712.0" y="659" text-anchor="middle" font-family="Helvetica" font-size="11.5">10. notifie le recruteur</text>
+  <line x1="238" y1="706" x2="90" y2="706" stroke="#000" stroke-width="1.3" stroke-dasharray="7,4"/>
+  <polyline points="102,701 90,706 102,711" fill="none" stroke="#000" stroke-width="1.4"/>
+  <text x="164.0" y="697" text-anchor="middle" font-family="Helvetica" font-size="11.5">11. accusé de dépôt</text>
+  <text x="164.0" y="722" text-anchor="middle" font-family="Helvetica" font-size="10.5" font-style="italic">aucune note n'est communiquée au candidat</text>
+  <text x="20" y="784" font-family="Helvetica" font-size="11" font-style="italic">Trait plein et pointe pleine : appel. Trait discontinu et chevron : retour.</text>
+</svg>

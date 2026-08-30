@@ -8,6 +8,7 @@ import { useGarde } from "@/lib/auth";
 import { api, telechargerFichier } from "@/lib/api";
 import { couleurScore, SEUIL_RETENU, PLAFOND_TOP } from "@/lib/scoring";
 import { useCompteur, retard } from "@/lib/mouvement";
+import { competencesDisponibles } from "@/lib/regles";
 
 const ONGLETS = [
   { cle: "toutes", libelle: "Toutes" },
@@ -81,17 +82,10 @@ export default function Candidatures() {
 
   // Compétences réellement présentes dans le lot, pour ne proposer que des
   // filtres qui donneront un résultat.
-  const competencesDisponibles = useMemo(() => {
-    const toutes = new Set();
-    candidatures.forEach((c) =>
-      (c.score_details?.profil_ats?.skills || []).forEach((s) => toutes.add(s))
-    );
-    // `localeCompare` et non le tri par défaut : celui-ci compare les
-    // caractères Unicode bruts, ce qui range « électricité » après « zsh ».
-    // Sur une liste de compétences lue par un recruteur, l'ordre doit être
-    // celui de l'alphabet français.
-    return [...toutes].sort((a, b) => a.localeCompare(b, "fr"));
-  }, [candidatures]);
+  const listeCompetences = useMemo(
+    () => competencesDisponibles(candidatures),
+    [candidatures]
+  );
 
   const affichees = useMemo(() => {
     const q = filtres.recherche.trim().toLowerCase();
@@ -231,7 +225,7 @@ export default function Candidatures() {
             className="champ w-auto py-2 text-[13px]"
           >
             <option value="">Toute compétence</option>
-            {competencesDisponibles.map((c) => (
+            {listeCompetences.map((c) => (
               <option key={c} value={c}>{c}</option>
             ))}
           </select>

@@ -102,6 +102,10 @@ jobs:
       - name: Lint (ESLint)
         run: npm run lint
 
+      - name: Tests unitaires (Vitest)
+        working-directory: frontend
+        run: npm run test
+
       - name: Construction de production
         # La construction est la vraie garde du frontend : elle échoue sur une
         # importation absente ou une syntaxe invalide, ce que le lint laisse

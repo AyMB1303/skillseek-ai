@@ -104,3 +104,6 @@ docs/*.vrb
 docs/*.synctex.gz
 docs/*.fls
 docs/*.fdb_latexmk
+
+# Rapports de couverture de l'interface
+frontend/coverage/

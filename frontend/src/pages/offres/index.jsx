@@ -6,6 +6,7 @@ import { Chargement, EtatErreur, EtatVide } from "@/components/ui";
 import { useGarde } from "@/lib/auth";
 import { api } from "@/lib/api";
 import { retard } from "@/lib/mouvement";
+import { trierFr } from "@/lib/regles";
 
 export default function Offres() {
   const { chargement: garde } = useGarde(["candidate", "recruiter", "admin"]);
@@ -32,13 +33,7 @@ export default function Offres() {
   }, [garde, charger]);
 
   const competences = useMemo(
-    // Tri selon l'alphabet français : le tri par défaut compare les
-    // caractères Unicode bruts et rangerait les compétences accentuées
-    // après toutes les autres.
-    () =>
-      [...new Set(offres.flatMap((o) => o.required_skills || []))].sort((a, b) =>
-        a.localeCompare(b, "fr")
-      ),
+    () => trierFr([...new Set(offres.flatMap((o) => o.required_skills || []))]),
     [offres]
   );
 

@@ -5,6 +5,7 @@ import { Chargement, EtatErreur, useToast } from "@/components/ui";
 import { useGarde } from "@/lib/auth";
 import { api } from "@/lib/api";
 import { retard } from "@/lib/mouvement";
+import { memesDroits } from "@/lib/regles";
 
 const LIBELLE_ROLE = { admin: "Administrateur", recruiter: "Recruteur", candidate: "Candidat" };
 
@@ -59,18 +60,8 @@ export default function AdminRoles() {
   const basculer = (code) =>
     setCochees((c) => (c.includes(code) ? c.filter((x) => x !== code) : [...c, code]));
 
-  // Deux listes de codes désignent-elles le même ensemble de droits ?
-  // Comparer des tableaux triés puis sérialisés donnerait le bon résultat,
-  // mais dirait mal l'intention : ce qui compte ici n'est pas un ordre, c'est
-  // une égalité d'ensembles. La comparaison des tailles précède la vérification
-  // d'inclusion pour rester juste même si un code apparaissait deux fois.
-  const memesDroits = (a, b) => {
-    const gauche = new Set(a);
-    const droite = new Set(b);
-    return gauche.size === droite.size && [...gauche].every((code) => droite.has(code));
-  };
-
-  const modifie = Boolean(selection) && !memesDroits(cochees, selection?.permissions || []);
+  const modifie =
+    Boolean(selection) && !memesDroits(cochees, selection?.permissions || []);
 
   const enregistrer = async () => {
     setEnvoi(true);

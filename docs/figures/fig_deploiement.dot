@@ -1,0 +1,65 @@
+digraph deploiement {
+
+  graph [fontname="Helvetica", fontsize=11, bgcolor="#FFFFFF", pad=0.3,
+         fontcolor="#12324F"];
+  node  [fontname="Helvetica", fontsize=11, color="#12324F", penwidth=1.4,
+         fontcolor="#12324F"];
+  edge  [fontname="Helvetica", fontsize=10, color="#5B6B7B", penwidth=1.3,
+         fontcolor="#12324F"];
+
+  rankdir=TB; nodesep=0.55; ranksep=0.75; compound=true;
+
+  subgraph cluster_dev {
+    label="Poste de développement"; fontsize=12; style=solid;
+    bgcolor="#FFFFFF";
+    poste [shape=box3d, style=filled, fillcolor="#D7E5F2",
+           label="«device» Poste\ndocker compose up -d\nquatre conteneurs locaux"];
+  }
+
+  subgraph cluster_forge {
+    label="Forge — GitHub"; fontsize=12; style=solid; bgcolor="#FFFFFF";
+    depot   [shape=box3d, style=filled, fillcolor="#D7E5F2",
+             label="«device» Exécuteur GitHub Actions\nsept travaux d'intégration"];
+    registre [shape=cylinder, style=filled, fillcolor="#C9E4E2",
+              label="«artifact» GHCR\nimages étiquetées\npar empreinte et version",
+              height=1.1];
+  }
+
+  subgraph cluster_azure {
+    label="Azure — groupe de conteneurs (Container Instances)";
+    fontsize=12; style=solid; bgcolor="#D7E5F2";
+
+    c_proxy [shape=box, style=filled, fillcolor="#C9E4E2",
+             label="«container» proxy\nnginx · 0,5 vCPU / 1 Gio\nseul port exposé : 80"];
+    c_front [shape=box, style=filled, fillcolor="#FFFFFF",
+             label="«container» frontend\nNext.js · 0,5 vCPU / 1,5 Gio"];
+    c_api   [shape=box, style=filled, fillcolor="#FFFFFF",
+             label="«container» backend\nFlask · 2 vCPU / 8 Gio"];
+    c_bd    [shape=box, style=filled, fillcolor="#FFFFFF",
+             label="«container» db\nPostgreSQL · 0,5 vCPU / 1,5 Gio"];
+
+    // Les liaisons internes portent l'adresse de bouclage, et non un nom de
+    // service : c'est le fait marquant de ce mode de déploiement, et sans ces
+    // arêtes les quatre conteneurs semblaient sans rapport entre eux.
+    // Les quatre conteneurs restent sur un même rang : sans cette contrainte,
+    // les liaisons ci-dessous les empilent en colonne et la figure passe de
+    // 1 263 à 2 217 pixels de haut, soit vingt-huit centimètres à l'échelle
+    // d'une page.
+    { rank=same; c_proxy; c_front; c_api; c_bd; }
+    // Les poids fixent l'ordre de gauche à droite. Sans eux, Graphviz range
+    // le frontal à l'extrémité et la liaison vers le port 3000 décrit une
+    // arche par-dessus tout le groupe, jusque sur son titre.
+    c_proxy -> c_front [label=" :3000 ", fontsize=9, weight=20];
+    c_proxy -> c_api   [label=" :5000 ", fontsize=9, weight=1];
+    c_api   -> c_bd    [label=" :5432 ", fontsize=9, weight=20];
+  }
+
+  poste -> depot [label="  git push  "];
+  depot -> registre [label="  publie les images  "];
+  registre -> c_proxy [lhead=cluster_azure,
+                       label="  étiquette de version → déploiement  "];
+
+  legende [shape=note, style=filled, fillcolor="#FFFFFF", fontsize=10,
+           label="Les quatre conteneurs partagent un même espace réseau.\nIls se joignent par l'adresse de bouclage, non par leur\nnom de service : c'est ce que change un groupe de\nconteneurs par rapport à Docker Compose."];
+  c_bd -> legende [style=invis];
+}

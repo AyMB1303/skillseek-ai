@@ -1,0 +1,73 @@
+digraph organigramme {
+
+  graph [fontname="Helvetica", fontsize=11, bgcolor="#FFFFFF", pad=0.3,
+         fontcolor="#12324F"];
+  node  [fontname="Helvetica", fontsize=11, color="#12324F", penwidth=1.4,
+         fontcolor="#12324F"];
+  edge  [fontname="Helvetica", fontsize=10, color="#5B6B7B", penwidth=1.3,
+         fontcolor="#12324F"];
+
+  rankdir=TB; nodesep=0.34; ranksep=0.6; splines=ortho;
+  node [shape=box, style="filled,rounded", fillcolor="#FFFFFF", height=0.62,
+        margin="0.20,0.10"];
+  edge [arrowhead=none, color="#5B6B7B"];
+
+  dg [style="filled,rounded", fillcolor="#1F4E79", fontcolor="#FFFFFF",
+      penwidth=1.8, label=<<B>Direction générale</B><BR/>
+      <FONT POINT-SIZE="10">Mohammed Jebbar, fondateur</FONT>>];
+  daf [style="filled,rounded", fillcolor="#D7E5F2", color="#1F4E79",
+       label=<<B>Direction financière</B><BR/>
+       <FONT POINT-SIZE="10">cofondateur</FONT>>];
+
+  // Encadrement supérieur : quatre pôles. Celui qui accueille le stage est
+  // souligné par un trait plus épais et un aplat distinct — la teinte seule
+  // ne suffirait pas en photocopie.
+  bd     [fillcolor="#E8ECF0", color="#5B6B7B",
+          label=<<B>Développement</B><BR/><B>commercial</B>>];
+  public [fillcolor="#E8ECF0", color="#5B6B7B",
+          label=<<B>Secteur public</B>>];
+  techno [fillcolor="#E8ECF0", color="#5B6B7B",
+          label=<<B>Technologie</B><BR/><B>et ingénierie</B>>];
+  conseil [fillcolor="#C9E4E2", color="#17706E", penwidth=2.4,
+           label=<<B>Services de conseil</B><BR/>
+           <FONT POINT-SIZE="10">agence de Rabat</FONT>>];
+
+  // L'agence de Rabat.
+  cp    [fillcolor="#FFFFFF", color="#17706E",
+         label=<Chef de projet<BR/>technique>];
+  ctech [fillcolor="#C9E4E2", color="#17706E", penwidth=2.0,
+         label=<<B>Consultants techniques</B><BR/>
+         <FONT POINT-SIZE="10">dont l'encadrant du stage :</FONT><BR/>
+         <FONT POINT-SIZE="10"><B>Houssam Haraf</B></FONT>>];
+  cfonc [fillcolor="#FFFFFF", color="#17706E",
+         label=<Consultants<BR/>fonctionnels>];
+  adm   [fillcolor="#FFFFFF", color="#17706E",
+         label=<Opérations<BR/>administratives>];
+
+  // Le stagiaire : trait discontinu, parce que la position est temporaire et
+  // n'appartient pas à la structure permanente.
+  stagiaire [style="filled,rounded,dashed", fillcolor="#F7E3B8",
+             color="#9C6404", penwidth=2.0,
+             label=<<B>Stagiaire — PFA</B><BR/>
+             <FONT POINT-SIZE="10">SkillSeek AI</FONT>>];
+
+  dg -> daf [style=dashed, constraint=false];
+  dg -> bd; dg -> public; dg -> techno;
+  dg -> conseil [penwidth=2.2, color="#17706E"];
+  conseil -> cp; conseil -> ctech [penwidth=2.0, color="#17706E"];
+  conseil -> cfonc; conseil -> adm;
+  ctech -> stagiaire [style=dashed, penwidth=2.0, color="#9C6404"];
+
+  { rank=same; dg; daf; }
+  { rank=same; bd; public; techno; conseil; }
+  { rank=same; cp; ctech; cfonc; adm; }
+
+  legende [shape=note, style=filled, fillcolor="#E8ECF0", color="#5B6B7B",
+           fontsize=10, margin="0.18,0.12",
+           label=<<B>Repères</B><BR ALIGN="LEFT"/>
+           Siège : Safi &#183; Conseil : Rabat &#183; EMEA : Londres<BR ALIGN="LEFT"/>
+           Fondée en 2009 &#183; 300+ consultants &#183; 500+ clients<BR ALIGN="LEFT"/>
+           Trait discontinu : rattachement temporaire<BR ALIGN="LEFT"/>
+           <FONT POINT-SIZE="9">Source : site institutionnel, consulté le 30 août 2026</FONT><BR ALIGN="LEFT"/>>];
+  adm -> legende [style=invis];
+}
