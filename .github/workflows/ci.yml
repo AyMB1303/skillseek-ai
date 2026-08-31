@@ -737,12 +737,16 @@ jobs:
 
       - name: Résumé de l'analyse dynamique
         if: always()
+        # Le rapport commence par des statistiques de parcours, et ne donne
+        # le nom des alertes qu'ensuite. Couper trop tôt affichait le compte
+        # — « une alerte élevée » — sans jamais dire laquelle, ce qui est le
+        # seul renseignement utile. On garde donc tout le tableau.
         run: |
           if [ -f rapport-zap/rapport-zap.md ]; then
             {
               echo "## Analyse dynamique (OWASP ZAP)"
               echo ""
-              head -40 rapport-zap/rapport-zap.md
+              head -120 rapport-zap/rapport-zap.md
             } >> "$GITHUB_STEP_SUMMARY"
           fi
 
