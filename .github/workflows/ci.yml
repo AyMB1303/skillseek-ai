@@ -151,6 +151,12 @@ jobs:
   infrastructure:
     name: Infrastructure — validation (Terraform)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # Ce travail alimente l'onglet Security. Sans cette permission
+      # l'analyse est bien calculée, mais l'envoi échoue avec un message
+      # d'accès refusé — le constat se perd, et l'analyse ne sert à rien.
+      security-events: write
     steps:
       - uses: actions/checkout@v4
 
@@ -215,6 +221,9 @@ jobs:
   orchestration:
     name: Orchestration — manifestes Kubernetes
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
     steps:
       - uses: actions/checkout@v4
 
@@ -287,9 +296,18 @@ jobs:
         # service applicatif pèse 3,7 Go, et la faire descendre à chaque
         # exécution coûterait plus qu'elle n'apprendrait ici. L'exécution
         # réelle, elle, est prouvée par le déploiement Azure.
+        #
+        # L'espace de noms, lui, est créé pour de bon. En simulation le
+        # serveur ne l'enregistre pas, et refuse ensuite chacun des objets
+        # qui s'y rattachent : « namespaces "skillseek-dev" not found ».
+        # La simulation ne peut pas valider un objet dont le contenant
+        # n'existe que dans la simulation précédente — c'est une limite du
+        # mécanisme, pas un défaut des manifestes.
         run: |
           for env in dev prod; do
             echo "::group::$env"
+            kubectl create namespace "skillseek-$env" \
+              --dry-run=client -o yaml | kubectl apply -f -
             kubectl apply --dry-run=server -f "assemble-$env.yaml"
             echo "::endgroup::"
           done
