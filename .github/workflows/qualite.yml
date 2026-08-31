@@ -27,6 +27,26 @@ jobs:
     name: SonarCloud
     runs-on: ubuntu-latest
 
+    # Les propositions ouvertes par Dependabot sont écartées, et il ne s'agit
+    # pas d'un contournement de confort.
+    #
+    # GitHub ne transmet pas les secrets du dépôt aux exécutions déclenchées
+    # par ce robot : une mise à jour de dépendance peut embarquer du code
+    # hostile, et l'exécuter avec le jeton d'analyse reviendrait à le lui
+    # remettre. Le robot dispose d'un magasin de secrets distinct, pour que
+    # ce qu'on lui confie soit un choix explicite.
+    #
+    # La garde ci-dessous constatait donc l'absence du jeton et faisait
+    # échouer le travail en trois secondes, sur chaque proposition de mise à
+    # jour — une croix rouge récurrente qui ne désignait aucun défaut du
+    # code. Un tableau de bord qui affiche un échec sans objet finit par ne
+    # plus être lu, et c'est le jour où il signale un vrai problème que
+    # personne ne le regarde.
+    #
+    # L'analyse n'est pas perdue : elle s'exécute à chaque poussée sur `main`
+    # et `dev`, donc sur le contenu fusionné de ces propositions.
+    if: github.actor != 'dependabot[bot]'
+
     steps:
       - name: Vérifier que le jeton est configuré
         env:
