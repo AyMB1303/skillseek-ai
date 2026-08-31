@@ -351,18 +351,22 @@ jobs:
             --redact --exit-code 0 --verbose
 
       - name: Compter les constats
-        # L'outil est laissé non bloquant le temps d'établir une base de
-        # référence : un scan d'historique remonte au premier commit, et
-        # faire échouer d'emblée la chaîne sur un fichier corrigé depuis
-        # longtemps n'apprend rien. Le compte est affiché en résumé
-        # d'exécution pour que la décision de durcir se prenne sur un
-        # chiffre plutôt que sur une impression.
+        # Bloquant, désormais. Le premier passage a servi de base de
+        # référence : un seul constat sur tout l'historique, la clé de
+        # projet SonarCloud, que la règle générique confond avec une clé
+        # d'API. Elle est écartée nommément dans `.gitleaks.toml`.
+        #
+        # La base étant à zéro, tout nouveau constat désigne un secret
+        # introduit par le changement en cours — et un secret publié dans un
+        # dépôt public doit arrêter la chaîne, pas produire un
+        # avertissement de plus dans une liste que personne ne relit.
         if: always()
         run: |
-          n=$(python3 -c "import json,sys; print(len(json.load(open('gitleaks.sarif'))['runs'][0]['results']))" 2>/dev/null || echo 0)
+          n=$(python3 -c "import json; print(len(json.load(open('gitleaks.sarif'))['runs'][0]['results']))" 2>/dev/null || echo 0)
           echo "### Secrets dans l'historique : $n constat(s)" >> "$GITHUB_STEP_SUMMARY"
           if [ "$n" -gt 0 ]; then
-            echo "::warning title=Gitleaks::$n constat(s) dans l'historique Git — voir l'onglet Security."
+            echo "::error title=Gitleaks::$n constat(s) dans l'historique Git — voir l'onglet Security."
+            exit 1
           fi
 
       - name: Publier dans l'onglet Security
@@ -688,7 +692,19 @@ jobs:
         # Le conteneur d'analyse n'écrit pas sous l'identité du runner ;
         # sans droits d'écriture ouverts sur le point de montage, il produit
         # son rapport puis échoue à l'enregistrer.
-        run: mkdir -p rapport-zap && chmod 777 rapport-zap
+        run: |
+          mkdir -p rapport-zap && chmod 777 rapport-zap
+          cp .zap/regles.tsv rapport-zap/regles.tsv
+
+      - name: Récupérer l'analyseur dynamique
+        # Étape distincte, et c'est délibéré. L'étape suivante absorbe le
+        # code de retour de l'analyse, puisqu'un constat ne doit pas
+        # interrompre la chaîne. Si la récupération de l'image était dans la
+        # même étape, une étiquette erronée produirait un échec instantané
+        # que cette absorption transformerait en simple avertissement : la
+        # chaîne resterait verte en annonçant une analyse qui n'a jamais eu
+        # lieu. C'est exactement ce qui s'est produit au premier essai.
+        run: docker pull zaproxy/zap-stable:2.17.0
 
       - name: Analyse dynamique de l'interface (OWASP ZAP)
         # `--network host` donne au conteneur d'analyse l'accès aux ports
@@ -701,13 +717,23 @@ jobs:
         # bloque sur ce qu'on a décidé de bloquer, pas sur ce que l'outil
         # décide ce matin-là.
         run: |
-          cp .zap/regles.tsv rapport-zap/regles.tsv
           docker run --rm --network host \
             -v "$PWD/rapport-zap:/zap/wrk/:rw" \
-            ghcr.io/zaproxy/zaproxy:20250127-stable \
+            zaproxy/zap-stable:2.17.0 \
             zap-baseline.py -t http://localhost:3000 \
               -c regles.tsv -r rapport-zap.html -w rapport-zap.md -I \
             || echo "::warning title=ZAP::Constats relevés par l'analyse dynamique, voir l'artefact."
+
+      - name: Vérifier que l'analyse a bien eu lieu
+        # Seconde garde contre le même piège : un rapport absent signifie
+        # que l'analyseur n'a pas tourné, ce qui est un échec de la chaîne
+        # et non un résultat.
+        run: |
+          if [ ! -s rapport-zap/rapport-zap.md ]; then
+            echo "::error title=ZAP::Aucun rapport produit — l'analyseur n'a pas pu s'exécuter."
+            ls -la rapport-zap/
+            exit 1
+          fi
 
       - name: Résumé de l'analyse dynamique
         if: always()

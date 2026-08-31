@@ -39,4 +39,14 @@ regexes = [
   # jetable remplie de données fabriquées pour la soutenance.
   '''Demo@1234''',
   '''Admin@1234''',
+  # Clé de projet SonarCloud. Le premier passage l'a signalée comme « clé
+  # d'API générique » : la règle repère la forme `…key = valeur` sans
+  # pouvoir savoir ce que la valeur ouvre. Celle-ci n'ouvre rien — elle
+  # désigne un projet dont le tableau de bord est public, et elle figure
+  # dans l'URL de ce tableau de bord.
+  #
+  # Le constat est écarté nommément, et non en excluant le fichier : si un
+  # vrai jeton était ajouté à `sonar-project.properties` demain, il serait
+  # toujours détecté.
+  '''AyMB1303_skillseek-ai''',
 ]
