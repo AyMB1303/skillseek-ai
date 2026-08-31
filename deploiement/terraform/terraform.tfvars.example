@@ -1,0 +1,16 @@
+# Modèle de paramétrage.
+#
+#   cp terraform.tfvars.example terraform.tfvars
+#
+# `terraform.tfvars` est ignoré par Git : il porte l'identifiant
+# d'abonnement, qui n'a rien à faire dans un dépôt public.
+
+# Relevé par : az account show --query id -o tsv
+abonnement = "00000000-0000-0000-0000-000000000000"
+
+# Version à mettre en ligne. `latest` suit la branche principale ; une
+# étiquette de version fige ce qui est déployé.
+etiquette = "v1.0.0"
+
+# Laisser vide pour un préfixe DNS tiré au hasard.
+etiquette_dns = ""

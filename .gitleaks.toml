@@ -1,0 +1,42 @@
+# Configuration du scan de secrets.
+#
+# Trivy cherche déjà des secrets, mais seulement dans les fichiers présents.
+# Or un secret supprimé reste dans l'historique Git : le commit qui l'a
+# introduit existe toujours, et se retrouve par `git log -p`. Gitleaks relit
+# tout l'historique, ce qui répond à une question différente — « ai-je déjà
+# publié un secret », et non « en publie-t-on un aujourd'hui ».
+#
+# La distinction n'est pas théorique : au cours de ce projet un fichier `.env`
+# a été écrit puis retiré, et seul un scan de l'historique peut dire si ce
+# passage a laissé une trace exploitable.
+
+title = "SkillSeek AI"
+
+# On part du jeu de règles fourni par l'outil plutôt que de le réécrire :
+# il couvre les formats de clés des principaux fournisseurs, régulièrement
+# mis à jour en amont.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Valeurs de démonstration, publiques par construction"
+
+paths = [
+  # Ce fichier est un modèle destiné à être lu : ses valeurs sont des
+  # exemples, publiés volontairement, et jamais utilisées ailleurs qu'au
+  # premier démarrage sur un poste de développement. Le déploiement, lui,
+  # tire trois secrets neufs à chaque exécution (voir deploiement/aci).
+  '''\.env\.example$''',
+  # Les captures et la documentation montrent des comptes de démonstration
+  # dont les mots de passe sont affichés à l'écran de connexion.
+  '''^docs/''',
+  '''^_Ecole/''',
+]
+
+regexes = [
+  # Mots de passe du jeu de démonstration, présents dans les fixtures et
+  # dans les commandes d'amorçage. Ils n'ouvrent rien d'autre qu'une base
+  # jetable remplie de données fabriquées pour la soutenance.
+  '''Demo@1234''',
+  '''Admin@1234''',
+]

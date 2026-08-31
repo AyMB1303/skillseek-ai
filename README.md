@@ -134,7 +134,13 @@ frontend/src/
   components/     éléments partagés
   lib/            appels API, thème, animations
 .github/workflows/
-  ci.yml          7 travaux d'intégration continue
+  ci.yml          10 travaux d'intégration continue
+deploiement/
+  aci/            script de déploiement Container Instances
+  terraform/      la même infrastructure, décrite et reproductible
+k8s/
+  base/           manifestes communs aux deux environnements
+  overlays/       ce qui distingue développement et production
 ```
 
 **La séparation `blueprints` / `services` est délibérée.** Les services ignorent
@@ -146,7 +152,8 @@ permet de tester le moteur de notation sans démarrer de serveur web.
 Flask 3 · SQLAlchemy · PostgreSQL 16 · Alembic · JWT · bcrypt
 Next.js 14 · React 18 · Tailwind CSS
 spaCy · sentence-transformers · scikit-learn · Tesseract OCR
-Docker · GitHub Actions · Trivy · Bandit · Semgrep · CodeQL
+Docker · GitHub Actions · Terraform · Kubernetes · Kustomize
+Trivy · Bandit · Semgrep · CodeQL · Gitleaks · OWASP ZAP
 
 ### Chaîne d'intégration continue
 
@@ -213,7 +220,7 @@ déguisé en perspective :
 |---|---|
 | [`docs/ANALYSE_ATS.md`](docs/ANALYSE_ATS.md) | lecture des CV, reconstitution du profil structuré |
 | [`docs/ASSISTANT_RAG.md`](docs/ASSISTANT_RAG.md) | assistant conversationnel, bases de connaissances |
-| [`docs/CI_CD.md`](docs/CI_CD.md) | détail des sept travaux d'intégration |
+| [`docs/CI_CD.md`](docs/CI_CD.md) | détail des dix travaux et des six contrôles de sûreté |
 | [`docs/DEPLOIEMENT_AZURE.md`](docs/DEPLOIEMENT_AZURE.md) | déploiement, contraintes de l'abonnement |
 | [`docs/DEVOPS.md`](docs/DEVOPS.md) | conteneurisation, images, exploitation |
 | [`bi/GUIDE_POWER_BI.md`](bi/GUIDE_POWER_BI.md) | vues décisionnelles |

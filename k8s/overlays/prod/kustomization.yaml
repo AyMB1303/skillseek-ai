@@ -1,0 +1,54 @@
+# Environnement de production.
+#
+# Deux différences de fond avec le développement, et elles sont
+# volontairement les seules qui touchent à autre chose que le
+# dimensionnement :
+#
+#   1. aucun secret n'est généré ici. Le secret `skillseek-secrets` doit
+#      exister dans l'espace de noms avant tout déploiement, déposé par un
+#      magasin externe. Un dépôt public ne doit contenir aucune valeur qui
+#      ouvre quelque chose, même sous forme de gabarit — un gabarit finit
+#      toujours par être appliqué tel quel un jour de hâte ;
+#   2. les images sont désignées par une étiquette de version, jamais par
+#      `latest`. « Quelle version est en ligne ? » doit avoir une réponse.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: skillseek-prod
+
+resources:
+  - ../../base
+  - espace-de-noms.yaml
+
+images:
+  - name: ghcr.io/aymb1303/skillseek-ai/backend
+    newTag: v1.0.0
+  - name: ghcr.io/aymb1303/skillseek-ai/frontend
+    newTag: v1.0.0
+
+patches:
+  - target:
+      kind: Deployment
+      name: frontend
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 3
+  - target:
+      kind: ConfigMap
+      name: skillseek-config
+    patch: |-
+      - op: replace
+        path: /data/FRONTEND_ORIGIN
+        value: http://skillseek.local
+  # Le service applicatif charge plusieurs modèles au démarrage : il monte
+  # lentement en charge et redescend mal. La mise à l'échelle automatique
+  # est donc calée large et lente, et non sur un seuil nerveux qui ferait
+  # osciller le nombre de répliques.
+  - target:
+      kind: Deployment
+      name: backend
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2

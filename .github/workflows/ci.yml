@@ -148,6 +148,213 @@ jobs:
           npm audit --audit-level=high \
             || echo "::warning title=Dépendances Node::Vulnérabilités connues signalées, voir le journal ci-dessus." 
 
+  infrastructure:
+    name: Infrastructure — validation (Terraform)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Installer Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.10.3"
+          # Le greffon d'enrobage réécrit la sortie des commandes pour la
+          # publier en commentaire de proposition de contribution. On ne s'en
+          # sert pas ici, et il masque les codes de retour, ce qui est
+          # exactement ce qu'on ne veut pas d'une étape de vérification.
+          terraform_wrapper: false
+
+      - name: Mise en forme
+        # Le formatage d'un fichier d'infrastructure n'est pas cosmétique :
+        # une différence d'indentation dans une revue noie le changement
+        # réel au milieu du bruit.
+        #
+        # Signalé et non bloquant pour l'instant. `terraform fmt` aligne les
+        # signes d'égalité par groupes d'attributs contigus, une règle que
+        # l'on ne devine pas de façon fiable à la main. Après un premier
+        # `terraform fmt -recursive` local, retirer la clause `||` pour que
+        # l'étape redevienne une vraie garde.
+        working-directory: deploiement/terraform
+        run: |
+          terraform fmt -check -recursive -diff \
+            || echo "::warning title=Terraform fmt::Formatage à normaliser : lancez 'terraform fmt -recursive'."
+
+      - name: Initialisation
+        # `-backend=false` : la vérification syntaxique n'a pas à joindre
+        # Azure ni à lire l'état distant. Elle doit fonctionner sur une
+        # proposition de contribution venue d'un dépôt dérivé, qui n'a aucun
+        # accès à l'abonnement.
+        working-directory: deploiement/terraform
+        run: terraform init -backend=false -input=false
+
+      - name: Validation
+        working-directory: deploiement/terraform
+        run: terraform validate
+
+      - name: Analyse de configuration (Trivy)
+        # Cherche les défauts propres à l'infrastructure décrite : port
+        # ouvert au-delà du nécessaire, secret en clair, chiffrement absent.
+        # Ni flake8 ni ESLint ne lisent du HCL.
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: config
+          scan-ref: deploiement
+          format: sarif
+          output: trivy-infra.sarif
+          severity: CRITICAL,HIGH
+          exit-code: "0"
+
+      - name: Publier dans l'onglet Security
+        if: always()
+        continue-on-error: true
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-infra.sarif
+          category: trivy-infrastructure
+
+  orchestration:
+    name: Orchestration — manifestes Kubernetes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Installer kubectl
+        # Kustomize est intégré à kubectl depuis la version 1.21 : un outil
+        # de moins à installer, à épingler et à faire vieillir.
+        uses: azure/setup-kubectl@v4
+        with:
+          version: v1.31.4
+
+      - name: Assembler les deux environnements
+        # Première garde, et la plus utile : une surcharge qui vise un champ
+        # inexistant échoue ici, pas au moment du déploiement.
+        run: |
+          for env in dev prod; do
+            echo "::group::$env"
+            kubectl kustomize "k8s/overlays/$env" > "assemble-$env.yaml"
+            grep -c '^kind:' "assemble-$env.yaml" | xargs echo "objets produits :"
+            echo "::endgroup::"
+          done
+
+      - name: Vérifier les schémas (kubeconform)
+        # Contrôle chaque objet contre le schéma officiel de sa version
+        # d'API. `-strict` refuse les champs inconnus : une faute de frappe
+        # dans un nom de champ est autrement acceptée en silence par le
+        # serveur, qui ignore ce qu'il ne comprend pas.
+        run: |
+          for env in dev prod; do
+            docker run --rm -v "$PWD:/travail" -w /travail \
+              ghcr.io/yannh/kubeconform:v0.6.7 \
+              -strict -summary -kubernetes-version 1.31.0 \
+              "assemble-$env.yaml"
+          done
+
+      - name: Vérifier la configuration (Trivy)
+        # Cherche les défauts propres aux manifestes : conteneur en root,
+        # limites de ressources absentes, privilèges non abandonnés. C'est
+        # ce contrôle qui a dicté les blocs `securityContext` du socle.
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: config
+          scan-ref: k8s
+          format: sarif
+          output: trivy-k8s.sarif
+          severity: CRITICAL,HIGH
+          exit-code: "0"
+
+      - name: Publier dans l'onglet Security
+        if: always()
+        continue-on-error: true
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-k8s.sarif
+          category: trivy-kubernetes
+
+      - name: Monter un cluster éphémère
+        # Un vrai serveur d'API, pas une simulation. Les deux étapes
+        # précédentes valident la forme ; celle-ci valide l'admission —
+        # quotas de nommage, cohérence des sélecteurs, champs immuables,
+        # règles de validation propres à la version du serveur.
+        uses: helm/kind-action@v1.10.0
+        with:
+          cluster_name: skillseek-validation
+          node_image: kindest/node:v1.31.2
+
+      - name: Soumettre les manifestes sans les appliquer
+        # `--dry-run=server` envoie réellement les objets au serveur, qui les
+        # valide comme s'il allait les créer, puis les jette. C'est la
+        # dernière vérification possible sans tirer les images — l'image du
+        # service applicatif pèse 3,7 Go, et la faire descendre à chaque
+        # exécution coûterait plus qu'elle n'apprendrait ici. L'exécution
+        # réelle, elle, est prouvée par le déploiement Azure.
+        run: |
+          for env in dev prod; do
+            echo "::group::$env"
+            kubectl apply --dry-run=server -f "assemble-$env.yaml"
+            echo "::endgroup::"
+          done
+
+      - name: Conserver les manifestes assemblés
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: manifestes-assembles
+          path: assemble-*.yaml
+          retention-days: 30
+
+  secrets:
+    name: Sécurité — secrets dans l'historique (Gitleaks)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Sans cette ligne, l'action ne récupère que le dernier commit, et
+          # le scan ne verrait donc que l'état actuel du dépôt — exactement
+          # ce que Trivy fait déjà. Tout l'intérêt est ici : relire chaque
+          # commit depuis le premier.
+          fetch-depth: 0
+
+      - name: Scanner l'historique complet
+        # L'image est ancrée sur une version, non sur `latest` : un scan de
+        # sécurité dont l'outil change sans prévenir ne permet plus de
+        # comparer deux exécutions.
+        #
+        # `--redact` remplace la valeur trouvée par des astérisques dans le
+        # rapport. Un rapport de fuite qui recopie le secret en clair, puis
+        # le conserve quatre-vingt-dix jours dans les artefacts d'exécution,
+        # est lui-même une fuite.
+        run: |
+          docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:v8.21.2 \
+            detect --source=/repo --config=/repo/.gitleaks.toml \
+            --report-format=sarif --report-path=/repo/gitleaks.sarif \
+            --redact --exit-code 0 --verbose
+
+      - name: Compter les constats
+        # L'outil est laissé non bloquant le temps d'établir une base de
+        # référence : un scan d'historique remonte au premier commit, et
+        # faire échouer d'emblée la chaîne sur un fichier corrigé depuis
+        # longtemps n'apprend rien. Le compte est affiché en résumé
+        # d'exécution pour que la décision de durcir se prenne sur un
+        # chiffre plutôt que sur une impression.
+        if: always()
+        run: |
+          n=$(python3 -c "import json,sys; print(len(json.load(open('gitleaks.sarif'))['runs'][0]['results']))" 2>/dev/null || echo 0)
+          echo "### Secrets dans l'historique : $n constat(s)" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$n" -gt 0 ]; then
+            echo "::warning title=Gitleaks::$n constat(s) dans l'historique Git — voir l'onglet Security."
+          fi
+
+      - name: Publier dans l'onglet Security
+        if: always()
+        continue-on-error: true
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: gitleaks.sarif
+          category: gitleaks
+
   securite:
     name: Sécurité — analyse du dépôt (Trivy)
     runs-on: ubuntu-latest
@@ -259,7 +466,7 @@ jobs:
   images:
     name: Images Docker
     runs-on: ubuntu-latest
-    needs: [backend, frontend, dependances, securite, sast]
+    needs: [backend, frontend, dependances, securite, sast, secrets, infrastructure, orchestration]
     permissions:
       contents: read
       packages: write
@@ -442,6 +649,66 @@ jobs:
 
       - name: Appliquer les migrations
         run: docker compose exec -T backend flask db upgrade
+
+      # ---------------------------------------------------------------- #
+      # Analyse dynamique                                                 #
+      # ---------------------------------------------------------------- #
+      #
+      # Les analyseurs précédents lisent le code sans jamais l'exécuter :
+      # ils reconnaissent des motifs réputés dangereux. Celui-ci fait
+      # l'inverse — il ignore le code et attaque l'application en marche,
+      # comme le ferait quelqu'un depuis l'extérieur. Les deux approches ne
+      # trouvent pas les mêmes choses : un en-tête de sécurité absent, une
+      # page d'erreur trop bavarde ou un cookie sans attribut ne se voient
+      # que sur un service qui répond.
+      #
+      # Ce travail est le seul de la chaîne où la pile complète tourne :
+      # c'est donc le seul endroit où ce contrôle est possible sans
+      # dépenser dix minutes de construction supplémentaires.
+
+      - name: Préparer le répertoire de rapport
+        # Le conteneur d'analyse n'écrit pas sous l'identité du runner ;
+        # sans droits d'écriture ouverts sur le point de montage, il produit
+        # son rapport puis échoue à l'enregistrer.
+        run: mkdir -p rapport-zap && chmod 777 rapport-zap
+
+      - name: Analyse dynamique de l'interface (OWASP ZAP)
+        # `--network host` donne au conteneur d'analyse l'accès aux ports
+        # publiés par la pile ; sans cela il tourne dans son propre réseau et
+        # ne joint rien.
+        #
+        # `-I` : les alertes de niveau avertissement ne font pas échouer le
+        # travail. Seul un constat classé en échec dans le fichier de règles
+        # arrête la chaîne. C'est le même principe que pour Trivy — on
+        # bloque sur ce qu'on a décidé de bloquer, pas sur ce que l'outil
+        # décide ce matin-là.
+        run: |
+          cp .zap/regles.tsv rapport-zap/regles.tsv
+          docker run --rm --network host \
+            -v "$PWD/rapport-zap:/zap/wrk/:rw" \
+            ghcr.io/zaproxy/zaproxy:20250127-stable \
+            zap-baseline.py -t http://localhost:3000 \
+              -c regles.tsv -r rapport-zap.html -w rapport-zap.md -I \
+            || echo "::warning title=ZAP::Constats relevés par l'analyse dynamique, voir l'artefact."
+
+      - name: Résumé de l'analyse dynamique
+        if: always()
+        run: |
+          if [ -f rapport-zap/rapport-zap.md ]; then
+            {
+              echo "## Analyse dynamique (OWASP ZAP)"
+              echo ""
+              head -40 rapport-zap/rapport-zap.md
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Conserver le rapport d'analyse dynamique
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rapport-zap
+          path: rapport-zap/
+          retention-days: 30
 
       - name: Journaux en cas d'échec
         if: failure()

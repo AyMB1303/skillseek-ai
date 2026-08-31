@@ -4,18 +4,59 @@
 
 L'outillage est **GitHub Actions**, décrit dans `.github/workflows/ci.yml`.
 La chaîne se déclenche à chaque poussée et à chaque demande de fusion sur
-`main` et `dev`, et se lit en quatre travaux.
+`main` et `dev`, et se lit en dix travaux répartis sur trois étages.
 
-| Travail | Ce qu'il vérifie | Quand |
+**Étage 1 — vérification.** Huit travaux en parallèle, tous rapides, chacun
+répondant à une question que les autres ne posent pas.
+
+| Travail | Ce qu'il vérifie | Question posée |
 |---|---|---|
-| `backend` | `flake8` sur `app` et `tests`, puis `pytest` | toujours |
-| `frontend` | `npm ci`, `npm run lint`, `npm run build` | toujours |
-| `images` | construction des deux images Docker ; publication sur GHCR | publication sur `main` seulement |
-| `assemblage` | `docker compose up`, sonde de vie de l'API, migrations | `main` seulement |
+| `backend` | `flake8` puis `pytest` | le raisonnement métier est-il juste ? |
+| `frontend` | `npm ci`, ESLint, Vitest, construction | l'interface se construit-elle ? |
+| `dependances` | `pip-audit`, `npm audit` | mes dépendances ont-elles des failles connues ? |
+| `infrastructure` | `terraform fmt`, `init`, `validate`, Trivy | l'infrastructure décrite est-elle valide ? |
+| `orchestration` | `kubectl kustomize`, kubeconform, Trivy, admission sur cluster kind | les manifestes sont-ils acceptés par un vrai serveur d'API ? |
+| `secrets` | Gitleaks sur l'historique Git complet | ai-je déjà publié un secret ? |
+| `securite` | Trivy sur le système de fichiers | le dépôt contient-il une faille ou une clé ? |
+| `sast` | Bandit, Semgrep | ai-je écrit du code intrinsèquement risqué ? |
 
-Les deux premiers s'exécutent en parallèle ; les deux suivants attendent
-qu'ils réussissent. L'ordre suit le coût : une faute de style se détecte en
-trente secondes, une image se construit en plusieurs minutes.
+**Étage 2 — images.** `images` construit les deux images Docker, les analyse
+avec Trivy, produit un inventaire logiciel (SBOM) et ne publie que sur `main`
+ou sur une étiquette de version.
+
+**Étage 3 — assemblage.** `assemblage` lève la pile complète avec Compose,
+applique les migrations sur une vraie base PostgreSQL, puis lance une analyse
+dynamique OWASP ZAP contre l'interface en marche.
+
+L'ordre suit le coût : une faute de style se détecte en trente secondes, une
+image se construit en plusieurs minutes.
+
+## Les cinq contrôles de sûreté
+
+Ils ne se recouvrent pas, et l'ordre dans la chaîne suit le moment où leur
+cible devient disponible — vérifier les secrets avant le code, le code avant
+l'image, l'image avant l'application en marche.
+
+| Étape | Contrôle | Outil |
+|---|---|---|
+| Après récupération du code | secrets dans l'historique Git | Gitleaks |
+| Sur les sources | analyse statique (SAST) | Bandit, Semgrep, CodeQL |
+| Sur le dépôt | dépendances vulnérables, clés en dur | Trivy `fs` |
+| Sur `deploiement/` et `k8s/` | mauvaise configuration d'infrastructure | Trivy `config` |
+| Après chaque construction | vulnérabilités de l'image | Trivy `image` |
+| Sur la pile en exécution | analyse dynamique (DAST) | OWASP ZAP |
+
+**Pourquoi le DAST en plus du SAST.** L'analyse statique lit le code sans
+l'exécuter : elle reconnaît des motifs réputés dangereux, et ne voit donc
+jamais ce qui n'existe qu'à l'exécution — un en-tête de sécurité absent, une
+page d'erreur trop bavarde, un cookie sans attribut. ZAP fait l'inverse : il
+ignore le code et interroge le service comme le ferait quelqu'un depuis
+l'extérieur.
+
+**Pourquoi Gitleaks en plus de Trivy.** Trivy cherche des secrets dans les
+fichiers présents. Un secret supprimé, lui, reste dans l'historique : le
+commit qui l'a introduit existe toujours. Gitleaks relit chaque commit depuis
+le premier, ce qui répond à une question différente.
 
 ## Choix expliqués
 

@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: skillseek-prod
+  labels:
+    kubernetes.io/metadata.name: skillseek-prod
+    environnement: production
+---
+# Mise à l'échelle automatique du service applicatif.
+#
+# Placée dans la surcharge de production et non dans le socle : en
+# développement, une seconde réplique doublerait la mémoire consommée par
+# les modèles sans rien apprendre. Ici elle permet d'absorber une rafale de
+# dépôts de candidatures.
+#
+# Le seuil de soixante-dix pour cent laisse la marge nécessaire au temps de
+# démarrage : une nouvelle réplique met plusieurs minutes à charger ses
+# modèles, et déclencher à quatre-vingt-quinze pour cent reviendrait à
+# demander du renfort une fois la saturation atteinte.
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: backend
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: backend
+  minReplicas: 2
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+  behavior:
+    scaleDown:
+      # Dix minutes d'observation avant de retirer une réplique : le coût
+      # d'une réplique gardée trop longtemps est faible, celui d'un
+      # rechargement complet des modèles ne l'est pas.
+      stabilizationWindowSeconds: 600
+---
+# Interdit de descendre sous une réplique disponible pendant une opération
+# de maintenance du cluster. Sans cet objet, vider un nœud peut arrêter la
+# dernière réplique et couper le service.
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: backend
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: skillseek
+      app.kubernetes.io/component: service-applicatif

@@ -1,20 +1,67 @@
 # Déploiement sur Azure Container Instances.
 #
-# ⚠ INACTIF TANT QUE LE SECRET `AZURE_CREDENTIALS` N'EST PAS RENSEIGNÉ.
-#
 # Pourquoi des conteneurs et non une machine virtuelle : l'abonnement
 # académique utilisé n'accorde aucun quota de processeurs sur les familles de
 # machines proposées dans les régions que sa politique autorise. Le service
 # Container Instances relève d'un quota distinct, lui disponible. Le projet
 # étant déjà conteneurisé, c'est une transposition et non un contournement.
 #
-# Pour l'activer :
+# ---------------------------------------------------------------------------
+# AUTHENTIFICATION
+# ---------------------------------------------------------------------------
 #
-#   az ad sp create-for-rbac --name skillseek-deploy \
-#     --role Contributor --scopes /subscriptions/<abonnement> --json-auth
+# Deux chemins sont acceptés, et le premier est préféré.
 #
-# puis coller le bloc JSON obtenu dans Settings → Secrets and variables →
-# Actions → `AZURE_CREDENTIALS`.
+# 1. Fédération d'identité (OIDC) — recommandé, et sans secret de longue
+#    durée. GitHub émet à chaque exécution un jeton signé qui atteste du
+#    dépôt, de la branche et du workflow en cours ; Azure vérifie cette
+#    attestation et rend un accès valable une heure. Rien n'est stocké : il
+#    n'y a donc aucun secret à faire tourner, ni à révoquer si le dépôt est
+#    compromis, ni qui puisse être exfiltré et rejoué ailleurs.
+#
+#    Mise en place, à exécuter une fois dans le Cloud Shell :
+#
+#      abonnement=$(az account show --query id -o tsv)
+#      app=$(az ad app create --display-name skillseek-deploy --query appId -o tsv)
+#      az ad sp create --id "$app"
+#
+#      az ad app federated-credential create --id "$app" --parameters '{
+#        "name": "github-main",
+#        "issuer": "https://token.actions.githubusercontent.com",
+#        "subject": "repo:AyMB1303/skillseek-ai:ref:refs/heads/main",
+#        "audiences": ["api://AzureADTokenExchange"]
+#      }'
+#
+#      # Une seconde attestation pour les étiquettes de version, qui ne
+#      # portent pas la même identité que la branche.
+#      az ad app federated-credential create --id "$app" --parameters '{
+#        "name": "github-etiquettes",
+#        "issuer": "https://token.actions.githubusercontent.com",
+#        "subject": "repo:AyMB1303/skillseek-ai:ref:refs/tags/v1.0.0",
+#        "audiences": ["api://AzureADTokenExchange"]
+#      }'
+#
+#      # Portée limitée au groupe de ressources, et non à l'abonnement :
+#      # ce workflow n'a aucune raison de pouvoir agir ailleurs.
+#      az group create -n SkillSeek-demo -l germanywestcentral -o none
+#      az role assignment create --assignee "$app" --role Contributor \
+#        --scope "/subscriptions/$abonnement/resourceGroups/SkillSeek-demo"
+#
+#      echo "AZURE_CLIENT_ID       = $app"
+#      echo "AZURE_TENANT_ID       = $(az account show --query tenantId -o tsv)"
+#      echo "AZURE_SUBSCRIPTION_ID = $abonnement"
+#
+#    Ces trois valeurs se déposent dans Settings → Secrets and variables →
+#    Actions → onglet « Variables ». Ce sont des identifiants, non des
+#    secrets : ils n'ouvrent rien sans l'attestation qui les accompagne.
+#
+# 2. Secret `AZURE_CREDENTIALS` — chemin historique, conservé pour ne pas
+#    perdre la possibilité de déployer avant que le premier soit configuré.
+#    Il repose sur un mot de passe d'application valable des mois, stocké
+#    dans le dépôt : c'est exactement ce que le premier chemin supprime.
+#
+#      az ad sp create-for-rbac --name skillseek-deploy \
+#        --role Contributor --scopes /subscriptions/<abonnement> --json-auth
 
 name: Déploiement
 
@@ -43,8 +90,14 @@ concurrency:
 
 # Moindre privilège : ce workflow lit le dépôt et agit sur Azure. Il n'a
 # aucune raison de pouvoir écrire quoi que ce soit sur GitHub.
+#
+# `id-token: write` ne donne aucun droit d'écriture sur le dépôt : c'est la
+# permission de demander à GitHub un jeton d'identité attestant du contexte
+# d'exécution. Sans elle, la fédération d'identité échoue avec un message
+# qui n'en dit rien.
 permissions:
   contents: read
+  id-token: write
 
 env:
   GROUPE: SkillSeek-demo
@@ -58,24 +111,41 @@ jobs:
     environment: demonstration
     permissions:
       contents: read
+      id-token: write
 
     steps:
       - name: Vérifier que la cible est configurée
         # Sans cette garde, le job échouerait plus loin sur une erreur
         # d'authentification illisible. Mieux vaut dire tout de suite ce qui
-        # manque.
+        # manque, et lequel des deux chemins sera emprunté.
         env:
           ACCES: ${{ secrets.AZURE_CREDENTIALS }}
+          CLIENT: ${{ vars.AZURE_CLIENT_ID }}
         run: |
-          if [ -z "$ACCES" ]; then
-            echo "::error::Aucun accès Azure configuré. Renseignez le secret"
-            echo "::error::AZURE_CREDENTIALS (voir l'en-tête de ce fichier)."
+          if [ -n "$CLIENT" ]; then
+            echo "Authentification par fédération d'identité (aucun secret stocké)."
+          elif [ -n "$ACCES" ]; then
+            echo "::warning title=Authentification::Secret de longue durée utilisé."
+            echo "::warning title=Authentification::Voir l'en-tête du fichier pour passer à la fédération d'identité."
+          else
+            echo "::error::Aucun accès Azure configuré."
+            echo "::error::Renseignez les variables AZURE_CLIENT_ID, AZURE_TENANT_ID"
+            echo "::error::et AZURE_SUBSCRIPTION_ID, ou le secret AZURE_CREDENTIALS."
             exit 1
           fi
 
       - uses: actions/checkout@v4
 
-      - name: S'authentifier auprès d'Azure
+      - name: S'authentifier auprès d'Azure (fédération d'identité)
+        if: vars.AZURE_CLIENT_ID != ''
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: S'authentifier auprès d'Azure (secret historique)
+        if: vars.AZURE_CLIENT_ID == ''
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}

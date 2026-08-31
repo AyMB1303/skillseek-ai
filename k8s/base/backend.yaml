@@ -1,0 +1,158 @@
+# Service applicatif.
+#
+# Les migrations sont jouées par un conteneur d'initialisation, et non au
+# démarrage du conteneur principal. La distinction compte dès qu'il y a plus
+# d'une réplique : trois conteneurs qui lancent `flask db upgrade` en même
+# temps entrent en concurrence sur la table de versions d'Alembic. Un
+# conteneur d'initialisation s'exécute jusqu'à son terme avant que le
+# conteneur principal ne démarre, et Kubernetes garantit qu'il n'y en a
+# qu'un par pod — ce qui ne règle pas tout, mais rend la course beaucoup
+# moins probable et le comportement observable.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  labels:
+    app.kubernetes.io/name: skillseek
+    app.kubernetes.io/component: service-applicatif
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: skillseek
+      app.kubernetes.io/component: service-applicatif
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: skillseek
+        app.kubernetes.io/component: service-applicatif
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      initContainers:
+        - name: migrations
+          image: ghcr.io/aymb1303/skillseek-ai/backend:latest
+          command:
+            - /bin/sh
+            - -c
+            - |
+              for _ in $(seq 1 90); do
+                python -c "import socket; socket.create_connection(('db', 5432), 2)" 2>/dev/null && break
+                sleep 2
+              done
+              flask db upgrade && flask seed
+          envFrom:
+            - configMapRef:
+                name: skillseek-config
+            - secretRef:
+                name: skillseek-secrets
+          resources:
+            requests:
+              cpu: 250m
+              memory: 1Gi
+            limits:
+              cpu: "1"
+              memory: 2Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop: ["ALL"]
+      containers:
+        - name: backend
+          image: ghcr.io/aymb1303/skillseek-ai/backend:latest
+          command: ["flask", "run", "--host=0.0.0.0", "--port=5000"]
+          ports:
+            - name: http
+              containerPort: 5000
+          envFrom:
+            - configMapRef:
+                name: skillseek-config
+            - secretRef:
+                name: skillseek-secrets
+          # `/api/health` répond dès que le processus écoute ; `/api/ready`
+          # ne répond qu'une fois la base joignable et les modèles chargés.
+          # Le premier convient à la sonde de vie, le second à la sonde de
+          # trafic — l'inverse redémarrerait un service occupé à charger ses
+          # modèles linguistiques, indéfiniment.
+          startupProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            periodSeconds: 10
+            # Jusqu'à dix minutes : l'image embarque PyTorch, le modèle de
+            # spaCy et celui des plongements. Sans cette sonde de démarrage,
+            # la sonde de vie tuerait le conteneur avant qu'il ait fini.
+            failureThreshold: 60
+          readinessProbe:
+            httpGet:
+              path: /api/ready
+              port: http
+            periodSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            periodSeconds: 20
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "1"
+              memory: 3Gi
+            limits:
+              cpu: "2"
+              memory: 6Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: depots
+              mountPath: /app/uploads
+      volumes:
+        - name: depots
+          persistentVolumeClaim:
+            claimName: depots-cv
+---
+# Les curriculums déposés survivent au redémarrage d'un pod : le système de
+# fichiers d'un conteneur est éphémère, et un dossier de candidature perdu
+# au premier redéploiement rendrait la traçabilité illusoire.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: depots-cv
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: skillseek
+    app.kubernetes.io/component: service-applicatif
+  ports:
+    - name: http
+      port: 5000
+      targetPort: http
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: skillseek-config
+data:
+  FLASK_ENV: production
+  LOGIN_MAX_ECHECS: "5"
+  LOGIN_VERROU_MINUTES: "10"
+  # Surchargé par chaque environnement : l'adresse publique n'est pas la
+  # même en développement et en production, et c'est précisément ce qui
+  # justifie de la sortir de l'image.
+  FRONTEND_ORIGIN: http://skillseek.local

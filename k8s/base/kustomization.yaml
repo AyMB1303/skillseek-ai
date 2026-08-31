@@ -1,0 +1,20 @@
+# Socle commun aux deux environnements.
+#
+# Rien ici ne mentionne un espace de noms, une adresse ni un nombre de
+# répliques particuliers : tout ce qui distingue développement et production
+# vit dans les surcharges. C'est ce qui permet d'affirmer que les deux
+# environnements exécutent la même chose.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - db.yaml
+  - backend.yaml
+  - frontend.yaml
+  - reseau.yaml
+
+labels:
+  - includeSelectors: false
+    pairs:
+      app.kubernetes.io/part-of: skillseek-ai
+      app.kubernetes.io/managed-by: kustomize

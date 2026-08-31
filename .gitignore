@@ -111,3 +111,24 @@ frontend/coverage/
 # Dossier de travail scolaire : rapports, captures et figures du PFA.
 # Il vit sur le disque a cote du code, mais n'appartient pas au produit.
 _Ecole/
+
+# Terraform.
+#
+# L'etat associe chaque ressource decrite a la ressource reelle qui lui
+# correspond, et porte au passage les valeurs calculees — dont les secrets
+# tires au hasard. Il ne doit jamais etre versionne. Les fichiers de
+# variables portent l'identifiant d'abonnement, qui n'a rien a faire dans
+# un depot public.
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+crash.*.log
+terraform.tfvars
+*.auto.tfvars
+!terraform.tfvars.example
+
+# Rapports d'analyse dynamique produits par la chaine.
+rapport-zap/
+gitleaks.sarif

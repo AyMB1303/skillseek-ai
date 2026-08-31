@@ -1,0 +1,110 @@
+# Base de données.
+#
+# Un « StatefulSet » plutôt qu'un « Deployment », pour une raison précise :
+# un Deployment considère ses répliques interchangeables et peut en démarrer
+# une nouvelle avant d'arrêter l'ancienne. Deux instances de Postgres montées
+# sur le même volume corrompent les données. Le StatefulSet garantit l'ordre
+# et l'identité — une réplique nommée `db-0`, un volume qui lui reste
+# attaché, et jamais deux à la fois.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: db
+  labels:
+    app.kubernetes.io/name: skillseek
+    app.kubernetes.io/component: base-de-donnees
+spec:
+  serviceName: db
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: skillseek
+      app.kubernetes.io/component: base-de-donnees
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: skillseek
+        app.kubernetes.io/component: base-de-donnees
+    spec:
+      securityContext:
+        # L'image officielle de Postgres tourne sous l'utilisateur `postgres`
+        # (identifiant 999). On l'énonce plutôt que de l'hériter : un scan de
+        # configuration ne peut pas deviner ce que fait l'image, et un
+        # conteneur qui tourne en root est le défaut le plus signalé.
+        runAsNonRoot: true
+        runAsUser: 999
+        fsGroup: 999
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          ports:
+            - name: postgres
+              containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: skillseek
+            - name: POSTGRES_DB
+              value: skillseek
+            # Sous-dossier du point de montage : Postgres refuse de
+            # s'initialiser dans un répertoire qui n'est pas vide, et un
+            # volume fraîchement attaché contient déjà `lost+found`.
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: skillseek-secrets
+                  key: POSTGRES_PASSWORD
+          # Les deux sondes interrogent la même commande mais ne répondent
+          # pas à la même question. « readiness » décide si l'instance reçoit
+          # du trafic ; « liveness » décide si on la redémarre. Confondre les
+          # deux conduit à redémarrer une base simplement lente à répondre.
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "skillseek", "-d", "skillseek"]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "skillseek", "-d", "skillseek"]
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            failureThreshold: 6
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: donnees
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: donnees
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 2Gi
+---
+# Service sans adresse propre : il ne sert qu'à donner un nom stable à la
+# réplique. Rien d'extérieur au groupe ne doit joindre la base.
+apiVersion: v1
+kind: Service
+metadata:
+  name: db
+spec:
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: skillseek
+    app.kubernetes.io/component: base-de-donnees
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres

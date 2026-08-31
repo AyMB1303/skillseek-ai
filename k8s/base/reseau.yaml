@@ -1,0 +1,97 @@
+# Point d'entrée et cloisonnement réseau.
+
+# L'Ingress joue ici le rôle que tient nginx dans le déploiement Azure :
+# une seule adresse publique, deux destinations selon le chemin. Le service
+# applicatif et la base ne sont jamais joignables directement de l'extérieur.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: skillseek
+  annotations:
+    # Les curriculums déposés dépassent la limite de un mégaoctet appliquée
+    # par défaut : sans cette annotation, le dépôt d'un CV un peu lourd
+    # échoue avec une erreur du proxy que l'application ne voit jamais.
+    nginx.ingress.kubernetes.io/proxy-body-size: 16m
+    # L'analyse d'un dossier prend plusieurs secondes ; la coupure par
+    # défaut à soixante secondes est trop courte pour le premier appel,
+    # celui qui charge les modèles.
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "180"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: skillseek.local
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: backend
+                port:
+                  name: http
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  name: http
+---
+# Refus par défaut de tout trafic entrant dans l'espace de noms. Sans cette
+# règle, n'importe quel pod du cluster peut joindre la base de données :
+# Kubernetes est ouvert par défaut, et c'est le défaut le plus souvent
+# oublié.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: refus-par-defaut
+spec:
+  podSelector: {}
+  policyTypes: ["Ingress"]
+---
+# La base n'accepte que le service applicatif. Ni l'interface, ni le
+# contrôleur d'entrée, ni un pod voisin n'ont de raison de lui parler.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: base-depuis-service-applicatif
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: skillseek
+      app.kubernetes.io/component: base-de-donnees
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: skillseek
+              app.kubernetes.io/component: service-applicatif
+      ports:
+        - protocol: TCP
+          port: 5432
+---
+# Le service applicatif et l'interface n'acceptent que le contrôleur
+# d'entrée. L'espace de noms de celui-ci est désigné par une étiquette
+# plutôt que par son nom, pour ne pas dépendre de la distribution employée.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: applications-depuis-entree
+spec:
+  podSelector:
+    matchExpressions:
+      - key: app.kubernetes.io/component
+        operator: In
+        values: ["service-applicatif", "interface"]
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+        # L'interface appelle le service applicatif pour le rendu côté
+        # serveur : le trafic reste interne à l'espace de noms.
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: skillseek

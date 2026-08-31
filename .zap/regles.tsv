@@ -1,0 +1,31 @@
+# Réglage du balayage dynamique OWASP ZAP.
+#
+# Format : identifiant de règle <TAB> action <TAB> commentaire
+# Actions : WARN (signale), FAIL (fait échouer), IGNORE (tait).
+#
+# Le principe retenu est celui appliqué au reste de la chaîne : on ne tait
+# une alerte que si l'on peut dire pourquoi elle ne s'applique pas ici. Tout
+# le reste reste visible, quitte à être seulement signalé.
+
+# --- Alertes sans objet sur ce déploiement ------------------------------- #
+
+# 10035  Strict-Transport-Security absent.
+#        L'en-tête n'a de sens que derrière HTTPS. Le déploiement de
+#        démonstration est en HTTP simple, faute de certificat sur une
+#        adresse `azurecontainer.io`. Poser l'en-tête ici n'apporterait rien
+#        et masquerait la vraie limite, qui est nommée au chapitre 8.
+10035	IGNORE	Sans objet en HTTP ; limite assumée du déploiement de démonstration.
+
+# 10063  Fonctionnalités de permissions non configurées.
+#        L'interface ne demande ni caméra, ni micro, ni géolocalisation.
+10063	WARN	À poser lorsque la plateforme sortira de la démonstration.
+
+# --- Alertes que l'on veut voir échouer ----------------------------------- #
+
+# 10202  Jeton anti-rejeu absent d'un formulaire.
+#        L'authentification repose sur un jeton signé porté par l'en-tête
+#        Authorization, non par un cookie : la falsification de requête
+#        intersite ne s'applique pas telle quelle. On garde néanmoins
+#        l'alerte visible, car le jour où un cookie apparaît, elle devient
+#        immédiatement pertinente.
+10202	WARN	Jetons portés par en-tête, non par cookie.

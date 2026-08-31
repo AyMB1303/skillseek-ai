@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: skillseek-dev
+  labels:
+    kubernetes.io/metadata.name: skillseek-dev
+    environnement: developpement
