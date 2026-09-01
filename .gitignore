@@ -132,3 +132,9 @@ terraform.tfvars
 # Rapports d'analyse dynamique produits par la chaine.
 rapport-zap/
 gitleaks.sarif
+
+# Ansible : inventaire et acces au cluster, produits par Terraform.
+# L'inventaire porte les adresses publiques des machines ; le fichier
+# d'acces porte un certificat qui ouvre le cluster en administrateur.
+deploiement/ansible/inventaire.ini
+deploiement/ansible/acces-cluster.yaml

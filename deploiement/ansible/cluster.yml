@@ -1,0 +1,174 @@
+# Installation du cluster k3s.
+#
+#   ansible-playbook -i inventaire.ini cluster.yml
+#
+# Séparation des rôles, et c'est le principe qui gouverne ce fichier :
+# Terraform crée l'infrastructure, Ansible l'installe. Les deux outils
+# répondent à des questions différentes — « quelles machines existent » et
+# « que contiennent-elles » — et les mêler produit un ensemble qu'on ne
+# peut plus rejouer partiellement.
+#
+# Le playbook est idempotent : le relancer sur un cluster déjà installé ne
+# casse rien et ne réinstalle rien. C'est ce qui permet de le rejouer après
+# une erreur au lieu de tout recommencer.
+
+- name: Préparation commune des deux nœuds
+  hosts: cluster
+  become: true
+  tasks:
+    - name: Attendre que la machine accepte les connexions
+      # Terraform rend la main dès qu'Azure a créé la machine, pas quand le
+      # système est prêt. Sans cette attente, la première tâche échoue une
+      # fois sur deux — et l'erreur, un refus de connexion, ne dit pas que
+      # le problème est un simple décalage de quelques secondes.
+      ansible.builtin.wait_for_connection:
+        timeout: 300
+
+    - name: Mettre à jour l'index des paquets
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Installer les outils nécessaires
+      ansible.builtin.apt:
+        name:
+          - curl
+          - ca-certificates
+          # Requis par le module Ansible qui manipule les objets Kubernetes.
+          - python3-pip
+        state: present
+
+    - name: Désactiver l'espace d'échange
+      # Kubernetes refuse de démarrer si la mémoire d'échange est active :
+      # l'ordonnanceur raisonne sur de la mémoire réelle, et un nœud qui
+      # échange donne des décisions fausses. Les images Azure l'activent.
+      ansible.builtin.shell:
+        cmd: swapoff -a
+      changed_when: false
+
+    - name: Rendre la désactivation permanente
+      ansible.builtin.replace:
+        path: /etc/fstab
+        regexp: '^([^#].*\sswap\s.*)$'
+        replace: '# \1'
+
+# ---------------------------------------------------------------------- #
+
+- name: Serveur k3s sur le nœud de contrôle
+  hosts: controle
+  become: true
+  tasks:
+    - name: Vérifier si k3s est déjà installé
+      ansible.builtin.stat:
+        path: /usr/local/bin/k3s
+      register: k3s_present
+
+    - name: Installer le serveur
+      # `--tls-san` inscrit l'adresse publique dans le certificat du serveur
+      # d'API. Sans elle, le fichier d'accès récupéré plus bas ne vaut que
+      # depuis la machine elle-même : toute connexion depuis l'extérieur est
+      # refusée pour un certificat qui ne couvre pas l'adresse employée.
+      #
+      # `--disable traefik` : k3s installe son propre contrôleur d'entrée.
+      # On lui préfère celui que décrivent déjà les manifestes du dépôt,
+      # afin que le cluster local et celui-ci se comportent pareil.
+      ansible.builtin.shell:
+        cmd: >
+          curl -sfL https://get.k3s.io |
+          INSTALL_K3S_VERSION=v1.31.4+k3s1
+          INSTALL_K3S_EXEC="server
+            --tls-san {{ ansible_host }}
+            --node-ip {{ adresse_privee }}
+            --disable traefik
+            --disable servicelb
+            --write-kubeconfig-mode 644"
+          sh -
+      when: not k3s_present.stat.exists
+
+    - name: Attendre que le serveur d'API réponde
+      ansible.builtin.wait_for:
+        port: 6443
+        timeout: 180
+
+    - name: Marquer le nœud de contrôle comme non ordonnançable
+      # Le plan de contrôle est réservé à la conduite du cluster et à
+      # l'outillage de rattachement. Aucun pod applicatif n'y sera placé.
+      # C'est la séparation qu'on trouve dans un cluster de production, et
+      # elle rend la topologie lisible : deux nœuds, deux fonctions.
+      ansible.builtin.shell:
+        cmd: >
+          k3s kubectl taint node {{ inventory_hostname }}
+          node-role=controle:NoSchedule --overwrite
+      changed_when: false
+
+    - name: Relever le jeton de rattachement
+      ansible.builtin.slurp:
+        src: /var/lib/rancher/k3s/server/node-token
+      register: jeton_brut
+
+    - name: Conserver le jeton pour le nœud de charge
+      ansible.builtin.set_fact:
+        jeton_cluster: "{{ jeton_brut.content | b64decode | trim }}"
+
+    - name: Récupérer le fichier d'accès
+      ansible.builtin.slurp:
+        src: /etc/rancher/k3s/k3s.yaml
+      register: acces_brut
+
+    - name: Écrire le fichier d'accès sur le poste
+      # L'adresse inscrite par k3s est 127.0.0.1, valable depuis la machine
+      # seulement. On la remplace par l'adresse publique, couverte par le
+      # certificat grâce à `--tls-san`.
+      ansible.builtin.copy:
+        content: >-
+          {{ acces_brut.content | b64decode
+             | replace('127.0.0.1', ansible_host)
+             | replace('default', 'skillseek-azure') }}
+        dest: "{{ playbook_dir }}/acces-cluster.yaml"
+        mode: "0600"
+      delegate_to: localhost
+      become: false
+
+# ---------------------------------------------------------------------- #
+
+- name: Agent k3s sur le nœud de charge
+  hosts: charge
+  become: true
+  tasks:
+    - name: Vérifier si l'agent est déjà installé
+      ansible.builtin.stat:
+        path: /usr/local/bin/k3s
+      register: agent_present
+
+    - name: Rattacher le nœud au cluster
+      # Le rattachement passe par l'adresse privée : le trafic reste sur le
+      # réseau interne d'Azure, et le serveur d'API n'a pas besoin d'être
+      # joignable depuis Internet.
+      ansible.builtin.shell:
+        cmd: >
+          curl -sfL https://get.k3s.io |
+          INSTALL_K3S_VERSION=v1.31.4+k3s1
+          K3S_URL=https://{{ hostvars[groups['controle'][0]]['adresse_privee'] }}:6443
+          K3S_TOKEN={{ hostvars[groups['controle'][0]]['jeton_cluster'] }}
+          INSTALL_K3S_EXEC="agent --node-ip {{ adresse_privee }} --node-label role=applicatif"
+          sh -
+      when: not agent_present.stat.exists
+
+# ---------------------------------------------------------------------- #
+
+- name: Vérification de la topologie
+  hosts: controle
+  become: true
+  tasks:
+    - name: Attendre que les deux nœuds soient prêts
+      ansible.builtin.shell:
+        cmd: k3s kubectl get nodes --no-headers
+      register: noeuds
+      until: noeuds.stdout_lines | length == 2 and 'NotReady' not in noeuds.stdout
+      retries: 30
+      delay: 10
+      changed_when: false
+
+    - name: Afficher l'état du cluster
+      ansible.builtin.debug:
+        msg: "{{ noeuds.stdout_lines }}"

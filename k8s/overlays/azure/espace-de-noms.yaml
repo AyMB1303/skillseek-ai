@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: skillseek-azure
+  labels:
+    kubernetes.io/metadata.name: skillseek-azure
+    environnement: azure
+---
+# Mise à l'échelle automatique.
+#
+# Une réplique au repos, trois au plus. Le nœud de charge offre quatre
+# cœurs ; le service applicatif en réserve un par réplique, la base un quart
+# et l'interface un dixième. Trois répliques laissent donc de la marge pour
+# le contrôleur d'entrée et les composants du cluster.
+#
+# Le plafond est délibérément atteignable. Une mise à l'échelle qui monterait
+# à cinq répliques sur un nœud qui n'en supporte que trois donnerait une
+# démonstration trompeuse : deux pods resteraient indéfiniment en attente,
+# et le tableau de bord afficherait une montée qui n'a pas lieu.
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: backend
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: backend
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 600
+---
+# Interdit de descendre sous une réplique disponible pendant une opération
+# de maintenance du cluster — vidange d'un nœud, mise à jour de k3s.
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: backend
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: skillseek
+      app.kubernetes.io/component: service-applicatif

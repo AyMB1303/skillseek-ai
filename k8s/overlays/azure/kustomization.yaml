@@ -1,0 +1,75 @@
+# Cluster Azure — l'environnement qui tourne réellement.
+#
+# Deux nœuds : le plan de contrôle est marqué pour refuser les charges
+# applicatives, tout se place donc sur le nœud dédié — quatre cœurs et seize
+# gigaoctets. C'est ce dimensionnement qui autorise à garder les
+# réservations du socle intactes, et donc à démontrer une mise à l'échelle
+# qui se produit vraiment au lieu de rester en attente.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: skillseek-azure
+
+resources:
+  - ../../base
+  - espace-de-noms.yaml
+
+images:
+  - name: ghcr.io/aymb1303/skillseek-ai/backend
+    newTag: latest
+  - name: ghcr.io/aymb1303/skillseek-ai/frontend
+    newTag: latest
+
+# Les secrets sont générés ici, et il faut le dire plutôt que le laisser
+# deviner : sur un cluster détruit le soir même, un magasin de secrets
+# externe ajouterait une dépendance sans rien rendre de vérifiable. La
+# surcharge de production, elle, n'en génère aucun — le secret doit y
+# préexister.
+secretGenerator:
+  - name: skillseek-secrets
+    literals:
+      - POSTGRES_PASSWORD=azure-demonstration-jetable
+      - DATABASE_URL=postgresql://skillseek:azure-demonstration-jetable@db:5432/skillseek
+      - SECRET_KEY=cle-detruite-avec-le-cluster
+      - JWT_SECRET_KEY=cle-jwt-detruite-avec-le-cluster
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+patches:
+  # Aucun nom de domaine n'est enregistré : le point d'entrée répond sur
+  # l'adresse publique du nœud, quel que soit l'en-tête « Host ».
+  - target:
+      kind: Ingress
+      name: skillseek
+    patch: |-
+      - op: remove
+        path: /spec/rules/0/host
+
+  # Les charges ne peuvent se placer que sur le nœud non marqué. On le dit
+  # explicitement plutôt que de compter sur le hasard de l'ordonnanceur :
+  # la contrainte devient lisible dans le manifeste.
+  - target:
+      kind: Deployment
+    patch: |-
+      - op: add
+        path: /spec/template/spec/nodeSelector
+        value:
+          role: applicatif
+
+  - target:
+      kind: StatefulSet
+      name: db
+    patch: |-
+      - op: add
+        path: /spec/template/spec/nodeSelector
+        value:
+          role: applicatif
+
+  - target:
+      kind: ConfigMap
+      name: skillseek-config
+    patch: |-
+      - op: replace
+        path: /data/FRONTEND_ORIGIN
+        value: http://adresse-renseignee-au-deploiement
