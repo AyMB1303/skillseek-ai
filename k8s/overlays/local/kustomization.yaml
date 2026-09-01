@@ -1,0 +1,76 @@
+# Cluster local — surcharge de démonstration.
+#
+# C'est cette surcharge qui a réellement tourné, faute d'avoir pu créer un
+# cluster infogéré : l'abonnement académique n'accorde de quota qu'à des
+# familles de machines que le service Kubernetes d'Azure n'accepte pas, et
+# réciproquement. Le détail est consigné dans `deploiement/terraform/aks`.
+#
+# Le socle est identique à celui des autres environnements. Seules changent
+# les trois choses qu'un poste de travail impose :
+#
+#   1. les images sont tirées du registre public plutôt que d'un registre
+#      privé, faute de secret d'accès à distribuer ;
+#   2. le point d'entrée répond sans nom d'hôte, sur le port redirigé par
+#      le cluster jetable ;
+#   3. une seule réplique d'interface : le nœud est un conteneur sur un
+#      portable, et trois répliques d'un service sans état ne démontreraient
+#      rien de plus.
+#
+# Les réservations du service applicatif ne sont pas touchées. Réduire les
+# demandes de ressources pour qu'elles tiennent aurait produit une
+# démonstration qui ne prouve rien sur le dimensionnement réel.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: skillseek-local
+
+resources:
+  - ../../base
+  - espace-de-noms.yaml
+
+images:
+  - name: ghcr.io/aymb1303/skillseek-ai/backend
+    newTag: latest
+  - name: ghcr.io/aymb1303/skillseek-ai/frontend
+    newTag: latest
+
+secretGenerator:
+  - name: skillseek-secrets
+    literals:
+      - POSTGRES_PASSWORD=local-jetable
+      - DATABASE_URL=postgresql://skillseek:local-jetable@db:5432/skillseek
+      - SECRET_KEY=cle-locale-sans-valeur
+      - JWT_SECRET_KEY=cle-jwt-locale-sans-valeur
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+patches:
+  - target:
+      kind: Deployment
+      name: frontend
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+
+  # Aucun nom d'hôte : le contrôleur d'entrée accepte alors toute requête
+  # qui lui parvient, quel que soit l'en-tête `Host`. C'est ce qui permet
+  # d'ouvrir simplement http://localhost:8080.
+  - target:
+      kind: Ingress
+      name: skillseek
+    patch: |-
+      - op: remove
+        path: /spec/rules/0/host
+
+  - target:
+      kind: ConfigMap
+      name: skillseek-config
+    patch: |-
+      - op: replace
+        path: /data/FRONTEND_ORIGIN
+        value: http://localhost:8080
+      - op: replace
+        path: /data/FLASK_ENV
+        value: production

@@ -185,17 +185,23 @@ jobs:
           terraform fmt -check -recursive -diff \
             || echo "::warning title=Terraform fmt::Formatage à normaliser : lancez 'terraform fmt -recursive'."
 
-      - name: Initialisation
+      - name: Initialisation et validation
+        # Un module par répertoire, et chacun a sa propre déclaration de
+        # fournisseur : `terraform validate` ne descend pas dans les
+        # sous-dossiers. Les valider en boucle évite qu'un module ajouté
+        # plus tard échappe silencieusement au contrôle.
+        #
         # `-backend=false` : la vérification syntaxique n'a pas à joindre
         # Azure ni à lire l'état distant. Elle doit fonctionner sur une
         # proposition de contribution venue d'un dépôt dérivé, qui n'a aucun
         # accès à l'abonnement.
-        working-directory: deploiement/terraform
-        run: terraform init -backend=false -input=false
-
-      - name: Validation
-        working-directory: deploiement/terraform
-        run: terraform validate
+        run: |
+          for module in deploiement/terraform deploiement/terraform/aks; do
+            echo "::group::$module"
+            terraform -chdir="$module" init -backend=false -input=false
+            terraform -chdir="$module" validate
+            echo "::endgroup::"
+          done
 
       - name: Analyse de configuration (Trivy)
         # Cherche les défauts propres à l'infrastructure décrite : port
@@ -238,7 +244,7 @@ jobs:
         # Première garde, et la plus utile : une surcharge qui vise un champ
         # inexistant échoue ici, pas au moment du déploiement.
         run: |
-          for env in dev prod aks; do
+          for env in dev prod aks local; do
             echo "::group::$env"
             kubectl kustomize "k8s/overlays/$env" > "assemble-$env.yaml"
             grep -c '^kind:' "assemble-$env.yaml" | xargs echo "objets produits :"
@@ -251,7 +257,7 @@ jobs:
         # dans un nom de champ est autrement acceptée en silence par le
         # serveur, qui ignore ce qu'il ne comprend pas.
         run: |
-          for env in dev prod aks; do
+          for env in dev prod aks local; do
             docker run --rm -v "$PWD:/travail" -w /travail \
               ghcr.io/yannh/kubeconform:v0.6.7 \
               -strict -summary -kubernetes-version 1.31.0 \
@@ -304,7 +310,7 @@ jobs:
         # n'existe que dans la simulation précédente — c'est une limite du
         # mécanisme, pas un défaut des manifestes.
         run: |
-          for env in dev prod aks; do
+          for env in dev prod aks local; do
             echo "::group::$env"
             # L'espace de noms est lu dans la surcharge plutôt que déduit du
             # nom du dossier : les deux coïncidaient jusqu'ici, et une
