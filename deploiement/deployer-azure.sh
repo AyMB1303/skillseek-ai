@@ -64,6 +64,20 @@ echo "   accès d'administration restreint à ${MON_IP}"
 ABONNEMENT="$(az account show --query id -o tsv)"
 echo "   abonnement ${ABONNEMENT}"
 
+# Locataire et abonnement fournis explicitement au fournisseur Terraform.
+#
+# Sans eux, celui-ci demande un jeton pour l'annuaire afin d'identifier le
+# compte qui l'exécute, en déduisant le locataire des revendications qu'il y
+# lit. Dans le Cloud Shell, ce jeton passe par un courtier du portail qui
+# expire régulièrement, et l'exécution s'arrête sur « could not acquire
+# access token to parse claims » — une panne d'outillage sans rapport avec
+# l'infrastructure décrite.
+#
+# Renseigner les deux valeurs supprime l'appel : elles sont connues, il n'y
+# a rien à déduire.
+export ARM_TENANT_ID="$(az account show --query tenantId -o tsv)"
+export ARM_SUBSCRIPTION_ID="$ABONNEMENT"
+
 # ---------------------------------------------------------------------- #
 etape "1/6 — Machines et réseau"
 
