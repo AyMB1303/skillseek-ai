@@ -1,0 +1,74 @@
+# Cluster infogéré Azure — surcharge de démonstration.
+#
+# Distincte de `prod`, qui décrit ce qu'il faudrait déployer, alors que
+# celle-ci décrit ce qui a réellement tourné. Trois écarts, tous imposés par
+# le cluster disponible plutôt que choisis :
+#
+#   1. un seul nœud de quatre cœurs — l'abonnement académique plafonne le
+#      total régional à six. Le service applicatif en réservant un à lui
+#      seul, on démarre à une réplique et la mise à l'échelle automatique
+#      monte à deux : c'est ce qui se démontre, pas ce qui se dimensionne ;
+#   2. aucune adresse enregistrée dans un annuaire de noms — le point
+#      d'entrée répond donc sur l'adresse publique attribuée au cluster,
+#      sans nom d'hôte ;
+#   3. les secrets sont générés ici. En production ils viendraient d'un
+#      magasin externe ; sur un cluster détruit le soir même, la
+#      complication n'apporterait rien de vérifiable.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: skillseek-demo
+
+resources:
+  - ../../base
+  - espace-de-noms.yaml
+
+images:
+  - name: ghcr.io/aymb1303/skillseek-ai/backend
+    newTag: latest
+  - name: ghcr.io/aymb1303/skillseek-ai/frontend
+    newTag: latest
+
+secretGenerator:
+  - name: skillseek-secrets
+    literals:
+      - POSTGRES_PASSWORD=demonstration-jetable-aks
+      - DATABASE_URL=postgresql://skillseek:demonstration-jetable-aks@db:5432/skillseek
+      - SECRET_KEY=cle-de-demonstration-detruite-avec-le-cluster
+      - JWT_SECRET_KEY=cle-jwt-de-demonstration-detruite-avec-le-cluster
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+patches:
+  # Une seule réplique d'interface : sur un nœud unique, trois répliques
+  # d'un service sans état consomment de la mémoire sans rien démontrer.
+  - target:
+      kind: Deployment
+      name: frontend
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+
+  # Le point d'entrée répond sur l'adresse publique du cluster. Retirer le
+  # nom d'hôte fait accepter toute requête qui arrive, quel qu'en soit
+  # l'en-tête `Host` — nécessaire faute d'annuaire de noms.
+  - target:
+      kind: Ingress
+      name: skillseek
+    patch: |-
+      - op: remove
+        path: /spec/rules/0/host
+
+  # L'origine autorisée à appeler l'API depuis un navigateur n'est connue
+  # qu'une fois l'adresse publique attribuée, donc après le déploiement.
+  # Le script de mise en service la renseigne et redémarre le service ; la
+  # valeur ci-dessous n'est qu'un point de départ inoffensif.
+  - target:
+      kind: ConfigMap
+      name: skillseek-config
+    patch: |-
+      - op: replace
+        path: /data/FRONTEND_ORIGIN
+        value: http://adresse-a-renseigner

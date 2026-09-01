@@ -238,7 +238,7 @@ jobs:
         # Première garde, et la plus utile : une surcharge qui vise un champ
         # inexistant échoue ici, pas au moment du déploiement.
         run: |
-          for env in dev prod; do
+          for env in dev prod aks; do
             echo "::group::$env"
             kubectl kustomize "k8s/overlays/$env" > "assemble-$env.yaml"
             grep -c '^kind:' "assemble-$env.yaml" | xargs echo "objets produits :"
@@ -251,7 +251,7 @@ jobs:
         # dans un nom de champ est autrement acceptée en silence par le
         # serveur, qui ignore ce qu'il ne comprend pas.
         run: |
-          for env in dev prod; do
+          for env in dev prod aks; do
             docker run --rm -v "$PWD:/travail" -w /travail \
               ghcr.io/yannh/kubeconform:v0.6.7 \
               -strict -summary -kubernetes-version 1.31.0 \
@@ -304,9 +304,13 @@ jobs:
         # n'existe que dans la simulation précédente — c'est une limite du
         # mécanisme, pas un défaut des manifestes.
         run: |
-          for env in dev prod; do
+          for env in dev prod aks; do
             echo "::group::$env"
-            kubectl create namespace "skillseek-$env" \
+            # L'espace de noms est lu dans la surcharge plutôt que déduit du
+            # nom du dossier : les deux coïncidaient jusqu'ici, et une
+            # convention qui tient par hasard finit par céder.
+            espace=$(awk '/^namespace:/{print $2; exit}' "k8s/overlays/$env/kustomization.yaml")
+            kubectl create namespace "$espace" \
               --dry-run=client -o yaml | kubectl apply -f -
             kubectl apply --dry-run=server -f "assemble-$env.yaml"
             echo "::endgroup::"

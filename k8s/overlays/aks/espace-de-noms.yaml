@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: skillseek-demo
+  labels:
+    kubernetes.io/metadata.name: skillseek-demo
+    environnement: demonstration
+---
+# Mise à l'échelle automatique du service applicatif.
+#
+# Une réplique au repos, deux au plus. Le plafond n'est pas une prudence
+# excessive : chaque réplique réserve un cœur, et le nœud n'en compte que
+# quatre dont une partie revient aux composants du cluster. Demander
+# davantage produirait une réplique en attente indéfinie, ce qui donnerait
+# une démonstration trompeuse — la mise à l'échelle paraîtrait déclenchée
+# alors qu'elle serait bloquée.
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: backend
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: backend
+  minReplicas: 1
+  maxReplicas: 2
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+  behavior:
+    scaleDown:
+      # Dix minutes avant de retirer une réplique : le service recharge ses
+      # modèles linguistiques à chaque démarrage, et une descente trop vive
+      # ferait osciller le nombre de répliques sans profit.
+      stabilizationWindowSeconds: 600
