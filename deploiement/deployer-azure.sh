@@ -29,7 +29,6 @@ ANS="$RACINE/deploiement/ansible"
 ESPACE="skillseek-azure"
 
 GROUPE_ARC="${GROUPE_ARC:-SkillSeek-arc}"
-REGION_ARC="${REGION_ARC:-westeurope}"
 CLUSTER="${CLUSTER:-skillseek-azure}"
 DEPOT="${DEPOT:-https://github.com/AyMB1303/skillseek-ai}"
 CLE="${CLE:-$HOME/.ssh/id_ed25519.pub}"
@@ -38,6 +37,14 @@ CLE="${CLE:-$HOME/.ssh/id_ed25519.pub}"
 # du module : la disponibilité réelle des machines ne se déduit ni du quota
 # ni de la liste des services.
 REGION="${REGION:-swedencentral}"
+
+# La ressource de rattachement suit le cluster.
+#
+# Elle ne fait que le representer dans Azure — le cluster, lui, reste sur ses
+# machines. Rien n'obligeait donc a la placer ailleurs, et une region choisie
+# au hasard se heurte a la politique d'abonnement qui restreint les regions
+# autorisees : « RequestDisallowedByAzure », le meme mur qu'au premier jour.
+REGION_ARC="${REGION_ARC:-$REGION}"
 
 etape() { printf '\n\033[1m━━ %s\033[0m\n' "$1"; }
 
