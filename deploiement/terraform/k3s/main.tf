@@ -47,9 +47,13 @@ resource "azurerm_subnet" "noeuds" {
 # règle par défaut d'Azure.
 #
 # Le trafic entre les deux nœuds n'a besoin d'aucune règle : les échanges
-# à l'intérieur d'un même réseau virtuel sont permis par défaut. Ouvrir le
-# port du serveur d'API vers l'extérieur serait une faute — il n'est
-# joignable que depuis le sous-réseau.
+# à l'intérieur d'un même réseau virtuel sont permis par défaut.
+#
+# Le serveur d'API, lui, n'est ouvert qu'à l'adresse d'administration. Le
+# laisser accessible à Internet serait une faute ; le fermer complètement
+# rendrait le cluster inadministrable à distance, alors même que son
+# certificat porte l'adresse publique. C'est le compromis des « plages
+# d'adresses autorisées » qu'appliquent les clusters infogérés.
 resource "azurerm_network_security_group" "cluster" {
   name                = "securite-skillseek"
   location            = azurerm_resource_group.cluster.location
@@ -66,6 +70,18 @@ resource "azurerm_network_security_group" "cluster" {
     destination_port_range     = "22"
     # Restreint à une seule adresse. C'est la mesure la plus simple du
     # montage, et celle qu'on omet le plus souvent.
+    source_address_prefix      = var.adresse_administration
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
+    name                       = "api-kubernetes"
+    priority                   = 105
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "6443"
     source_address_prefix      = var.adresse_administration
     destination_address_prefix = "*"
   }
