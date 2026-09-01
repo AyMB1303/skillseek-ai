@@ -33,6 +33,11 @@ REGION_ARC="${REGION_ARC:-westeurope}"
 CLUSTER="${CLUSTER:-skillseek-azure}"
 DEPOT="${DEPOT:-https://github.com/AyMB1303/skillseek-ai}"
 CLE="${CLE:-$HOME/.ssh/id_ed25519.pub}"
+# Région du cluster. Distincte de celle du rattachement Arc, qui n'héberge
+# qu'une ressource de suivi. Voir le commentaire de la variable « region »
+# du module : la disponibilité réelle des machines ne se déduit ni du quota
+# ni de la liste des services.
+REGION="${REGION:-swedencentral}"
 
 etape() { printf '\n\033[1m━━ %s\033[0m\n' "$1"; }
 
@@ -65,6 +70,7 @@ etape "1/6 — Machines et réseau"
 terraform -chdir="$TF" init -input=false
 terraform -chdir="$TF" apply -auto-approve -input=false \
   -var="abonnement=$ABONNEMENT" \
+  -var="region=$REGION" \
   -var="adresse_administration=$MON_IP" \
   -var="chemin_cle_publique=$CLE"
 

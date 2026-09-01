@@ -10,9 +10,24 @@ variable "groupe" {
 }
 
 variable "region" {
-  description = "Région Azure."
+  description = <<-TXT
+    Région Azure.
+
+    Ni germanywestcentral, où tourne pourtant le groupe de conteneurs, ni
+    aucune des sept autres régions proches. La création y échoue sur une
+    restriction de capacité — « SkuNotAvailable » — qui n'est ni un quota ni
+    une exclusion de service : Azure n'a tout simplement pas de machines de
+    ces familles à fournir, pour ce type d'abonnement, à cet endroit.
+
+    C'est le troisième obstacle rencontré sur ce déploiement, et le seul qui
+    ne se lise pas dans une politique : il faut interroger la disponibilité
+    réelle par région, ce que fait `az vm list-skus` en regardant le champ
+    des restrictions.
+
+    swedencentral et polandcentral sont les deux seules à répondre.
+  TXT
   type        = string
-  default     = "germanywestcentral"
+  default     = "swedencentral"
 }
 
 variable "taille_controle" {
