@@ -58,10 +58,26 @@
   hosts: controle
   become: true
   tasks:
-    - name: Vérifier si k3s est déjà installé
-      ansible.builtin.stat:
-        path: /usr/local/bin/k3s
-      register: k3s_present
+    # L'installateur est téléchargé dans un fichier, puis exécuté.
+    #
+    # La forme habituelle — `curl … | sh -` — a deux défauts qui se sont
+    # révélés ici. Le premier : le code de retour d'un tuyau est celui de sa
+    # dernière commande, donc un téléchargement raté produit un `sh` qui lit
+    # une entrée vide, ne fait rien, et rend zéro. Ansible conclut à une
+    # réussite et poursuit sur un cluster inexistant.
+    #
+    # Le second est plus sournois : les variables d'environnement passées
+    # devant `sh` traversent l'analyse du shell, et une valeur contenant un
+    # retour à la ligne — ce que le pliage YAML avait introduit — donne une
+    # commande que rien ne signale comme invalide.
+    #
+    # Un téléchargement explicite échoue franchement s'il échoue, et le bloc
+    # `environment` transmet les variables sans passer par le shell.
+    - name: Télécharger l'installateur
+      ansible.builtin.get_url:
+        url: https://get.k3s.io
+        dest: /tmp/installer-k3s.sh
+        mode: "0755"
 
     - name: Installer le serveur
       # `--tls-san` inscrit l'adresse publique dans le certificat du serveur
@@ -72,23 +88,37 @@
       # `--disable traefik` : k3s installe son propre contrôleur d'entrée.
       # On lui préfère celui que décrivent déjà les manifestes du dépôt,
       # afin que le cluster local et celui-ci se comportent pareil.
-      ansible.builtin.shell:
-        cmd: >
-          curl -sfL https://get.k3s.io |
-          INSTALL_K3S_VERSION=v1.31.4+k3s1
-          INSTALL_K3S_EXEC="server
-            --tls-san {{ ansible_host }}
-            --node-ip {{ adresse_privee }}
-            --disable traefik
-            --disable servicelb
-            --write-kubeconfig-mode 644"
-          sh -
-      when: not k3s_present.stat.exists
+      ansible.builtin.command:
+        cmd: /tmp/installer-k3s.sh
+        # Idempotence portée par le fichier produit, et non par une variable
+        # relevée plus haut : c'est le résultat qui compte, pas ce qu'on
+        # croyait savoir avant de commencer.
+        creates: /usr/local/bin/k3s
+      environment:
+        INSTALL_K3S_VERSION: v1.31.4+k3s1
+        INSTALL_K3S_EXEC: >-
+          server
+          --tls-san {{ ansible_host }}
+          --node-ip {{ adresse_privee }}
+          --disable traefik
+          --disable servicelb
+          --write-kubeconfig-mode 644
+
+    - name: Vérifier que l'installation a produit quelque chose
+      # Sans ce contrôle, une installation sans effet se poursuit jusqu'à
+      # l'attente du serveur d'API, qui expire au bout de trois minutes sur
+      # un message qui n'en désigne pas la cause.
+      ansible.builtin.stat:
+        path: /usr/local/bin/k3s
+      register: k3s_binaire
+      failed_when: not k3s_binaire.stat.exists
 
     - name: Attendre que le serveur d'API réponde
       ansible.builtin.wait_for:
         port: 6443
-        timeout: 180
+        # Cinq minutes : sur deux cœurs, l'initialisation de la base interne
+        # de k3s prend davantage que sur une machine de développement.
+        timeout: 300
 
     - name: Marquer le nœud de contrôle comme non ordonnançable
       # Le plan de contrôle est réservé à la conduite du cluster et à
@@ -135,24 +165,33 @@
   hosts: charge
   become: true
   tasks:
-    - name: Vérifier si l'agent est déjà installé
-      ansible.builtin.stat:
-        path: /usr/local/bin/k3s
-      register: agent_present
+    - name: Télécharger l'installateur
+      ansible.builtin.get_url:
+        url: https://get.k3s.io
+        dest: /tmp/installer-k3s.sh
+        mode: "0755"
 
     - name: Rattacher le nœud au cluster
       # Le rattachement passe par l'adresse privée : le trafic reste sur le
       # réseau interne d'Azure, et le serveur d'API n'a pas besoin d'être
       # joignable depuis Internet.
-      ansible.builtin.shell:
-        cmd: >
-          curl -sfL https://get.k3s.io |
-          INSTALL_K3S_VERSION=v1.31.4+k3s1
-          K3S_URL=https://{{ hostvars[groups['controle'][0]]['adresse_privee'] }}:6443
-          K3S_TOKEN={{ hostvars[groups['controle'][0]]['jeton_cluster'] }}
-          INSTALL_K3S_EXEC="agent --node-ip {{ adresse_privee }} --node-label role=applicatif"
-          sh -
-      when: not agent_present.stat.exists
+      ansible.builtin.command:
+        cmd: /tmp/installer-k3s.sh
+        creates: /usr/local/bin/k3s
+      environment:
+        INSTALL_K3S_VERSION: v1.31.4+k3s1
+        K3S_URL: "https://{{ hostvars[groups['controle'][0]]['adresse_privee'] }}:6443"
+        K3S_TOKEN: "{{ hostvars[groups['controle'][0]]['jeton_cluster'] }}"
+        INSTALL_K3S_EXEC: >-
+          agent
+          --node-ip {{ adresse_privee }}
+          --node-label role=applicatif
+
+    - name: Vérifier que l'agent est installé
+      ansible.builtin.stat:
+        path: /usr/local/bin/k3s
+      register: agent_binaire
+      failed_when: not agent_binaire.stat.exists
 
 # ---------------------------------------------------------------------- #
 
