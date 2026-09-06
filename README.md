@@ -4,12 +4,15 @@
 
 [![CI/CD](https://github.com/AyMB1303/skillseek-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/AyMB1303/skillseek-ai/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/AyMB1303/skillseek-ai/actions/workflows/codeql.yml/badge.svg)](https://github.com/AyMB1303/skillseek-ai/actions/workflows/codeql.yml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/AyMB1303/skillseek-ai/badge)](https://scorecard.dev/viewer/?uri=github.com/AyMB1303/skillseek-ai)
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=AyMB1303_skillseek-ai&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=AyMB1303_skillseek-ai)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=AyMB1303_skillseek-ai&metric=coverage)](https://sonarcloud.io/summary/new_code?id=AyMB1303_skillseek-ai)
-![Tests](https://img.shields.io/badge/tests-192%20reussis-brightgreen)
+
+[![Sécurité](https://sonarcloud.io/api/project_badges/measure?project=AyMB1303_skillseek-ai&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=AyMB1303_skillseek-ai)
+[![Fiabilité](https://sonarcloud.io/api/project_badges/measure?project=AyMB1303_skillseek-ai&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=AyMB1303_skillseek-ai)
+[![Maintenabilité](https://sonarcloud.io/api/project_badges/measure?project=AyMB1303_skillseek-ai&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=AyMB1303_skillseek-ai)
+[![Vulnérabilités](https://sonarcloud.io/api/project_badges/measure?project=AyMB1303_skillseek-ai&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=AyMB1303_skillseek-ai)
+[![Couverture](https://sonarcloud.io/api/project_badges/measure?project=AyMB1303_skillseek-ai&metric=coverage)](https://sonarcloud.io/summary/new_code?id=AyMB1303_skillseek-ai)
 ![Python](https://img.shields.io/badge/python-3.12-blue)
-![Next.js](https://img.shields.io/badge/next.js-14.2-black)
-![Licence](https://img.shields.io/badge/licence-usage%20pédagogique-lightgrey)
 
 [![Ouvrir dans GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/AyMB1303/skillseek-ai)
 
@@ -191,11 +194,51 @@ la main.
 
 Le recours aux conteneurs plutôt qu'à une machine virtuelle découle d'une
 contrainte de l'abonnement académique utilisé, dont la politique de régions et
-les quotas de processeurs n'autorisaient aucune instance. Le détail figure
-dans [`docs/DEPLOIEMENT_AZURE.md`](docs/DEPLOIEMENT_AZURE.md).
+les quotas de processeurs n'autorisaient aucune instance dans les familles
+proposées. Le détail figure dans
+[`docs/DEPLOIEMENT_AZURE.md`](docs/DEPLOIEMENT_AZURE.md).
 
-L'instance de démonstration est libérée après validation : le crédit
+#### Second chemin : un cluster Kubernetes sur Azure
+
+Quatre conteneurs sur une seule machine ne se répliquent pas, ne se remplacent
+pas sans coupure, et rien ne les redémarre selon un critère de santé. La
+plateforme tourne donc aussi sur un **cluster Kubernetes à deux nœuds**, monté
+par une seule commande :
+
+```bash
+bash deploiement/deployer-azure.sh
+```
+
+Six étapes, chacune reprenable après une erreur :
+
+| Étape | Outil | Ce qu'elle produit |
+|---|---|---|
+| Machines et réseau | **Terraform** | Réseau virtuel, groupe de sécurité, deux machines — onze ressources |
+| Cluster | **Ansible** | k3s installé, plan de contrôle marqué comme non ordonnançable |
+| Point d'entrée | `kubectl` | Contrôleur d'entrée sur les ports du nœud, sans équilibreur de charge |
+| Plateforme | **Kustomize** | Manifestes de `k8s/overlays/azure` |
+| Rattachement | **Azure Arc** | Le cluster devient une ressource de l'abonnement |
+| Réconciliation | **Flux** | Git devient l'état de référence |
+
+Le service Kubernetes infogéré d'Azure n'était pas utilisable : sa liste de
+tailles de machines acceptées et le quota de l'abonnement académique ont une
+intersection vide, dans les neuf régions autorisées. Les machines ordinaires
+relèvent d'un quota distinct — d'où un cluster auto-géré, sur la même
+distribution que celle du développement local.
+
+La séparation entre les deux outils d'infrastructure n'est pas une question de
+goût : **Terraform répond à « quelles machines existent », Ansible à « que
+contiennent-elles »**. Les mêler produit un ensemble qu'on ne peut plus rejouer
+partiellement.
+
+Une fois Flux en place, la chaîne de livraison ne détient plus aucun secret
+permettant de joindre le serveur d'API : elle pousse un commit, et le cluster
+va chercher ce qu'il doit être. Le sens du flux s'inverse, et avec lui la
+surface d'attaque.
+
+Les instances de démonstration sont libérées après validation : le crédit
 disponible est limité, et une ressource inutilisée n'a pas à tourner.
+L'infrastructure étant décrite, une commande la reconstruit à l'identique.
 
 ---
 
@@ -213,6 +256,11 @@ déguisé en perspective :
   mesurés, imputables à la similarité sémantique qui encode le document entier,
   identité comprise. Négligeable, mais réel : la formule « sans biais » serait
   fausse.
+- **Le cluster n'a pas été éprouvé dans la durée.** La topologie, le
+  cloisonnement réseau, la persistance et l'auto-réparation ont été vérifiés sur
+  le cluster Azure, mais la fenêtre d'exécution s'est comptée en heures, sur le
+  crédit disponible, et sans trafic réel : la règle de montée en charge n'a
+  jamais été déclenchée par autre chose que sa propre définition.
 
 ## Documentation
 

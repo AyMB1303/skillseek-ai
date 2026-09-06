@@ -1,0 +1,72 @@
+# Note de sûreté de la chaîne d'approvisionnement logicielle.
+#
+# OpenSSF Scorecard n'analyse pas le code : il analyse les *pratiques* du
+# dépôt. Une vingtaine de contrôles automatisés, chacun noté sur dix — les
+# actions sont-elles épinglées par empreinte plutôt que par étiquette
+# mouvante, les dépendances sont-elles tenues à jour, la branche principale
+# est-elle protégée, un scan de secrets tourne-t-il, les artefacts publiés
+# sont-ils signés, le projet publie-t-il une politique de sécurité.
+#
+# C'est une lecture différente de celle de Trivy ou de CodeQL, qui cherchent
+# des défauts dans ce qui est écrit. Scorecard demande si le projet est
+# conduit de façon à ce que ces défauts soient trouvés — et un jury comme un
+# recruteur lisent cette note-là en premier, parce qu'elle tient en un
+# chiffre.
+#
+# Le résultat est publié et alimente le badge du README. Il se met donc à
+# jour tout seul, contrairement à un badge écrit à la main.
+
+name: Sûreté — note OpenSSF Scorecard
+
+on:
+  branch_protection_rule:
+  schedule:
+    # Une fois par semaine : les contrôles portent sur l'état du dépôt, qui
+    # bouge peu, et une exécution par commit n'apprendrait rien de plus.
+    - cron: "27 4 * * 1"
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: read-all
+
+jobs:
+  analyse:
+    name: Analyse des pratiques du dépôt
+    runs-on: ubuntu-latest
+    permissions:
+      # Écrit le résultat dans l'onglet « Security » du dépôt.
+      security-events: write
+      # Requis pour publier le résultat : l'action demande un jeton OIDC à
+      # GitHub, qui atteste que l'exécution vient bien de ce dépôt. Sans
+      # cela, n'importe qui pourrait publier une note pour n'importe quel
+      # projet.
+      id-token: write
+      contents: read
+      actions: read
+
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Analyser
+        uses: ossf/scorecard-action@v2.4.0
+        with:
+          results_file: resultats.sarif
+          results_format: sarif
+          # Publie la note vers l'API publique, ce qui alimente le badge.
+          publish_results: true
+
+      - name: Conserver le rapport
+        uses: actions/upload-artifact@v4
+        with:
+          name: scorecard
+          path: resultats.sarif
+          retention-days: 5
+
+      - name: Publier dans l'onglet Security
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: resultats.sarif

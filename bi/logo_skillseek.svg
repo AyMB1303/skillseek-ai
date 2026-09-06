@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 261 221" width="1044" height="884">
+  <!-- Logo SkillSeek AI — 261 x 221, calibre pour un bandeau Power BI.
+       Palette reprise de theme_skillseek.json : marine #1F3A5F, bleu #2E86AB,
+       vert #2E7D5B, ambre #B5820A.
+
+       La marque figure une note qui se decompose : trois barres croissantes
+       lues a la loupe, ce que fait exactement la plateforme.
+
+       Aucun clip-path, aucun marker, aucun degrade : plusieurs rastériseurs
+       ignorent ces constructions en silence. Les barres sont dimensionnees
+       pour tenir dans le cercle par leur seule geometrie. -->
+
+  <!-- Pastille -->
+  <rect x="20" y="14" width="118" height="118" rx="30" fill="#1F3A5F"/>
+
+  <!-- Lentille claire -->
+  <circle cx="86" cy="72" r="40" fill="#F4F8FB"/>
+
+  <!-- Trois barres croissantes, inscrites dans la lentille -->
+  <rect x="64.5" y="80" width="11" height="16" rx="2.5" fill="#5AA9C9"/>
+  <rect x="80.5" y="66" width="11" height="30" rx="2.5" fill="#2E86AB"/>
+  <rect x="96.5" y="54" width="11" height="42" rx="2.5" fill="#2E7D5B"/>
+
+  <!-- Anneau de loupe et manche -->
+  <circle cx="86" cy="72" r="40" fill="none" stroke="#FFFFFF" stroke-width="7"/>
+  <line x1="114" y1="100" x2="133" y2="119" stroke="#FFFFFF" stroke-width="9"
+        stroke-linecap="round"/>
+
+  <!-- Nom -->
+  <text x="152" y="60" font-family="Segoe UI, Helvetica, Arial, sans-serif"
+        font-size="29" font-weight="700" fill="#1F3A5F">Skill</text>
+  <text x="152" y="93" font-family="Segoe UI, Helvetica, Arial, sans-serif"
+        font-size="29" font-weight="700" fill="#2E86AB">Seek</text>
+  <rect x="152" y="106" width="44" height="24" rx="6" fill="#2E86AB"/>
+  <text x="174" y="124" text-anchor="middle"
+        font-family="Segoe UI, Helvetica, Arial, sans-serif"
+        font-size="16" font-weight="700" fill="#FFFFFF">AI</text>
+
+  <!-- Filet et signature -->
+  <line x1="20" y1="156" x2="241" y2="156" stroke="#2E86AB" stroke-width="2.5"/>
+  <text x="20" y="180" font-family="Segoe UI, Helvetica, Arial, sans-serif"
+        font-size="15" font-weight="600" fill="#1F3A5F">Présélection justifiable</text>
+  <text x="20" y="202" font-family="Segoe UI, Helvetica, Arial, sans-serif"
+        font-size="13" fill="#6B7A8F">Tableau de bord décisionnel</text>
+</svg>

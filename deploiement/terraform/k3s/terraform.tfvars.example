@@ -1,0 +1,25 @@
+# Copier en `terraform.tfvars` et renseigner. Le fichier réel n'est jamais
+# versionné : il porte l'identifiant d'abonnement et l'adresse du poste.
+
+# Identifiant de l'abonnement Azure.
+#   az account show --query id -o tsv
+abonnement = "00000000-0000-0000-0000-000000000000"
+
+# Adresse publique du poste d'administration, en notation CIDR. Elle restreint
+# l'accès SSH et le serveur d'API Kubernetes à cette seule adresse.
+#   echo "$(curl -fsS https://api.ipify.org)/32"
+#
+# Le module refuse « 0.0.0.0/0 » : ouvrir l'administration à Internet entier
+# est la faute la plus courante de ce type de montage.
+adresse_administration = "0.0.0.0/32"
+
+# Région du cluster. La disponibilité réelle des machines ne se déduit ni du
+# quota ni de la liste des services : une taille peut figurer au catalogue,
+# disposer d'un quota, et être refusée faute de capacité dans la région.
+region = "swedencentral"
+
+# Compte administrateur des machines. C'est ce nom qui apparaît dans l'invite
+# SSH, donc sur toute capture d'écran de la partie cluster.
+utilisateur = "aymen"
+
+chemin_cle_publique = "~/.ssh/id_ed25519.pub"
