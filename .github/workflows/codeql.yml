@@ -54,10 +54,10 @@ jobs:
             source: frontend
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Préparer CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@6f5948dfacef28e207b48d0905cf90c03365536d # v3
         with:
           languages: ${{ matrix.langage }}
           # `security-and-quality` ajoute aux règles de sécurité celles de
@@ -68,6 +68,6 @@ jobs:
       # Ni Python ni JavaScript ne demandent de compilation : CodeQL construit
       # sa base de données directement depuis les sources.
       - name: Analyser
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@6f5948dfacef28e207b48d0905cf90c03365536d # v3
         with:
           category: "/langage:${{ matrix.langage }}"
