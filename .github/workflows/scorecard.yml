@@ -18,15 +18,18 @@
 
 name: Sûreté — note OpenSSF Scorecard
 
+# Deux déclencheurs, et pas un de plus : ce sont les seuls que l'API de
+# publication accepte. « branch_protection_rule » et « workflow_dispatch » font
+# rejeter le résultat — l'API vérifie le workflow qui le produit, et une
+# exécution issue d'un déclencheur non reconnu est refusée, ce qui fait échouer
+# l'action alors même que l'analyse s'est bien déroulée.
 on:
-  branch_protection_rule:
   schedule:
     # Une fois par semaine : les contrôles portent sur l'état du dépôt, qui
     # bouge peu, et une exécution par commit n'apprendrait rien de plus.
     - cron: "27 4 * * 1"
   push:
     branches: [main]
-  workflow_dispatch:
 
 permissions: read-all
 
