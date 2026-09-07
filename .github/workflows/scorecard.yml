@@ -19,10 +19,9 @@
 name: Sûreté — note OpenSSF Scorecard
 
 # Deux déclencheurs, et pas un de plus : ce sont les seuls que l'API de
-# publication accepte. « branch_protection_rule » et « workflow_dispatch » font
-# rejeter le résultat — l'API vérifie le workflow qui le produit, et une
-# exécution issue d'un déclencheur non reconnu est refusée, ce qui fait échouer
-# l'action alors même que l'analyse s'est bien déroulée.
+# publication accepte. « pull_request » et « workflow_dispatch » y sont
+# expérimentaux, « branch_protection_rule » n'y figure pas — un résultat
+# produit par l'un d'eux peut être refusé à la publication.
 on:
   schedule:
     # Une fois par semaine : les contrôles portent sur l'état du dépôt, qui
@@ -55,7 +54,7 @@ jobs:
           persist-credentials: false
 
       - name: Analyser
-        uses: ossf/scorecard-action@v2.4.0
+        uses: ossf/scorecard-action@v2.4.4
         with:
           results_file: resultats.sarif
           results_format: sarif
