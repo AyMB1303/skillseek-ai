@@ -53,6 +53,12 @@ def create_app(env: str = "development") -> Flask:
     app.register_blueprint(evaluations_bp, url_prefix="/api/evaluations")
     app.register_blueprint(journal_bp, url_prefix="/api/journal")
 
+    # --- Contrat de l'API ---
+    # Enregistré en dernier : le document est construit à partir de la table
+    # de routage, qui doit donc être complète au moment où il est demandé.
+    from .openapi import openapi_bp
+    app.register_blueprint(openapi_bp, url_prefix="/api")
+
     # --- Supervision ---
     # Branchée après les traces : elle réutilise le chronomètre posé par
     # `_ouvrir_trace` plutôt que d'en démarrer un second.

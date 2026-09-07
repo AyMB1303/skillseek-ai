@@ -9,10 +9,10 @@ from flask_jwt_extended import (
     create_refresh_token,
     get_jwt,
     get_jwt_identity,
-    jwt_required,
 )
 
 from ..extensions import db
+from ..middleware.permissions import jeton_requis
 from ..models.role import Role
 from ..models.token_blocklist import TokenBlocklist
 from ..models.user import User
@@ -175,14 +175,14 @@ def login():
 
 
 @auth_bp.post("/refresh")
-@jwt_required(refresh=True)
+@jeton_requis(refresh=True)
 def refresh():
     identity = get_jwt_identity()
     return jsonify(access_token=create_access_token(identity=identity))
 
 
 @auth_bp.post("/logout")
-@jwt_required(verify_type=False)
+@jeton_requis(verify_type=False)
 def logout():
     """Revoque le token presente (access OU refresh) via la blacklist."""
     jti = get_jwt()["jti"]
@@ -192,7 +192,7 @@ def logout():
 
 
 @auth_bp.get("/me")
-@jwt_required()
+@jeton_requis()
 def me():
     user = db.session.get(User, int(get_jwt_identity()))
     if user is None:
