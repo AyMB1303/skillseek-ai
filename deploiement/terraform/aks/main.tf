@@ -56,6 +56,24 @@ resource "azurerm_kubernetes_cluster" "skillseek" {
     type = "SystemAssigned"
   }
 
+  # Le serveur d'API n'est joignable que depuis l'adresse d'administration.
+  #
+  # C'est la même exigence que la règle « api-kubernetes » du module k3s, et
+  # elle doit être dite ici aussi : un cluster infogéré expose son serveur
+  # d'API sur Internet par défaut. L'authentification le protège, mais une
+  # surface exposée reste une surface — et l'analyse de configuration le
+  # relève, à juste titre, comme un constat critique.
+  api_server_access_profile {
+    authorized_ip_ranges = [var.adresse_administration]
+  }
+
+  # Contrôle d'accès fondé sur les rôles, activé explicitement. Il l'est par
+  # défaut sur les versions récentes, mais le laisser implicite revient à
+  # dépendre d'un réglage du fournisseur pour une propriété de sûreté — la
+  # même raison qui fait écrire les politiques réseau plutôt que de compter
+  # sur la configuration du cluster.
+  role_based_access_control_enabled = true
+
   network_profile {
     network_plugin = "azure"
     # Le greffon réseau par défaut n'applique pas les règles de

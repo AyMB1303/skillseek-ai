@@ -67,3 +67,23 @@ variable "marqueurs" {
     duree       = "ephemere"
   }
 }
+
+# Adresse publique du poste d'administration, en notation CIDR.
+#
+# Elle restreint l'accès au serveur d'API du cluster. Sans elle, ce serveur
+# est joignable depuis Internet entier : l'authentification le protège, mais
+# une surface exposée reste une surface, et c'est le premier constat que
+# relève l'analyse de configuration.
+#
+# Le module k3s applique déjà cette restriction par une règle de groupe de
+# sécurité. Ne pas la poser ici aurait laissé les deux modules dire deux
+# choses différentes de la même exigence.
+variable "adresse_administration" {
+  type        = string
+  description = "Adresse autorisée à joindre le serveur d'API, en CIDR."
+
+  validation {
+    condition     = var.adresse_administration != "0.0.0.0/0"
+    error_message = "Le serveur d'API ne peut pas être ouvert à Internet."
+  }
+}

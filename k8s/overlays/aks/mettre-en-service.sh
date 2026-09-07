@@ -3,7 +3,11 @@
 # Met la plateforme en service sur le cluster AKS, de bout en bout.
 #
 #   cd deploiement/terraform/aks
-#   terraform init && terraform apply
+#   terraform init
+#   terraform apply -var="adresse_administration=$(curl -fsS https://api.ipify.org)/32"
+#
+# L'adresse d'administration est obligatoire : le serveur d'API du cluster
+# n'est joignable que depuis elle.
 #   eval "$(terraform output -raw commande_acces)"
 #   cd ../../../ && bash k8s/overlays/aks/mettre-en-service.sh
 #
