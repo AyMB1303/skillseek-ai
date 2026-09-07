@@ -654,17 +654,27 @@ jobs:
         # C'est pourquoi on signe `image@sha256:…` et non `image:latest`.
         if: steps.publication.outcome == 'success'
         env:
-          IMAGE: ${{ env.REGISTRE }}/${{ github.repository }}/${{ matrix.service }}
+          DEPOT: ${{ github.repository }}
+          SERVICE: ${{ matrix.service }}
           EMPREINTE: ${{ steps.publication.outputs.digest }}
         run: |
           set -euo pipefail
+          # Une référence d'image OCI est entièrement en minuscules, alors que
+          # le nom du dépôt GitHub conserve sa casse — « AyMB1303/… ». Les
+          # actions Docker abaissent la casse pour les étiquettes qu'elles
+          # produisent ; ce nom-ci étant reconstruit à la main, il faut le
+          # faire ici. Sans cela : « could not parse reference ».
+          IMAGE="${{ env.REGISTRE }}/${DEPOT,,}/${SERVICE}"
           cosign sign --yes "${IMAGE}@${EMPREINTE}"
           # Vérification immédiate : signer sans relire laisserait passer une
           # signature mal formée, et le défaut ne se découvrirait qu'au
           # moment où quelqu'un chercherait à s'en servir.
+          # L'identité du certificat, elle, garde la casse d'origine : elle
+          # vient de GitHub, pas du registre. Abaisser la casse ici ferait
+          # échouer la vérification d'une signature pourtant valide.
           cosign verify \
             --certificate-identity-regexp \
-              "^https://github.com/${GITHUB_REPOSITORY}/.github/workflows/" \
+              "^https://github.com/${DEPOT}/.github/workflows/" \
             --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
             "${IMAGE}@${EMPREINTE}"
 
