@@ -1,0 +1,89 @@
+# Règles d'alerte.
+#
+# Quatre règles, pas davantage. Une alerte qui se déclenche souvent sans rien
+# désigner apprend à ne plus regarder le tableau de bord — et c'est le jour où
+# elle signale un vrai problème que personne ne la lit. Chaque règle ci-dessous
+# répond donc à une question qu'aucune autre ne pose, et porte une durée
+# minimale : un pic d'une seconde n'appelle personne.
+
+groups:
+  - name: skillseek
+    rules:
+
+      # --- Le service ne répond plus -------------------------------------
+      #
+      # La première alerte qu'on veut, et la seule qu'un système à poussée ne
+      # sait pas produire. « up » vaut 0 quand la page d'indicateurs ne répond
+      # pas — donc quand le processus est mort, saturé, ou coupé du réseau.
+      - alert: ServiceInjoignable
+        expr: up{job="skillseek-backend"} == 0
+        for: 1m
+        labels:
+          gravite: critique
+        annotations:
+          resume: "Le service applicatif ne répond plus."
+          detail: >-
+            Sa page d'indicateurs est injoignable depuis une minute. Vérifier
+            l'état du conteneur, puis la sonde de disponibilité, qui distingue
+            un processus mort d'un processus vivant privé de base.
+
+      # --- Les erreurs serveur ------------------------------------------
+      #
+      # Le taux, pas le compte : cent erreurs sur un million d'appels et cent
+      # erreurs sur deux cents appels ne demandent pas la même réaction. Les
+      # codes 4xx sont volontairement exclus — un client qui envoie une requête
+      # invalide n'est pas une panne du service.
+      - alert: TropDErreursServeur
+        expr: |
+          sum(rate(skillseek_requetes_total{code=~"5.."}[5m]))
+            / sum(rate(skillseek_requetes_total[5m])) > 0.05
+        for: 5m
+        labels:
+          gravite: critique
+        annotations:
+          resume: "Plus de 5 % des requêtes échouent."
+          detail: >-
+            Taux d'erreurs serveur sur cinq minutes. Croiser avec le journal
+            par identifiant de requête pour retrouver les appels concernés.
+
+      # --- L'analyse ralentit --------------------------------------------
+      #
+      # Le 95e centile et non la moyenne : une moyenne acceptable peut cacher
+      # une candidature sur vingt qui attend trente secondes, et c'est
+      # exactement celle-là qui fait abandonner le dépôt.
+      - alert: AnalyseLente
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum(rate(skillseek_duree_analyse_secondes_bucket[10m])) by (le)
+          ) > 12
+        for: 10m
+        labels:
+          gravite: avertissement
+        annotations:
+          resume: "L'analyse d'un curriculum dépasse douze secondes."
+          detail: >-
+            Sur dix minutes, une analyse sur vingt dure plus de douze secondes.
+            Vérifier la charge du service et la taille des documents déposés :
+            le coût de la lecture croît avec le nombre de caractères.
+
+      # --- Le moteur répond mais n'analyse plus ---------------------------
+      #
+      # La règle qui justifie d'avoir séparé indicateurs techniques et
+      # métier. Le service peut répondre 200 à tout, sonde de vie au vert,
+      # tout en échouant à analyser chaque curriculum déposé — un modèle
+      # absent, un moteur de lecture en panne. Aucune règle technique ne le
+      # voit ; celle-ci si.
+      - alert: AnalysesEnEchec
+        expr: |
+          sum(rate(skillseek_analyses_total{resultat="indisponible"}[15m]))
+            / sum(rate(skillseek_analyses_total[15m])) > 0.20
+        for: 15m
+        labels:
+          gravite: critique
+        annotations:
+          resume: "Plus d'une analyse sur cinq n'aboutit pas."
+          detail: >-
+            Les candidatures sont enregistrées — elles ne sont jamais perdues —
+            mais elles arrivent sans note et devront être traitées à la main.
+            Vérifier la disponibilité des modèles par la sonde « /api/ready ».

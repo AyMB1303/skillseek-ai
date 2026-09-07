@@ -53,6 +53,12 @@ def create_app(env: str = "development") -> Flask:
     app.register_blueprint(evaluations_bp, url_prefix="/api/evaluations")
     app.register_blueprint(journal_bp, url_prefix="/api/journal")
 
+    # --- Supervision ---
+    # Branchée après les traces : elle réutilise le chronomètre posé par
+    # `_ouvrir_trace` plutôt que d'en démarrer un second.
+    from .supervision import MODELE_CHARGE, brancher as brancher_supervision
+    brancher_supervision(app)
+
     # --- Commandes CLI ---
     from .seeds import seed_command
     from .bi import creer_vues_command, export_command
@@ -156,12 +162,19 @@ def create_app(env: str = "development") -> Flask:
             app.logger.warning("Base de données injoignable : %s", exc)
             base = False
 
+        modele_appris = prediction.disponible()
+        # La sonde est le seul endroit qui interroge déjà cette disponibilité :
+        # l'indicateur la recopie plutôt que de la redemander. Sans lui, un
+        # modèle absent laisserait toutes les sondes au vert — le service
+        # répond, il note simplement moins bien.
+        MODELE_CHARGE.set(1 if modele_appris else 0)
+
         return jsonify(
             status="ready" if base else "degraded",
             dependances={
                 "base_de_donnees": base,
                 "modele_semantique": semantique.encoder("test") is not None,
-                "modele_appris": prediction.disponible(),
+                "modele_appris": modele_appris,
             },
         ), (200 if base else 503)
 

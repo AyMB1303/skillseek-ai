@@ -1,0 +1,70 @@
+# Supervision : collecte, tableaux de bord et acheminement des alertes.
+#
+# Surcouche volontairement séparée du fichier principal. La plateforme doit
+# pouvoir démarrer sans elle — un poste de développement n'a pas besoin de
+# trois services de plus — et la supervision doit pouvoir être ajoutée sans
+# toucher à la définition de l'application.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.supervision.yml up -d
+#
+#   Prometheus   http://localhost:9090   (cibles, règles, exploration)
+#   Grafana      http://localhost:3001   (admin / admin au premier accès)
+#   Alertmanager http://localhost:9093   (alertes en cours)
+#
+# Les trois responsabilités sont tenues par trois composants distincts, et
+# c'est le point à retenir : l'application expose, Prometheus collecte et
+# évalue les règles, Grafana affiche, Alertmanager achemine. Les réunir dans
+# un seul outil rendrait impossible de remplacer l'un sans les autres.
+
+services:
+
+  prometheus:
+    image: prom/prometheus:v3.1.0
+    restart: unless-stopped
+    volumes:
+      - ./deploiement/supervision/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./deploiement/supervision/alertes.yml:/etc/prometheus/alertes.yml:ro
+      - promdata:/prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      # Quinze jours : au-delà, l'intérêt d'un historique fin décroît vite
+      # alors que le volume, lui, ne décroît pas.
+      - --storage.tsdb.retention.time=15d
+      - --web.enable-lifecycle
+    ports:
+      - "9090:9090"
+    depends_on:
+      - backend
+
+  grafana:
+    image: grafana/grafana:11.4.0
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      # Aucune inscription ouverte : ce tableau de bord n'a qu'un lecteur.
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+    volumes:
+      # Source de données et tableaux déclarés par fichier : un Grafana
+      # recréé depuis zéro retrouve sa configuration sans intervention.
+      - ./deploiement/supervision/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./deploiement/supervision/grafana/tableaux:/var/lib/grafana/tableaux:ro
+      - grafanadata:/var/lib/grafana
+    ports:
+      # 3001 et non 3000 : l'interface de la plateforme occupe déjà ce port.
+      - "3001:3000"
+    depends_on:
+      - prometheus
+
+  alertmanager:
+    image: prom/alertmanager:v0.28.0
+    restart: unless-stopped
+    volumes:
+      - ./deploiement/supervision/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    ports:
+      - "9093:9093"
+
+volumes:
+  promdata:
+  grafanadata:

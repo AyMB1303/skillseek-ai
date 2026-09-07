@@ -1,0 +1,44 @@
+# Collecte des indicateurs.
+#
+# Prometheus fonctionne par interrogation : il vient lire la page « /metrics »
+# de chaque service à intervalle régulier, plutôt que d'attendre que les
+# services lui envoient des valeurs.
+#
+# La différence n'est pas de goût. Un service qui devait pousser et qui se tait
+# ne se distingue pas d'un service qui n'a rien à dire ; un service qu'on
+# interroge et qui ne répond pas est immédiatement visible. C'est ce qui rend
+# possible l'alerte « le service ne répond plus », qui est la première qu'on
+# veut et la seule qu'un système à poussée ne sait pas produire.
+
+global:
+  # Quinze secondes : assez fin pour voir une dégradation s'installer, assez
+  # espacé pour ne pas peser sur un service qui n'a pas été taillé pour ça.
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - alertes.yml
+
+# Prometheus évalue les règles ; c'est Alertmanager qui décide du destinataire
+# et du regroupement. Séparer les deux permet de changer l'un sans l'autre.
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ["alertmanager:9093"]
+
+scrape_configs:
+  # Le service applicatif. C'est lui qui porte les indicateurs métier —
+  # analyses abouties, notes produites — que les autres n'ont pas.
+  - job_name: skillseek-backend
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["backend:5000"]
+        labels:
+          service: backend
+
+  # Prometheus s'observe lui-même. Sans cela, une collecte qui ralentit ou
+  # sature ne se voit pas : l'outil qui mesure serait le seul à n'être pas
+  # mesuré.
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]

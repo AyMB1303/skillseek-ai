@@ -134,6 +134,20 @@ apiVersion: v1
 kind: Service
 metadata:
   name: backend
+  annotations:
+    # Repères pour un collecteur d'indicateurs déployé dans le cluster. Ils ne
+    # font rien par eux-mêmes : c'est la configuration du collecteur qui les
+    # lit. Les poser ici plutôt que dans cette configuration place la
+    # connaissance là où elle est vraie — le service sait sur quel chemin et
+    # quel port il publie, le collecteur n'a pas à le deviner.
+    #
+    # « /metrics » n'est volontairement pas routé par le point d'entrée : une
+    # page d'indicateurs renseigne un attaquant sur le trafic, les chemins
+    # existants et les moments creux. Seul un appelant interne au cluster
+    # l'atteint, et la politique réseau décide lequel.
+    prometheus.io/scrape: "true"
+    prometheus.io/path: "/metrics"
+    prometheus.io/port: "5000"
 spec:
   type: ClusterIP
   selector:

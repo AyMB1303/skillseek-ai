@@ -1,0 +1,39 @@
+# Acheminement des alertes.
+#
+# Prometheus décide *qu'il y a* une alerte ; Alertmanager décide *qui est
+# prévenu et comment*. La séparation est ce qui permet de changer le
+# destinataire sans toucher aux règles, et de grouper plusieurs alertes en un
+# seul message plutôt que d'en envoyer une par minute.
+#
+# Aucun canal réel n'est configuré ici : le projet n'a pas d'astreinte, et un
+# jeton de messagerie n'a rien à faire dans un dépôt public. Le récepteur par
+# défaut ne fait rien — les alertes restent consultables dans l'interface, ce
+# qui suffit à démontrer le chemin complet. Brancher un canal réel consiste à
+# ajouter un bloc au récepteur, sans modifier une seule règle.
+
+global:
+  resolve_timeout: 5m
+
+route:
+  # Les alertes portant le même nom et la même gravité arrivent groupées : une
+  # panne qui touche dix routes ne doit pas produire dix messages.
+  group_by: ["alertname", "gravite"]
+  # Trente secondes avant le premier envoi : le temps que les alertes liées à
+  # une même cause se rejoignent dans le même groupe.
+  group_wait: 30s
+  group_interval: 5m
+  # Quatre heures avant de répéter une alerte non résolue. Plus court, on
+  # apprend à ignorer ; plus long, on oublie.
+  repeat_interval: 4h
+  receiver: journal
+
+  routes:
+    # Le critique ne patiente pas et se répète plus souvent.
+    - matchers:
+        - gravite = "critique"
+      receiver: journal
+      group_wait: 10s
+      repeat_interval: 1h
+
+receivers:
+  - name: journal

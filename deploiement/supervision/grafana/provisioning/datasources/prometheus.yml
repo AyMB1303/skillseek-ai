@@ -1,0 +1,10 @@
+# Source de données déclarée par fichier plutôt que cliquée dans l'interface :
+# un Grafana recréé depuis zéro retrouve sa configuration sans intervention.
+apiVersion: 1
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: false

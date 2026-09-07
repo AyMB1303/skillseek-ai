@@ -1,0 +1,11 @@
+# Les tableaux de bord sont versionnés dans le dépôt et chargés au démarrage.
+# Un tableau construit à la main dans l'interface disparaît avec le conteneur.
+apiVersion: 1
+providers:
+  - name: SkillSeek
+    type: file
+    disableDeletion: true
+    updateIntervalSeconds: 30
+    options:
+      path: /var/lib/grafana/tableaux
+      foldersFromFilesStructure: false

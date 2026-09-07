@@ -1,5 +1,6 @@
 """Candidatures : dépôt du CV, consultation classée, changement de statut."""
 import os
+import time
 import uuid
 
 from flask import Blueprint, current_app, jsonify, request, send_file
@@ -9,6 +10,7 @@ from werkzeug.utils import secure_filename
 from ..extensions import db
 from ..middleware.permissions import current_user_required, require_permission
 from ..models.ai_metric import AiMetric
+from ..supervision import observer_analyse
 from ..models.application import STATUSES, Application
 from ..models.job_offer import JobOffer
 from ..services import acces, journal, notifications as notifs
@@ -130,16 +132,25 @@ def postuler(current_user):
     # Analyse automatique immediate : extraction, profil, similarite, score.
     # Un echec de lecture n'empeche jamais l'enregistrement de la candidature ;
     # elle est alors signalee comme non analysable et reste traitable a la main.
+    debut_analyse = time.perf_counter()
+    aboutie = True
     try:
         details = analyser_candidature(candidature, chemin_cv=chemin)
     except Exception as exc:  # noqa: BLE001 - on ne perd jamais une candidature
         current_app.logger.exception("Analyse du CV impossible : %s", exc)
+        aboutie = False
         candidature.score = None
         candidature.score_details = {
             "statut": "analyse_indisponible",
-            "message": "Le service d'analyse est momentanément indisponible.",
+            "message": "Le service d'analyse est momentanement indisponible.",
         }
         details = candidature.score_details
+
+    # L'indicateur est publie ici parce que le resultat y est deja connu :
+    # aucune mesure supplementaire n'est prise pour lui.
+    observer_analyse(
+        time.perf_counter() - debut_analyse, candidature.score, aboutie
+    )
 
     db.session.add(candidature)
     db.session.flush()
