@@ -64,6 +64,27 @@ Les constats sont publiés dans l'onglet **Security** du dépôt. La recherche d
 secrets est bloquante : une modification qui en introduit un n'est pas
 fusionnée.
 
+## Ce qui accompagne chaque image publiée
+
+| Élément | Ce qu'il permet |
+|---|---|
+| Inventaire logiciel (SPDX) | Savoir en quelques secondes si l'image contient un composant que l'on vient de découvrir vulnérable, sans la reconstruire |
+| Attestation d'origine | Retrouver la source, la chaîne et le commit qui ont produit l'image |
+| Signature Sigstore | Vérifier que l'image vient bien de ce dépôt et n'a pas été remplacée au registre |
+
+La signature est établie sans clé privée : la chaîne obtient de GitHub un
+jeton attestant son origine, et une autorité publique le certifie. Aucun
+secret de longue durée n'est donc conservé pour signer.
+
+Pour vérifier une image vous-même :
+
+```
+cosign verify \
+  --certificate-identity-regexp "^https://github.com/AyMB1303/skillseek-ai/.github/workflows/" \
+  --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+  ghcr.io/aymb1303/skillseek-ai/backend@sha256:<empreinte>
+```
+
 ## Ce qui n'est pas couvert
 
 - Les manifestes Kubernetes sont validés et analysés, mais le cluster de

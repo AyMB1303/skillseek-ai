@@ -508,6 +508,14 @@ jobs:
       # constat se perd dans le journal d'execution — l'analyse ne sert alors
       # a rien.
       security-events: write
+      # Signature des images publiées. Cosign ne demande pas de clé : il
+      # obtient de GitHub un jeton attestant que l'exécution vient bien de ce
+      # dépôt, et fait certifier la signature par une autorité publique. Sans
+      # cette permission, le jeton n'est pas émis et la signature échoue.
+      #
+      # Une clé privée aurait exigé un secret de longue durée dans un dépôt
+      # public, exactement ce que la recherche de secrets cherche à empêcher.
+      id-token: write
     strategy:
       # Les deux images se construisent en parallèle et l'échec de l'une
       # n'interrompt pas l'autre : on veut connaître les deux résultats.
@@ -615,6 +623,7 @@ jobs:
           retention-days: 90
 
       - name: Publier au registre
+        id: publication
         # Seconde passe, réservée à `main` et aux étiquettes de version. Tout
         # est en cache : elle ne reconstruit rien, elle pousse. C'est ici que
         # l'inventaire et l'attestation d'origine sont attachés à l'image,
@@ -629,6 +638,35 @@ jobs:
           cache-from: type=gha,scope=${{ matrix.service }}
           sbom: true
           provenance: mode=max
+
+      - name: Installer Cosign
+        if: steps.publication.outcome == 'success'
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+
+      - name: Signer l'image publiée
+        # L'inventaire dit *ce que* contient l'image ; la signature dit *d'où*
+        # elle vient. Ce sont deux questions distinctes, et la seconde est
+        # celle qui manquait : rien n'empêchait jusqu'ici de pousser au
+        # registre une image portant le même nom mais construite ailleurs.
+        #
+        # La signature porte sur l'empreinte, jamais sur l'étiquette : une
+        # étiquette se redéplace vers une autre image, une empreinte non.
+        # C'est pourquoi on signe `image@sha256:…` et non `image:latest`.
+        if: steps.publication.outcome == 'success'
+        env:
+          IMAGE: ${{ env.REGISTRE }}/${{ github.repository }}/${{ matrix.service }}
+          EMPREINTE: ${{ steps.publication.outputs.digest }}
+        run: |
+          set -euo pipefail
+          cosign sign --yes "${IMAGE}@${EMPREINTE}"
+          # Vérification immédiate : signer sans relire laisserait passer une
+          # signature mal formée, et le défaut ne se découvrirait qu'au
+          # moment où quelqu'un chercherait à s'en servir.
+          cosign verify \
+            --certificate-identity-regexp \
+              "^https://github.com/${GITHUB_REPOSITORY}/.github/workflows/" \
+            --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+            "${IMAGE}@${EMPREINTE}"
 
   # ------------------------------------------------------------------ #
   # 3. Vérification d'assemblage                                        #
