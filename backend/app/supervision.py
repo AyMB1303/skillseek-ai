@@ -1,10 +1,12 @@
 """Exposition des indicateurs d'exploitation au format Prometheus.
 
-Le principe qui gouverne ce fichier : **on n'invente aucune mesure ici.**
-L'application chronométrait déjà chaque requête pour l'inscrire au journal, et
-conservait déjà le détail de chaque analyse. Ce module ne fait que publier ces
-mêmes valeurs sous une forme qu'un collecteur sait lire — il ne mesure rien de
-nouveau, il rend lisible ce qui était déjà mesuré.
+Le principe qui gouverne ce fichier : **aucune grandeur nouvelle n'est
+inventée ici.** L'application chronométrait déjà chaque requête pour l'inscrire
+au journal, et conservait déjà le détail de chaque analyse. Ce module publie
+ces mêmes grandeurs sous une forme qu'un collecteur sait lire. Il pose son
+propre point de départ plutôt que de réutiliser celui des traces — voir le
+commentaire de « _demarrer_chrono », qui explique ce que cette indépendance
+évite — mais ce qu'il expose reste ce que l'application mesurait déjà.
 
 Deux familles d'indicateurs, et la distinction compte pour l'exploitation.
 
@@ -125,13 +127,23 @@ def brancher(app) -> None:
 
     @app.before_request
     def _demarrer_chrono():
-        # Le chronomètre existant sert au journal ; on ne le double pas.
-        if not hasattr(g, "debut_requete"):
-            g.debut_requete = time.perf_counter()
+        # Chronomètre distinct de celui des traces, et c'est délibéré.
+        #
+        # Les traces posent « debut_requete » puis le *retirent* de `g` dans
+        # leur propre `after_request`. Or Flask exécute ces fonctions en ordre
+        # inverse d'enregistrement : selon l'endroit où la supervision est
+        # branchée dans la fabrique, elle peut passer après le retrait et ne
+        # plus rien trouver. Le premier essai en a fait les frais — les
+        # indicateurs s'exposaient sans le moindre échantillon.
+        #
+        # Une clé qui n'appartient qu'à ce module supprime la dépendance à
+        # l'ordre. Le second appel à l'horloge est négligeable devant le
+        # traitement d'une requête.
+        g.debut_supervision = time.perf_counter()
 
     @app.after_request
     def _observer(reponse):
-        debut = g.get("debut_requete")
+        debut = g.get("debut_supervision")
         # La règle de routage plutôt que le chemin : voir le commentaire des
         # étiquettes. Une requête sur une route inconnue est rangée sous
         # « inconnue » pour la même raison — sinon un balayage automatisé
