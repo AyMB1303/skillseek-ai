@@ -329,8 +329,28 @@ def calculer_score(profil, offre, similarite_semantique=None, probabilite_modele
         if similarite_semantique is not None
         else 0.0
     )
+    # Deux lectures de l'experience, et elles ne servent pas au meme endroit.
+    #
+    # L'anciennete brute repond a « le candidat a-t-il la seniorite annoncee ».
+    # C'est elle qui qualifie ou disqualifie, parce que c'est elle que l'offre
+    # demande explicitement.
+    #
+    # L'experience *pertinente* repond a « combien de ce temps touche aux
+    # competences du poste ». Elle pondere chaque poste occupe par la part des
+    # competences exigees que sa description fait apparaitre : huit ans passes
+    # a autre chose ne valent pas huit ans sur le sujet.
+    #
+    # Seule la seconde entre dans la note. La faire entrer aussi dans la
+    # disqualification a ete mesure : le rappel tombait a 65 %, parce qu'un
+    # curriculum sobre est alors traite comme un curriculum sans experience.
+    # Ecarter quelqu'un sur ce qu'il n'a pas ecrit serait exactement
+    # l'injustice silencieuse que ce projet combat ; le signaler dans la note,
+    # que le recruteur lit avec son detail, ne l'est pas.
+    pertinente = profil.get("experience_pertinente")
+    if pertinente is None:
+        pertinente = experience
     if offre.min_experience_years:
-        ratio = min(experience / offre.min_experience_years, 1.5) / 1.5
+        ratio = min(pertinente / offre.min_experience_years, 1.5) / 1.5
     else:
         ratio = 1.0
     part_experience = ratio * POIDS_EXPERIENCE

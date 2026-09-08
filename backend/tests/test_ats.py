@@ -234,3 +234,69 @@ def test_le_recit_d_experience_est_lu_en_entier():
     )
     # Seulement listée en fin de curriculum : la distinction doit tenir.
     assert "docker" in profil["skills"] and "docker" not in etayees
+
+
+# ----------------- Expérience adossée aux compétences du poste -----------------
+
+def test_l_experience_pertinente_pondere_chaque_poste():
+    """Huit ans passés à autre chose ne valent pas huit ans sur le sujet.
+
+    Le moteur comptait l'ancienneté brute. Un profil du bon domaine mais au
+    parcours hors sujet en tirait la totalité des points d'expérience — ce que
+    le recruteur, lui, voit immédiatement.
+    """
+    profil = ats.analyser_cv(CV_COMPLET)
+    annees, part = ats.experience_pertinente(profil, ["flask", "postgresql"])
+    assert 0 < part <= 1
+    assert annees < profil["totalExperienceYears"]
+
+
+def test_un_parcours_hors_sujet_ne_compte_presque_pas():
+    brut = """Mehdi Touzani
+m@mail.ma
+
+EXPÉRIENCE PROFESSIONNELLE
+
+Janvier 2016 – Présent
+Administrateur systèmes chez Assurances
+  Exploitation de serveurs Windows et gestion des sauvegardes.
+
+FORMATION
+
+2015 - Master en réseaux
+
+COMPÉTENCES
+
+Docker, Kubernetes, Linux
+"""
+    profil = ats.analyser_cv(brut)
+    _, part = ats.experience_pertinente(profil, ["docker", "kubernetes"])
+    assert part == 0.0
+
+
+def test_un_profil_junior_entierement_pertinent_garde_sa_part():
+    """La mesure est une part, pas une durée : elle ne punit pas la jeunesse."""
+    brut = """Salma Idrissi
+s@mail.ma
+
+EXPÉRIENCE PROFESSIONNELLE
+
+Janvier 2023 – Décembre 2024
+Développeuse chez SoftHouse
+  Développement d'API REST avec Flask et PostgreSQL.
+
+FORMATION
+
+2022 - Master en informatique
+"""
+    profil = ats.analyser_cv(brut)
+    _, part = ats.experience_pertinente(profil, ["flask", "postgresql"])
+    assert part == 1.0
+
+
+def test_sans_competence_exigee_la_part_est_entiere():
+    """Une offre sans exigence ne doit pas annuler l'expérience du candidat."""
+    profil = ats.analyser_cv(CV_COMPLET)
+    annees, part = ats.experience_pertinente(profil, [])
+    assert part == 1.0
+    assert annees == profil["totalExperienceYears"]
