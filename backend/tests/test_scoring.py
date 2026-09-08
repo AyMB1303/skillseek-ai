@@ -355,3 +355,33 @@ def test_les_competences_souhaitees_passent_aussi_par_le_referentiel():
     profil = _profil(["python", "kubernetes"], ["python", "kubernetes"])
     _, details = calculer_score(profil, offre)
     assert details["competences_souhaitees_trouvees"] == ["kubernetes"]
+
+
+def test_deux_ans_sur_trois_reste_une_reserve():
+    """La tolérance implémente enfin ce que sa documentation annonçait.
+
+    Le commentaire de « TOLERANCE_EXPERIENCE » donnait « quatre ans sur six »
+    comme limite du tolérable. À 0,7, ce cas précis tombait à 0,667, passait
+    sous le seuil et devenait éliminatoire : l'exemple documenté était rejeté
+    par la constante qu'il documentait. Deux tiers implémente l'intention.
+    """
+    offre = _Offre(["python"], annees=3, diplome="Bac+3")
+    profil = _profil(["python"], ["python"], annees=2, diplome="Bac+5")
+    _, details = calculer_score(profil, offre, similarite_semantique=0.6)
+    assert details["eliminatoires"] == []
+    assert any("2 an(s) pour 3" in r for r in details["reserves"])
+
+
+def test_quatre_ans_sur_six_reste_une_reserve():
+    offre = _Offre(["python"], annees=6, diplome="Bac+3")
+    profil = _profil(["python"], ["python"], annees=4, diplome="Bac+5")
+    _, details = calculer_score(profil, offre, similarite_semantique=0.6)
+    assert details["eliminatoires"] == []
+
+
+def test_un_manque_de_plus_d_un_tiers_reste_eliminatoire():
+    """La règle n'est pas supprimée : au-delà d'un tiers, elle disqualifie."""
+    offre = _Offre(["python"], annees=6, diplome="Bac+3")
+    profil = _profil(["python"], ["python"], annees=3, diplome="Bac+5")
+    _, details = calculer_score(profil, offre, similarite_semantique=0.6)
+    assert details["eliminatoires"]

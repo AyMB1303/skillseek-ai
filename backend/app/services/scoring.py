@@ -104,9 +104,21 @@ NIVEAUX_DIPLOME = {"bac": 0, "bac+2": 1, "bac+3": 2, "bac+5": 3, "doctorat": 4}
 # candidature reste eligible, la reserve est affichee, et le point perdu se
 # reflete dans la note. Au-dela d'une marge, l'ecart redevient eliminatoire.
 
-# Part minimale de l'experience requise en deca de laquelle l'ecart n'est
-# plus une reserve mais une disqualification (70 % : quatre ans sur six).
-TOLERANCE_EXPERIENCE = 0.7
+# Part minimale de l'experience requise en deca de laquelle l'ecart n'est plus
+# une reserve mais une disqualification.
+#
+# L'intention ecrite ici etait « quatre ans sur six ». Elle n'etait pas
+# implementee : a 0,7, quatre ans sur six donne 0,667, passe sous le seuil, et
+# devient eliminatoire — l'exemple meme que le commentaire donnait comme
+# tolerable etait rejete par la constante qu'il documentait. Meme cas pour
+# deux ans sur trois.
+#
+# Deux tiers implemente ce que la regle annonce : un manque d'un tiers de
+# l'experience demandee reste une reserve, au-dela il disqualifie. Ce choix est
+# coherent avec le principe pose plus haut — l'experience annoncee est un
+# repere, pas un couperet — et avec la pratique des annonces, qui ecrivent
+# « 3 ans » en recevant des candidats a deux.
+TOLERANCE_EXPERIENCE = 2 / 3
 
 # Chaque niveau de diplome manquant est compense par cette avance
 # d'experience. Transposition de la clause « ou experience equivalente », que
