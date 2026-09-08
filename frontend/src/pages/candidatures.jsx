@@ -9,6 +9,8 @@ import { api, telechargerFichier } from "@/lib/api";
 import { couleurScore, SEUIL_RETENU, PLAFOND_TOP } from "@/lib/scoring";
 import { useCompteur, retard } from "@/lib/mouvement";
 import { competencesDisponibles } from "@/lib/regles";
+import ComparaisonCandidats from "@/components/ComparaisonCandidats";
+import { etatSelection, MAXIMUM_COMPARABLE } from "@/lib/comparaison";
 
 const ONGLETS = [
   { cle: "toutes", libelle: "Toutes" },
@@ -31,6 +33,12 @@ export default function Candidatures() {
   const [onglet, setOnglet] = useState("toutes");
   const [tri, setTri] = useState({ champ: "score", sens: "desc" });
   const [selection, setSelection] = useState(null);
+  // Identifiants cochés en vue d'une comparaison. On garde des identifiants
+  // plutôt que les objets : une candidature rechargée après un changement de
+  // statut serait un objet différent, et la sélection se viderait toute
+  // seule sans que le recruteur comprenne pourquoi.
+  const [aComparer, setAComparer] = useState([]);
+  const [comparaisonOuverte, setComparaisonOuverte] = useState(false);
   const [filtres, setFiltres] = useState({
     recherche: "",
     competence: "",
@@ -120,6 +128,25 @@ export default function Candidatures() {
 
   const filtreActif =
     filtres.recherche || filtres.competence || filtres.tranche || filtres.signalees;
+
+  // Les candidatures cochées, dans l'ordre où elles apparaissent à l'écran.
+  // On les relit dans la liste courante plutôt que de les mémoriser : après
+  // un changement de statut ou une relance d'analyse, une copie figée
+  // afficherait des valeurs périmées dans la comparaison.
+  const selectionnees = useMemo(
+    () => candidatures.filter((c) => aComparer.includes(c.id)),
+    [candidatures, aComparer]
+  );
+  const etatComparaison = useMemo(
+    () => etatSelection(selectionnees),
+    [selectionnees]
+  );
+
+  const basculerComparaison = useCallback((id) => {
+    setAComparer((liste) =>
+      liste.includes(id) ? liste.filter((x) => x !== id) : [...liste, id]
+    );
+  }, []);
 
   const compteurs = useMemo(
     () => Object.fromEntries(Object.entries(groupes).map(([k, v]) => [k, v.length])),
@@ -272,6 +299,40 @@ export default function Candidatures() {
         </div>
       )}
 
+      {/* Barre de comparaison. Elle n'apparaît qu'une fois une case cochée :
+          une commande visible en permanence sur un écran déjà dense serait
+          lue comme un filtre de plus. */}
+      {aComparer.length > 0 && (
+        <div className="flex flex-wrap items-center gap-3 mb-4 bg-surface border border-bordure rounded-[10px] px-3.5 py-2.5">
+          <span className="text-[13px]">
+            <strong>{selectionnees.length}</strong> sélectionnée
+            {selectionnees.length > 1 ? "s" : ""}
+            {selectionnees.length > 0 && (
+              <span className="text-txt2">
+                {" "}
+                — {selectionnees.map((c) => c.candidate?.full_name).join(", ")}
+              </span>
+            )}
+          </span>
+          {!etatComparaison.comparable && (
+            <span className="text-[12px] text-txt2">{etatComparaison.motif}</span>
+          )}
+          <button
+            onClick={() => setComparaisonOuverte(true)}
+            disabled={!etatComparaison.comparable}
+            className="ml-auto btn-primaire text-[13px] py-2 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            Comparer
+          </button>
+          <button
+            onClick={() => setAComparer([])}
+            className="text-[12.5px] text-txt2 hover:text-txt"
+          >
+            Annuler
+          </button>
+        </div>
+      )}
+
       {etat === "chargement" && <Chargement lignes={5} />}
       {etat === "erreur" && <EtatErreur message={erreur} onReessayer={charger} />}
 
@@ -283,6 +344,9 @@ export default function Candidatures() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-left text-txt2 text-xs border-b border-bordure">
+                  <th className="pl-5 pr-0 py-3 w-8">
+                    <span className="sr-only">Comparer</span>
+                  </th>
                   <ThTri champ="nom" tri={tri} onClick={basculerTri}>Candidat</ThTri>
                   <th className="px-5 py-3 font-medium">Offre</th>
                   <ThTri champ="score" tri={tri} onClick={basculerTri}>Score</ThTri>
@@ -303,6 +367,35 @@ export default function Candidatures() {
                       className="border-b border-bordure last:border-0 hover:bg-surface2/60 transition-colors entree"
                       style={{ animationDelay: retard(rang, 22, 260) }}
                     >
+                      <td className="pl-5 pr-0 py-3">
+                        {/* La case est désactivée dès que la sélection est
+                            pleine ou porte sur une autre offre : mieux vaut
+                            empêcher le geste que refuser après coup. Le
+                            titre dit pourquoi, sans quoi une case grisée
+                            passerait pour un défaut. */}
+                        <input
+                          type="checkbox"
+                          checked={aComparer.includes(c.id)}
+                          onChange={() => basculerComparaison(c.id)}
+                          disabled={
+                            !aComparer.includes(c.id) &&
+                            (aComparer.length >= MAXIMUM_COMPARABLE ||
+                              (selectionnees.length > 0 &&
+                                selectionnees[0].offer?.id !== c.offer?.id) ||
+                              c.score == null)
+                          }
+                          title={
+                            c.score == null
+                              ? "Candidature non analysée : rien à comparer."
+                              : selectionnees.length > 0 &&
+                                selectionnees[0].offer?.id !== c.offer?.id
+                              ? "La comparaison porte sur une seule offre à la fois."
+                              : `Comparer ${c.candidate?.full_name || ""}`
+                          }
+                          aria-label={`Comparer ${c.candidate?.full_name || ""}`}
+                          className="accent-accent w-4 h-4 disabled:opacity-30"
+                        />
+                      </td>
                       <td className="px-5 py-3">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-full bg-bordure text-cyan grid place-items-center text-[11px] font-bold shrink-0">
@@ -365,6 +458,17 @@ export default function Candidatures() {
           />
         )}
       </Drawer>
+
+      {comparaisonOuverte && etatComparaison.comparable && (
+        <ComparaisonCandidats
+          candidatures={selectionnees}
+          onFermer={() => setComparaisonOuverte(false)}
+          onOuvrirDetail={(c) => {
+            setComparaisonOuverte(false);
+            setSelection(c);
+          }}
+        />
+      )}
     </Layout>
   );
 }
