@@ -516,10 +516,21 @@ def analyser_cv(texte):
     #
     # On ne juge pas ici : on distingue. Ce que le score en fait est decide
     # dans « scoring.py », et une competence declaree n'est jamais niee.
+    # `summary` est une chaine une fois l'entree consolidee, une liste de
+    # lignes tant qu'elle se construit. Un « join » applique a une chaine
+    # insere un espace entre chaque *caractere* — « F l a s k » — et aucune
+    # competence n'y est plus reconnaissable. Le defaut ne levait aucune
+    # erreur : il rendait simplement l'etayage nul pour tout le monde, ce qui
+    # ressemblait a un resultat plutot qu'a une panne.
+    def _texte(valeur):
+        if isinstance(valeur, str):
+            return valeur
+        return " ".join(valeur or [])
+
     recit = "\n".join(
         " ".join(filter(None, [
             poste.get("position"), poste.get("company"),
-            " ".join(poste.get("summary") or []),
+            _texte(poste.get("summary")),
         ]))
         for poste in experiences
     )

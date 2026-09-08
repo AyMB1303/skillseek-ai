@@ -213,3 +213,24 @@ def test_un_document_vide_ne_provoque_pas_d_erreur():
     assert profil["work"] == []
     assert profil["totalExperienceYears"] == 0
     assert profil["highestDegree"] is None
+
+
+def test_le_recit_d_experience_est_lu_en_entier():
+    """Toutes les compétences décrites dans les postes doivent être étayées.
+
+    Le récit était assemblé avec « " ".join(summary) », alors que `summary`
+    est une chaîne une fois l'entrée consolidée. Un `join` sur une chaîne
+    insère un espace entre chaque caractère — « F l a s k » — et plus aucune
+    compétence n'y était reconnaissable. Aucune erreur n'était levée : l'étayage
+    tombait simplement à zéro pour tout le monde, ce qui ressemblait à un
+    résultat plutôt qu'à une panne, et faussait la mesure qui en dépendait.
+    """
+    profil = ats.analyser_cv(CV_COMPLET)
+    etayees = set(profil["skillsEtayees"])
+    # Décrites dans un poste : « API REST avec Flask et PostgreSQL ».
+    assert {"flask", "postgresql"} <= etayees, (
+        f"compétences décrites mais non étayées : "
+        f"{ {'flask', 'postgresql'} - etayees }"
+    )
+    # Seulement listée en fin de curriculum : la distinction doit tenir.
+    assert "docker" in profil["skills"] and "docker" not in etayees
