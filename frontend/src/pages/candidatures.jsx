@@ -503,14 +503,39 @@ function CompteurScore({ valeur }) {
  *
  * Les compétences absentes restent affichées. Les masquer donnerait un profil
  * plus flatteur qu'il ne l'est.
+ *
+ * Trois états, et non deux. Une compétence figurant dans la rubrique
+ * « compétences » d'un curriculum n'est pas au même rang qu'une compétence
+ * qu'une expérience datée décrit en train d'être exercée. Le moteur note déjà
+ * ces deux cas différemment ; l'écran doit le dire, sinon le recruteur voit un
+ * écart de points sans cause visible — c'est précisément le reproche adressé
+ * aux dispositifs opaques.
  */
 function CorrespondanceCompetences({ details: d, nonAnalysee }) {
   const [survolee, setSurvolee] = useState(null);
 
+  // Les compétences étayées sont publiées par le moteur ; en leur absence
+  // (analyse produite par une version anterieure), tout ce qui est trouvé est
+  // presenté comme auparavant, sans distinction inventée.
+  const etayees = new Set(
+    (d.competences_etayees || []).map((s) => (s || "").toLowerCase())
+  );
+  const distingue = Array.isArray(d.competences_etayees);
+
   const requises = [
-    ...(d.competences_trouvees || []).map((s) => ({ nom: s, trouvee: true })),
-    ...(d.competences_manquantes || []).map((s) => ({ nom: s, trouvee: false })),
+    ...(d.competences_trouvees || []).map((s) => ({
+      nom: s,
+      trouvee: true,
+      etayee: !distingue || etayees.has((s || "").toLowerCase()),
+    })),
+    ...(d.competences_manquantes || []).map((s) => ({
+      nom: s,
+      trouvee: false,
+      etayee: false,
+    })),
   ];
+  const nbEtayees = requises.filter((r) => r.etayee).length;
+  const nbCitees = requises.filter((r) => r.trouvee && !r.etayee).length;
   const detectees = (d.profil_ats?.skills || d.profil_analyse?.skills || []).slice(0, 24);
 
   if (!requises.length) {
@@ -554,20 +579,35 @@ function CorrespondanceCompetences({ details: d, nonAnalysee }) {
               onFocus={() => r.trouvee && setSurvolee(r.nom)}
               onBlur={() => setSurvolee(null)}
               title={
-                r.trouvee
-                  ? "Relevée dans le CV — survolez pour voir la correspondance"
-                  : "Absente du CV"
+                !r.trouvee
+                  ? "Absente du CV"
+                  : r.etayee
+                    ? "Décrite dans une expérience : le CV montre cette compétence exercée"
+                    : "Citée dans la liste des compétences, mais aucune expérience ne la décrit"
               }
               className={`entree ${classe(
                 r.trouvee ? r.nom : null,
-                r.trouvee ? "bg-succes/10 text-succes" : "bg-erreur/10 text-erreur"
+                !r.trouvee
+                  ? "bg-erreur/10 text-erreur"
+                  : r.etayee
+                    ? "bg-succes/10 text-succes"
+                    : "bg-alerte/10 text-alerte"
               )}`}
               style={{ animationDelay: retard(i, 40) }}
             >
-              {r.trouvee ? "✓" : "✗"} {r.nom}
+              {!r.trouvee ? "✗" : r.etayee ? "✓" : "~"} {r.nom}
             </button>
           ))}
         </div>
+        {distingue && nbCitees > 0 && (
+          <p className="text-[11px] text-txt2 mt-2 leading-snug">
+            <span className="text-succes">✓ {nbEtayees} démontrée{nbEtayees > 1 ? "s" : ""}</span>
+            {" — une expérience la décrit. "}
+            <span className="text-alerte">~ {nbCitees} citée{nbCitees > 1 ? "s" : ""}</span>
+            {" — présente dans la liste des compétences seulement. Une compétence"}
+            {" citée compte pour trois quarts d'une compétence démontrée."}
+          </p>
+        )}
       </div>
 
       <div>
