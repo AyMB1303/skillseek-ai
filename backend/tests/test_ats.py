@@ -346,3 +346,66 @@ Développeuse chez SoftHouse
 def test_un_nombre_aberrant_n_est_pas_pris_pour_une_anciennete():
     assert ats.annees_annoncees("Formation de 80 ans d'expérience cumulée") == 0
     assert ats.annees_annoncees("aucune mention") == 0
+
+
+# ------------- Pratiquer une compétence, ou en être l'entourage -------------
+#
+# Les exemples ci-dessous sont écrits pour ces tests. Ils ne reprennent pas
+# les cas du jeu retenu à l'écart : les mesurer ici reviendrait à les
+# transformer en jeu d'entraînement, et ils perdraient toute valeur.
+
+def _cv_avec(phrase):
+    return f"""Test Personne
+t@mail.ma
+
+EXPÉRIENCE PROFESSIONNELLE
+
+Janvier 2019 – Présent
+Ingénieur chez Entreprise
+  {phrase}
+
+FORMATION
+
+2018 - Master en informatique
+
+COMPÉTENCES
+
+Kubernetes, Docker
+"""
+
+
+def test_une_competence_pratiquee_est_etayee():
+    profil = ats.analyser_cv(_cv_avec(
+        "Mise en place d'un cluster Kubernetes et automatisation des déploiements."
+    ))
+    assert "kubernetes" in profil["skillsEtayees"]
+
+
+def test_une_competence_seulement_encadree_n_est_pas_etayee():
+    """Valider des rapports sur un cluster n'est pas exploiter un cluster.
+
+    C'est la limite qu'un jeu de cas écrit par un tiers a révélée : le
+    mécanisme voyait le mot, pas ce que la personne en avait fait.
+    """
+    profil = ats.analyser_cv(_cv_avec(
+        "Validation documentaire des rapports de sécurité des clusters Kubernetes."
+    ))
+    assert "kubernetes" in profil["skills"]
+    assert "kubernetes" not in profil["skillsEtayees"]
+
+
+def test_le_doute_profite_au_candidat():
+    """Ni terme de pratique ni terme d'entourage : on ne retire rien.
+
+    Un curriculum sobre ne doit pas être traité comme un curriculum creux.
+    """
+    profil = ats.analyser_cv(_cv_avec("Kubernetes au quotidien sur le parc interne."))
+    assert "kubernetes" in profil["skillsEtayees"]
+
+
+def test_une_phrase_mixte_reste_creditee():
+    """Coordonner *et* faire reste faire."""
+    profil = ats.analyser_cv(_cv_avec(
+        "Pilotage des comités et mise en place des clusters Kubernetes."
+    ))
+    assert "kubernetes" in profil["skillsEtayees"]

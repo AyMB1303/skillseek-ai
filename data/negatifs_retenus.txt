@@ -49,45 +49,154 @@
 
 ## backend
 
-NOM PRÉNOM
-Intitulé du poste actuel
-adresse@example.ma | +212 6 00 00 00 00
+YASSINE EL MANSOURI
+Ingénieur Backend Python
+yassine.elmansouri@example.ma | +212 6 45 78 21 36
 
 EXPÉRIENCE PROFESSIONNELLE
 
-Mois AAAA – Présent
-Intitulé du poste chez Employeur
-  Ce que la personne a réellement fait, en deux ou trois lignes.
-  C'est ici que se joue la différence avec un vrai bon profil.
+Septembre 2021 – Présent
+Ingénieur Logiciel chez Atlas Digital Services
+Développement de fonctionnalités métier en Python au sein d’une application interne de gestion.
+Participation principalement à l’évolution de scripts de traitement et à la correction d’incidents sur une plateforme existante.
 
-Mois AAAA – Mois AAAA
-Intitulé du poste précédent chez Employeur
-  Description.
+Janvier 2019 – Août 2021
+Développeur Logiciel chez Maghreb Solutions
+Développement de modules de reporting et d’outils d’automatisation en Python.
+Utilisation quotidienne de requêtes SQL pour extraire des données depuis la base PostgreSQL de l’entreprise.
 
 FORMATION
 
-AAAA - Diplôme, Établissement
+2018 - Diplôme d’Ingénieur en Informatique, École Nationale des Sciences Appliquées
 
 COMPÉTENCES
 
-Les compétences citées, séparées par des virgules.
+Python, Django, Flask, FastAPI, PostgreSQL, SQL, Docker, GitLab CI, Kubernetes, REST API, Redis
+
+LANGUES
+
+Français, arabe, anglais
+
+## frontend
+
+AMINA BERRADA
+Développeuse Frontend React (Spécialité UX/UI)
+amina.berrada@example.ma | +212 6 55 44 33 22
+
+EXPÉRIENCE PROFESSIONNELLE
+
+Janvier 2021 – Présent
+Designer UX et Prototypage React chez e-Com Agency
+Conception des parcours utilisateurs sur Figma. Génération de feuilles de style CSS et de composants React statiques via des plugins d'exportation pour la seule validation visuelle des clients. Envoi des maquettes sur le serveur d'intégration continue.
+
+Septembre 2019 – Décembre 2020
+Chargée de Recherche Utilisateur chez Digital Media
+Animation d'ateliers de conception et rédaction des spécifications fonctionnelles. Conduite des campagnes de tests d'interface (A/B testing) et recueil des retours directement auprès d'un panel de consommateurs.
+
+FORMATION
+
+2019 - Licence Professionnelle Design Numérique, Université Hassan II
+
+COMPÉTENCES
+
+JavaScript, React, CSS, Tests d'interface, Intégration continue
+
+LANGUES
+
+Français, arabe , espagnole
+
+COMPÉTENCES
+
+JavaScript, React, CSS, HTML, TypeScript, Next.js, Jest, Cypress, GitLab CI, Responsive Design, UI Design
+
+LANGUES
+
+Français, arabe, anglais
+
+## data
+
+HAMZA ALAOUI
+Data Analyst Senior
+hamza.alaoui@example.ma | +212 6 61 48 93 27
+
+EXPÉRIENCE PROFESSIONNELLE
+
+Mars 2021 – Présent
+Data Analyst chez Finance Analytics Maroc
+Analyse des indicateurs commerciaux et financiers à partir de données issues des systèmes de l’entreprise.
+Préparation de jeux de données SQL et réalisation de tableaux de bord destinés aux équipes métier.
+
+Septembre 2019 – Février 2021
+Analyste BI chez Conseil Data Solutions
+Conception de rapports décisionnels et développement de requêtes SQL pour différents clients.
+Participation à la définition des indicateurs et à la validation des résultats avec les responsables métier.
+
+FORMATION
+
+2019 - Master en Data Science et Intelligence Artificielle, Université Hassan II
+
+COMPÉTENCES
+
+Python, Pandas, NumPy, Scikit-learn, SQL, Machine Learning, Deep Learning, NLP, Power BI, TensorFlow, Matplotlib
+
+LANGUES
+
+Français, arabe, anglais
+
+## devops
+
+MEHDI CHRAIBI
+Ingénieur DevOps
+mehdi.chraibi@example.ma | +212 6 77 66 55 44
+
+EXPÉRIENCE PROFESSIONNELLE
+
+Novembre 2019 – Présent
+Coordinateur DevOps chez TechCloud
+Pilotage des comités de mise en production entre les développeurs et l'infogérant. Validation documentaire des rapports de sécurité des clusters Kubernetes et suivi des tickets d'incidents sur les environnements Linux.
+
+Octobre 2017 – Octobre 2019
+Gestionnaire des Déploiements chez SoftFactory
+Animation des réunions de gestion des changements (ITIL) pour approuver le passage en production. Création de tickets JIRA pour demander le déclenchement des chaînes de livraison continue.
+
+FORMATION
+
+2017 - Master en Ingénierie des Systèmes, FST Settat
+
+COMPÉTENCES
+
+Docker, Kubernetes, Systèmes Linux, Livraison continue, Cloud AWS
 
 LANGUES
 
 Français, arabe
 
-## frontend
-
-(deuxième candidature)
-
-## data
-
-(troisième candidature)
-
-## devops
-
-(quatrième candidature)
-
 ## java
 
-(cinquième candidature)
+MOHAMED AMINE CHRAIBI
+Développeur Java Senior
+mohamed.chraibi@example.ma | +212 6 72 41 65 93
+
+EXPÉRIENCE PROFESSIONNELLE
+
+Janvier 2021 – Présent
+Consultant Java chez Enterprise Solutions Maroc
+Participation à plusieurs projets de développement d’applications de gestion avec Java et Spring.
+Intervention principalement sur les tests d’intégration, l’analyse des anomalies et la maintenance corrective des services développés par l’équipe.
+
+Juillet 2018 – Décembre 2020
+Ingénieur Logiciel chez SoftTech Rabat
+Développement de modules Java pour une application de gestion documentaire.
+Contribution ponctuelle à l’écriture de requêtes SQL et à la préparation des jeux de tests avant livraison.
+
+FORMATION
+
+2018 - Diplôme d’Ingénieur en Génie Informatique, École Mohammadia d’Ingénieurs
+
+COMPÉTENCES
+
+Java, Spring, Spring Boot, SQL, PostgreSQL, JUnit, Mockito, Docker, Git, Jenkins, Agile, Microservices
+
+LANGUES
+
+Français, arabe, anglai

@@ -561,14 +561,15 @@ def analyser_cv(texte):
             return valeur
         return " ".join(valeur or [])
 
-    recit = "\n".join(
-        " ".join(filter(None, [
-            poste.get("position"), poste.get("company"),
-            _texte(poste.get("summary")),
-        ]))
-        for poste in experiences
-    )
-    etayees = [c for c in extraire_competences(recit) if c not in noms_langues]
+    etayees = []
+    for poste in experiences:
+        entete = " ".join(filter(None, [poste.get("position"), poste.get("company")]))
+        for phrase in re.split(r"[.;]\s+", _texte(poste.get("summary")) or ""):
+            if not _situee(phrase):
+                continue
+            for c in extraire_competences(entete + " " + phrase):
+                if c not in noms_langues and c not in etayees:
+                    etayees.append(c)
 
     return {
         "basics": extraire_identite(texte, sections.get("entete", "")),
@@ -607,6 +608,64 @@ def vers_profil_scoring(profil_ats):
 
 
 # --------------------------------------------------------------------------
+# Pratique ou entourage : ce que la phrase dit du role du candidat
+# --------------------------------------------------------------------------
+#
+# Une premiere version tenait une competence pour etayee des lors que son nom
+# figurait dans un poste occupe. Un jeu de cas ecrit par un tiers a montre la
+# limite : « Validation documentaire des rapports de securite des clusters
+# Kubernetes » creditait Kubernetes autant que « Mise en place d'un cluster
+# Kubernetes ». Le mecanisme voyait le mot, pas ce que la personne en avait
+# fait — et cinq candidatures sur cinq passaient.
+#
+# Les curriculums francais nominalisent l'action : ils ecrivent « Conception
+# de… », « Pilotage de… », rarement « j'ai concu ». Deux lexiques suffisent
+# donc, et ils sont volontairement courts : une liste longue donne l'illusion
+# de la couverture et multiplie les faux positifs.
+#
+# La regle penche du cote du candidat. En l'absence de tout indice — ni
+# pratique ni entourage — la competence reste creditee : on ne retire rien sur
+# un silence. Seule la presence explicite d'un terme d'entourage, sans aucun
+# terme de pratique dans la meme phrase, fait basculer.
+#
+# C'est une heuristique lexicale, avec les limites d'une heuristique : elle
+# reconnait « validation » et « pilotage », elle ne reconnait pas « generation
+# via des plugins d'exportation ». Nommer un role demande de lire la phrase,
+# pas d'y chercher des mots.
+
+TERMES_PRATIQUE = {
+    "conception", "concu", "developpement", "developpe", "mise", "oeuvre",
+    "implementation", "implemente", "realisation", "realise", "deploiement",
+    "deploye", "industrialisation", "automatisation", "automatise",
+    "optimisation", "optimise", "migration", "migre", "refonte",
+    "administration", "administre", "exploitation", "exploite", "maintenance",
+    "integration", "integre", "ecriture", "ecrit", "creation", "cree",
+    "construction", "configuration", "configure", "parametrage",
+    "programmation", "modelisation", "traitement", "extraction", "entrainement",
+    "correction", "corrige", "reprise",
+}
+
+TERMES_ENTOURAGE = {
+    "pilotage", "pilote", "coordination", "coordonne", "animation", "anime",
+    "validation", "valide", "suivi", "supervision", "supervise", "redaction",
+    "redige", "participation", "contribution", "accompagnement", "veille",
+    "presentation", "recueil", "approbation", "approuve", "revue",
+    "sensibilisation", "assistance", "reunion", "reunions", "comite",
+    "comites", "ticket", "tickets", "documentaire",
+}
+
+
+def _situee(phrase):
+    """La phrase décrit-elle une pratique, ou seulement un entourage ?"""
+    mots = set(re.findall(r"[a-z]+", sans_accents(phrase.lower())))
+    if mots & TERMES_PRATIQUE:
+        return True
+    if mots & TERMES_ENTOURAGE:
+        return False
+    return True          # aucun indice : le doute profite au candidat
+
+
+# --------------------------------------------------------------------------
 # Experience adossee aux competences du poste
 # --------------------------------------------------------------------------
 
@@ -642,12 +701,15 @@ def experience_pertinente(profil_ats, competences_requises):
     for poste in profil_ats.get("work") or []:
         resume = poste.get("summary")
         recit = resume if isinstance(resume, str) else " ".join(resume or [])
-        recit = " ".join(filter(None, [
-            poste.get("position"), poste.get("company"), recit,
-        ]))
+        entete = " ".join(filter(None, [poste.get("position"), poste.get("company")]))
         mois = poste.get("months") or 0
         mois_totaux += mois
-        decrites = cles & set(extraire_competences(recit))
+        # Seules les phrases decrivant une pratique comptent : un poste passe
+        # a valider et a coordonner n'adosse pas la competence a une experience.
+        decrites = set()
+        for phrase in re.split(r"[.;]\s+", recit or ""):
+            if _situee(phrase):
+                decrites |= cles & set(extraire_competences(entete + " " + phrase))
         mois_ponderes += mois * (len(decrites) / len(cles))
 
     part = mois_ponderes / mois_totaux if mois_totaux else 1.0
