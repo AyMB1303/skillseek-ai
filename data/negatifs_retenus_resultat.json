@@ -1,5 +1,5 @@
 {
-  "date": "2026-09-08 22:38",
+  "date": "2026-09-08 22:52",
   "code": "inconnue",
   "total": 5,
   "ecartees": 0,
@@ -20,16 +20,18 @@
     },
     {
       "domaine": "frontend",
-      "score": 80,
+      "score": 70,
       "retenue": true,
       "eliminatoires": [],
-      "reserves": [],
+      "reserves": [
+        "Compétence(s) obligatoire(s) citée(s) sans apparaître dans l'expérience décrite : javascript, css"
+      ],
       "etayees": [
-        "react",
-        "css"
+        "react"
       ],
       "declarees": [
-        "javascript"
+        "javascript",
+        "css"
       ]
     },
     {
@@ -50,16 +52,17 @@
     },
     {
       "domaine": "devops",
-      "score": 78,
+      "score": 59,
       "retenue": true,
       "eliminatoires": [],
-      "reserves": [],
-      "etayees": [
+      "reserves": [
+        "Compétence(s) obligatoire(s) citée(s) sans apparaître dans l'expérience décrite : docker, kubernetes, linux"
+      ],
+      "etayees": [],
+      "declarees": [
+        "docker",
         "kubernetes",
         "linux"
-      ],
-      "declarees": [
-        "docker"
       ]
     },
     {

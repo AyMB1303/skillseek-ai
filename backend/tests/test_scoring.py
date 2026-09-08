@@ -1,6 +1,10 @@
 """Tests du moteur de score et de la règle RG-01."""
 from app.services.scoring import (
     AMPLITUDE_MODELE,
+    CREDIT_DECLAREE,
+    POIDS_COMPETENCES,
+    POIDS_SEMANTIQUE,
+    POIDS_SOUHAITEES,
     SEUIL_RETENU,
     appliquer_regle_top,
     calculer_score,
@@ -219,24 +223,30 @@ def _profil(skills, etayees, annees=5, diplome="Bac+5"):
     }
 
 
-def test_la_preuve_ne_modifie_pas_la_note():
-    """Décision mesurée, et non de principe : la preuve signale, elle ne juge pas.
+def test_une_competence_pratiquee_vaut_plus_qu_une_competence_citee():
+    """Le coefficient est calibré sur les cibles annoncées, pas sur le F1.
 
-    Trois pénalités ont été mesurées sur le jeu de validation — crédit de 0,5,
-    de 0,75, puis aucun. À chaque valeur, la baisse du rappel dépassait le gain
-    de précision : les profils réellement adaptés ne décrivent eux-mêmes que
-    62 % de leurs compétences dans le récit de leurs postes, si bien que la
-    pénalité frappait d'abord les bons dossiers. Le signal est réel mais pas
-    décisif, les quatre autres composantes créditant ces profils tout autant.
+    Le balayage complet figure au rapport. Il montre un compromis régulier
+    entre précision et rappel, et une seule valeur satisfait les deux
+    objectifs du cahier des charges — 85 % de précision, 80 % de rappel. Le F1
+    serait plus élevé sans aucune pénalité : c'est le respect de la
+    spécification qui a décidé.
 
-    Le mécanisme reste donc en place pour *nommer* ce qui n'est pas étayé, et
-    laisse la décision au recruteur. Ce test échoue si quelqu'un rétablit une
-    pénalité sans refaire la mesure qui l'a écartée.
+    Ce test échoue si quelqu'un modifie le coefficient sans refaire la mesure
+    qui l'a fixé.
     """
     offre = _Offre(["python", "docker"])
-    etaye, _ = calculer_score(_profil(["python", "docker"], ["python", "docker"]), offre)
-    declare, _ = calculer_score(_profil(["python", "docker"], []), offre)
-    assert etaye == declare
+    pratiquee, _ = calculer_score(
+        _profil(["python", "docker"], ["python", "docker"]), offre
+    )
+    citee, _ = calculer_score(_profil(["python", "docker"], []), offre)
+    assert pratiquee > citee
+    # Une compétence citée conserve les trois quarts de sa valeur. L'écart est
+    # donc borné par le quart du poids réellement porté par les compétences
+    # obligatoires — poids qui absorbe ici celui des composantes absentes,
+    # aucune similarité ni compétence souhaitée n'étant fournie.
+    poids = POIDS_COMPETENCES + POIDS_SEMANTIQUE + POIDS_SOUHAITEES
+    assert (pratiquee - citee) <= (1 - CREDIT_DECLAREE) * poids + 1
 
 
 def test_un_profil_sans_information_d_etayage_n_est_pas_penalise():

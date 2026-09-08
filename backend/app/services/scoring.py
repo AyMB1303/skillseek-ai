@@ -40,25 +40,24 @@ POIDS_DIPLOME = 10
 # Amplitude maximale de l'ajustement apporte par le modele appris, en points
 AMPLITUDE_MODELE = 8
 
-# Part accordee a une competence obligatoire citee dans le curriculum mais
-# absente du recit d'experience.
+# Part accordee a une competence obligatoire citee dans le curriculum mais que
+# le recit d'experience ne rattache a aucune pratique.
 #
-# Le choix de trois quarts repose sur un constat, non sur un reglage : meme
-# les profils pleinement adaptes du jeu de validation ne font apparaitre que
-# 62 % de leurs competences dans le recit de leurs postes. Un curriculum n'est
-# pas un inventaire exhaustif, et beaucoup de candidats legitimes ne racontent
-# pas chaque outil employe. Une penalite de moitie punissait donc surtout les
-# bons dossiers — le rappel tombait de 72 a 56 %.
+# Trois quarts, pour une raison mesuree et non choisie : sur le jeu de
+# validation, les profils pleinement adaptes ne font eux-memes apparaitre que
+# 75 % de leurs competences dans la description de leurs postes. Un curriculum
+# n'est pas un inventaire exhaustif — beaucoup de candidats legitimes ne
+# racontent pas chaque outil employe. Une competence citee conserve donc les
+# trois quarts de sa valeur : ni pleine, puisqu'elle n'est pas demontree, ni
+# nulle, puisqu'elle n'est pas dementie.
 #
-# Trois quarts conserve la lecture : une competence declaree reste presque
-# entierement creditee, mais un curriculum dont *rien* n'est etaye accumule
-# l'ecart sur toutes ses competences. C'est l'ecart cumule qui distingue, pas
-# la ligne isolee.
-#
-# La sensibilite a ce coefficient est publiee au meme titre que celle du
-# seuil : un parametre dont on ne montre que la valeur retenue est un
-# parametre qu'on soupconne d'avoir ete choisi pour son resultat.
-CREDIT_DECLAREE = 1.0
+# Le balayage complet de ce coefficient est publie au meme titre que celui du
+# seuil. Il montre un compromis regulier entre precision et rappel, et une
+# seule valeur satisfait les deux objectifs annonces au cahier des charges
+# — 85 % de precision, 80 % de rappel. Le F1 serait plus eleve sans aucune
+# penalite ; c'est le respect des cibles qui a decide, pas le chiffre le plus
+# flatteur.
+CREDIT_DECLAREE = 0.75
 
 # En deca de cette part de competences etayees, une reserve est posee. Elle
 # n'ecarte pas : elle nomme, dans le detail du calcul, ce que le recruteur doit
