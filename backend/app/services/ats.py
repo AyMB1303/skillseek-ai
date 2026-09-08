@@ -292,6 +292,40 @@ def extraire_experiences(section):
     return entrees
 
 
+# « 6 ans d'experience », « experience : 4 ans », « 5+ years of experience ».
+# Ces tournures figurent dans le resume de tete de nombreux curriculums.
+MOTIFS_ANNEES_ANNONCEES = [
+    r"(\d{1,2})\s*\+?\s*(?:ans?|annees?|years?)\s*(?:of\s*)?(?:d[e']\s*)?experience",
+    r"experience\s*(?:professionnelle\s*)?[:\-]?\s*(\d{1,2})\s*\+?\s*(?:ans?|years?)",
+    r"(\d{1,2})\s*\+?\s*(?:ans?|years?)\s*(?:dans|en|d[e'])",
+]
+
+
+def annees_annoncees(texte):
+    """Anciennete que le candidat declare en toutes lettres, si elle existe.
+
+    Repli employe lorsque aucune periode datee n'a pu etre reconstruite. Un
+    curriculum qui ecrit « Ingenieur, 6 ans d'experience » sans dater ses
+    postes produisait jusqu'ici zero annee d'experience — donc, l'exigence
+    d'anciennete etant un critere eliminatoire, une candidature ecartee sur
+    une information que le document contenait pourtant.
+
+    Le defaut est silencieux : rien ne distingue « ce candidat n'a aucune
+    experience » de « je n'ai pas su lire ses dates ». C'est exactement le
+    genre d'ecart que ce projet s'attache a ne pas laisser passer sans le
+    nommer.
+
+    On retient la plus grande valeur trouvee, et jamais plus de 45 ans : au
+    dela, le nombre lu vient d'autre chose que d'une anciennete.
+    """
+    normalise = _sans_accents((texte or "").lower())
+    valeurs = []
+    for motif in MOTIFS_ANNEES_ANNONCEES:
+        valeurs += [int(v) for v in re.findall(motif, normalise)]
+    valeurs = [v for v in valeurs if 0 < v <= 45]
+    return max(valeurs) if valeurs else 0
+
+
 def annees_experience(experiences):
     """Durée totale en années, sans compter deux fois les postes simultanés."""
     intervalles = []
@@ -544,8 +578,15 @@ def analyser_cv(texte):
         "skillsEtayees": etayees,
         "certificates": extraire_certifications(sections.get("certifications", "")),
         "languages": langues,
-        # Agregats consommes par le moteur de score
-        "totalExperienceYears": annees_experience(experiences),
+        # Agregats consommes par le moteur de score.
+        #
+        # Le repli sur l'anciennete annoncee n'intervient que si aucune
+        # periode datee n'a pu etre reconstruite : une valeur lue dans une
+        # phrase ne doit jamais l'emporter sur des dates effectivement
+        # presentes, qui sont verifiables.
+        "totalExperienceYears": (
+            annees_experience(experiences) or annees_annoncees(texte)
+        ),
         "highestDegree": diplome_le_plus_eleve(formations, texte),
         "sectionsDetectees": [k for k, v in sections.items() if v and k != "entete"],
     }

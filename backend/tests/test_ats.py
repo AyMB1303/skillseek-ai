@@ -300,3 +300,49 @@ def test_sans_competence_exigee_la_part_est_entiere():
     annees, part = ats.experience_pertinente(profil, [])
     assert part == 1.0
     assert annees == profil["totalExperienceYears"]
+
+
+def test_l_anciennete_annoncee_sert_de_repli_sans_dates():
+    """Un CV sans dates n'est pas un CV sans expérience.
+
+    Rien ne distinguait « ce candidat n'a aucune expérience » de « je n'ai pas
+    su lire ses dates ». Comme l'ancienneté insuffisante est un critère
+    éliminatoire, un candidat était écarté sur une information que son
+    document contenait pourtant en toutes lettres.
+    """
+    brut = """Karim Ouazzani
+Ingénieur logiciel, 6 ans d'expérience
+k@mail.ma
+
+EXPÉRIENCE PROFESSIONNELLE
+
+Développeur backend chez SoftHouse
+  Conception d'API REST avec Flask et PostgreSQL.
+
+FORMATION
+Master en informatique
+"""
+    profil = ats.analyser_cv(brut)
+    assert profil["work"] == [] or all(not w.get("startDate") for w in profil["work"])
+    assert profil["totalExperienceYears"] == 6
+
+
+def test_les_dates_l_emportent_sur_l_anciennete_annoncee():
+    """Une durée vérifiable prime sur une phrase, toujours."""
+    brut = """Salma Idrissi
+Développeuse, 15 ans d'expérience
+s@mail.ma
+
+EXPÉRIENCE PROFESSIONNELLE
+
+Janvier 2022 – Décembre 2023
+Développeuse chez SoftHouse
+  Développement d'API REST.
+"""
+    profil = ats.analyser_cv(brut)
+    assert profil["totalExperienceYears"] == 2
+
+
+def test_un_nombre_aberrant_n_est_pas_pris_pour_une_anciennete():
+    assert ats.annees_annoncees("Formation de 80 ans d'expérience cumulée") == 0
+    assert ats.annees_annoncees("aucune mention") == 0
