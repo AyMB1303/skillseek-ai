@@ -24,6 +24,8 @@ rattraper une candidature écartée pour un motif explicite.
 Règle RG-01 : score < 50 -> écartée (conservée, repêchable) ;
 parmi les >= 50, les 10 meilleures forment la shortlist.
 """
+from .competences import canoniser
+
 
 SEUIL_RETENU = 50
 PLAFOND_TOP = 10
@@ -120,6 +122,30 @@ PENALITE_ANNEE = 3
 PENALITE_NIVEAU = 5
 
 
+def exigences_canoniques(libelles):
+    """Ramene les competences d'une offre a la forme du referentiel.
+
+    Le referentiel etait applique au curriculum et pas a l'offre. Les deux
+    cotes de la comparaison ne parlaient donc pas la meme langue : le CV
+    produisait « javascript », et une offre redigee « JS » — ou « K8s »,
+    « Postgres », « React.js », « Spring Boot » — ne trouvait jamais preneur.
+    La competence etait declaree absente, ce qui est un critere eliminatoire :
+    un recruteur ecrivant l'abreviation usuelle de son metier ecartait tous
+    ses candidats, sans qu'aucun message ne le signale.
+
+    Le libelle d'origine est conserve : c'est celui que le recruteur a ecrit,
+    et c'est donc celui qu'il doit relire dans la liste des competences
+    manquantes.
+
+    Retourne [(forme_canonique, libelle_affiche)].
+    """
+    paires = []
+    for libelle in libelles or []:
+        canonique = canoniser(libelle) or (libelle or "").lower()
+        paires.append((canonique.lower(), libelle))
+    return paires
+
+
 def _niveau(libelle, defaut=-1):
     return NIVEAUX_DIPLOME.get((libelle or "").lower(), defaut)
 
@@ -130,9 +156,10 @@ def qualifier(profil, offre):
     Retourne (eliminatoires, reserves, mesures) où `mesures` porte les écarts
     chiffrés, réutilisés pour la pénalité et pour l'explication affichée.
     """
-    requises = [s.lower() for s in (offre.required_skills or [])]
-    possedees = [s.lower() for s in profil.get("skills", [])]
-    manquantes = [s for s in requises if s not in possedees]
+    exigences = exigences_canoniques(offre.required_skills)
+    possedees = {s.lower() for s in profil.get("skills", [])}
+    # Le libelle du recruteur est affiche, la forme canonique compare.
+    manquantes = [affiche for cle, affiche in exigences if cle not in possedees]
 
     experience = profil.get("experience_years", 0) or 0
     requise = offre.min_experience_years or 0
@@ -219,13 +246,20 @@ def calculer_score(profil, offre, similarite_semantique=None, probabilite_modele
 
     Retourne (score, details) — details sert a l'explicabilite cote interface.
     """
-    requises = [s.lower() for s in (offre.required_skills or [])]
-    souhaitees = [s.lower() for s in (getattr(offre, "preferred_skills", None) or [])]
-    possedees = [s.lower() for s in profil.get("skills", [])]
+    exigences = exigences_canoniques(offre.required_skills)
+    exigences_souhaitees = exigences_canoniques(
+        getattr(offre, "preferred_skills", None)
+    )
+    possedees = {s.lower() for s in profil.get("skills", [])}
+    requises = [cle for cle, _ in exigences]
+    souhaitees = [cle for cle, _ in exigences_souhaitees]
 
-    trouvees = [s for s in requises if s in possedees]
-    manquantes = [s for s in requises if s not in possedees]
-    bonus_trouvees = [s for s in souhaitees if s in possedees]
+    # « trouvees » porte la forme canonique : c'est elle qui sert ensuite a
+    # verifier l'etayage, lui aussi canonique. « manquantes » porte le libelle
+    # du recruteur, qui doit s'y reconnaitre.
+    trouvees = [cle for cle, _ in exigences if cle in possedees]
+    manquantes = [affiche for cle, affiche in exigences if cle not in possedees]
+    bonus_trouvees = [cle for cle, _ in exigences_souhaitees if cle in possedees]
 
     # Preuve : la competence apparait-elle dans le recit de l'experience, ou
     # seulement dans la liste declarative du curriculum ?
@@ -361,7 +395,9 @@ def calculer_score(profil, offre, similarite_semantique=None, probabilite_modele
         "competences_etayees": competences_etayees,
         "competences_declarees": competences_declarees,
         "competences_souhaitees_trouvees": bonus_trouvees,
-        "competences_souhaitees_manquantes": [s for s in souhaitees if s not in possedees],
+        "competences_souhaitees_manquantes": [
+            affiche for cle, affiche in exigences_souhaitees if cle not in possedees
+        ],
         "eliminatoires": eliminatoires,
         "reserves": reserves,
         "composantes": composantes,

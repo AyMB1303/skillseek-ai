@@ -312,3 +312,46 @@ def test_l_experience_compense_toujours_un_diplome_manquant():
     _, details = calculer_score(profil, offre)
     assert details["eliminatoires"] == []
     assert any("compensé par" in r for r in details["reserves"])
+
+
+# ----------------------- Référentiel des deux côtés -----------------------
+
+def test_une_abreviation_dans_l_offre_reconnait_la_competence():
+    """« K8s » exigé, « kubernetes » possédé : c'est la même compétence.
+
+    Le référentiel n'était appliqué qu'au curriculum. Une offre rédigée avec
+    les abréviations usuelles du métier — JS, K8s, Postgres, Spring Boot —
+    ne trouvait donc jamais preneur : la compétence était déclarée absente,
+    donc éliminatoire. Un recruteur écartait ainsi tous ses candidats sans
+    qu'aucun message ne le signale.
+    """
+    offre = _Offre(["K8s", "JS"])
+    profil = _profil(["kubernetes", "javascript"], ["kubernetes", "javascript"])
+    score, details = calculer_score(profil, offre, similarite_semantique=0.8)
+    assert details["competences_manquantes"] == []
+    assert details["eliminatoires"] == []
+    assert score >= SEUIL_RETENU
+
+
+def test_une_competence_reellement_absente_reste_eliminatoire():
+    """La normalisation ne rend pas le moteur permissif."""
+    offre = _Offre(["Terraform"])
+    profil = _profil(["kubernetes"], ["kubernetes"])
+    _, details = calculer_score(profil, offre, similarite_semantique=0.8)
+    assert details["eliminatoires"]
+
+
+def test_la_competence_manquante_garde_le_libelle_du_recruteur():
+    """Il doit se reconnaître dans la liste, pas y lire une forme interne."""
+    offre = _Offre(["Terraform"])
+    profil = _profil(["kubernetes"], ["kubernetes"])
+    _, details = calculer_score(profil, offre)
+    assert details["competences_manquantes"] == ["Terraform"]
+
+
+def test_les_competences_souhaitees_passent_aussi_par_le_referentiel():
+    offre = _Offre(["python"])
+    offre.preferred_skills = ["K8s"]
+    profil = _profil(["python", "kubernetes"], ["python", "kubernetes"])
+    _, details = calculer_score(profil, offre)
+    assert details["competences_souhaitees_trouvees"] == ["kubernetes"]
