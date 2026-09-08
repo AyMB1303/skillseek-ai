@@ -63,7 +63,23 @@ CREDIT_DECLAREE = 1.0
 # verifier lui-meme.
 SEUIL_ETAYAGE = 0.5
 
-NIVEAUX_DIPLOME = {"bac": 0, "bac+2": 2, "bac+3": 3, "bac+5": 5, "doctorat": 8}
+# Deux echelles, parce que deux questions distinctes se posaient sous une
+# seule table.
+#
+# ANNEES_DIPLOME dit combien d'annees d'etudes un diplome represente. C'est
+# l'information qu'on affiche, et celle qui sert a comparer deux candidats.
+#
+# RANGS_DIPLOME dit de combien de *diplomes* deux niveaux sont separes. C'est
+# la seule qui doive entrer dans une regle, et elle n'a rien a voir avec la
+# premiere : une licence et un master sont deux diplomes adjacents, meme si
+# deux annees les separent.
+#
+# Confondre les deux avait une consequence qu'aucun test ne montrait : l'ecart
+# entre Bac+3 et Bac+5 valait 2, franchissait le seuil de la reserve et rendait
+# la candidature eliminatoire. La branche « un niveau d'ecart » etait donc
+# inatteignable pour le cas le plus frequent qu'elle etait censee traiter.
+ANNEES_DIPLOME = {"bac": 0, "bac+2": 2, "bac+3": 3, "bac+5": 5, "doctorat": 8}
+NIVEAUX_DIPLOME = {"bac": 0, "bac+2": 1, "bac+3": 2, "bac+5": 3, "doctorat": 4}
 
 # --------------------------------------------------------------------------
 # Qualification : ce qui élimine, ce qui n'est qu'une réserve

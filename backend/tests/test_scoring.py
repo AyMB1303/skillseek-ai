@@ -277,3 +277,38 @@ def test_la_reserve_ne_transforme_pas_en_eliminatoire():
     offre = _Offre(["python", "docker", "sql"])
     _, details = calculer_score(_profil(["python", "docker", "sql"], []), offre)
     assert details["eliminatoires"] == []
+
+
+# ----------------------- Échelle des diplômes -----------------------
+
+def test_licence_et_master_sont_a_un_niveau_d_ecart():
+    """Deux diplômes adjacents, quelles que soient les années qui les séparent.
+
+    Le défaut corrigé ici ne se voyait nulle part : la distance entre diplômes
+    était comptée en années d'études, si bien que Bac+3 pour un poste Bac+5
+    valait un écart de 2, franchissait le seuil de la réserve et rendait la
+    candidature éliminatoire. La branche « un niveau d'écart » était donc
+    inatteignable pour le cas le plus courant qu'elle devait traiter — et le
+    jeu de validation y perdait cinq candidatures légitimes.
+    """
+    offre = _Offre(["python"], annees=3, diplome="Bac+5")
+    profil = _profil(["python"], ["python"], annees=3, diplome="Bac+3")
+    _, details = calculer_score(profil, offre)
+    assert details["eliminatoires"] == []
+    assert any("un niveau d'écart" in r for r in details["reserves"])
+
+
+def test_un_ecart_de_deux_diplomes_reste_eliminatoire():
+    """La règle n'est pas supprimée, elle est mesurée dans la bonne unité."""
+    offre = _Offre(["python"], annees=3, diplome="Bac+5")
+    profil = _profil(["python"], ["python"], annees=3, diplome="Bac+2")
+    _, details = calculer_score(profil, offre)
+    assert details["eliminatoires"]
+
+
+def test_l_experience_compense_toujours_un_diplome_manquant():
+    offre = _Offre(["python"], annees=3, diplome="Bac+5")
+    profil = _profil(["python"], ["python"], annees=9, diplome="Bac+3")
+    _, details = calculer_score(profil, offre)
+    assert details["eliminatoires"] == []
+    assert any("compensé par" in r for r in details["reserves"])

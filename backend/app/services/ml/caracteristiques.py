@@ -29,7 +29,7 @@ import numpy as np
 
 from .. import ats, semantique
 from ..competences import canoniser
-from ..scoring import NIVEAUX_DIPLOME
+from ..scoring import ANNEES_DIPLOME
 
 # L'ordre doit rester stable entre l'entrainement et la prediction, sous peine
 # de nourrir le modele avec des colonnes decalees.
@@ -60,7 +60,15 @@ NOMS = [
 
 
 def _niveau_diplome(libelle):
-    return NIVEAUX_DIPLOME.get((libelle or "").lower(), -1)
+    """Diplome exprime en annees d'etudes, pour le modele appris.
+
+    Volontairement l'echelle en annees, et non celle des rangs employee par
+    les regles : le modele en production a ete entraine sur ces valeurs, et en
+    changer l'unite deplacerait silencieusement toutes ses predictions sans
+    qu'aucun test n'echoue. Les deux echelles repondent d'ailleurs a deux
+    questions differentes — voir leur definition dans « scoring.py ».
+    """
+    return ANNEES_DIPLOME.get((libelle or "").lower(), -1)
 
 
 MOTIFS_EXPERIENCE = [
