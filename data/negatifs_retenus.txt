@@ -1,0 +1,93 @@
+> JEU RETENU À L'ÉCART — cinq candidatures écrites par Aymen, mesurées une seule fois.
+>
+> POURQUOI CE FICHIER EXISTE
+>
+> Les huit « négatifs difficiles » du jeu de validation ont été écrits par
+> l'assistant qui a ensuite modifié le moteur pour en attraper deux. C'est
+> évaluer sur des données ayant servi à guider le développement : le chiffre
+> obtenu est optimiste, et un jury a raison de s'en méfier.
+>
+> Ce fichier corrige cela. Tu écris les cas, personne ne touche au moteur
+> ensuite, et on mesure UNE SEULE FOIS. Quel que soit le résultat, il est
+> publiable — c'est même sa seule valeur.
+>
+> CE QU'EST UN « NÉGATIF DIFFICILE »
+>
+> Un candidat qu'un recruteur écarte d'un coup d'œil, mais qui coche tout
+> sur le papier :
+>
+>   - il est du MÊME domaine que l'offre ;
+>   - il a l'expérience et le diplôme demandés ;
+>   - son curriculum emploie les mots-clés attendus ;
+>   - mais ce qu'il a RÉELLEMENT fait ne correspond pas au poste.
+>
+> Exemples de mécanismes, à ne pas recopier — trouve les tiens :
+> quelqu'un qui a subi une technologie au lieu de la pratiquer ; qui l'a vue
+> en formation et jamais en production ; qui a le titre sans les
+> responsabilités ; qui vient d'un secteur où le même mot désigne autre chose.
+>
+> N'ESSAIE PAS DE PIÉGER LE MOTEUR.
+>
+> C'est important. N'écris pas ce qui, selon toi, va le tromper : écris des
+> candidats réalistes que tu refuserais. Si tu vises le moteur, tu mesures
+> ton intuition sur lui, pas sa performance.
+>
+> COMMENT REMPLIR
+>
+> Une candidature par bloc. La ligne « ## » donne le domaine de l'offre,
+> parmi : backend, frontend, data, comptable, devops, java, bdd, controle.
+> Le reste est le texte du curriculum, comme s'il sortait d'un PDF.
+> Garde les rubriques habituelles — expérience datée, formation, compétences —
+> sinon tu mesures l'extraction plutôt que le score.
+>
+> QUAND C'EST PRÊT
+>
+>   docker compose exec backend python mesurer_retenus.py
+>
+> Les lignes commençant par « > » sont ignorées : tu peux laisser ce mode
+> d'emploi en place.
+
+## backend
+
+NOM PRÉNOM
+Intitulé du poste actuel
+adresse@example.ma | +212 6 00 00 00 00
+
+EXPÉRIENCE PROFESSIONNELLE
+
+Mois AAAA – Présent
+Intitulé du poste chez Employeur
+  Ce que la personne a réellement fait, en deux ou trois lignes.
+  C'est ici que se joue la différence avec un vrai bon profil.
+
+Mois AAAA – Mois AAAA
+Intitulé du poste précédent chez Employeur
+  Description.
+
+FORMATION
+
+AAAA - Diplôme, Établissement
+
+COMPÉTENCES
+
+Les compétences citées, séparées par des virgules.
+
+LANGUES
+
+Français, arabe
+
+## frontend
+
+(deuxième candidature)
+
+## data
+
+(troisième candidature)
+
+## devops
+
+(quatrième candidature)
+
+## java
+
+(cinquième candidature)
