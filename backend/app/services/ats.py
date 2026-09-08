@@ -503,11 +503,34 @@ def analyser_cv(texte):
     noms_langues = {_sans_accents(li["language"].lower()) for li in langues}
     competences_techniques = [c for c in competences if c not in noms_langues]
 
+    # Competences etayees : celles que le candidat fait apparaitre dans le
+    # recit de ce qu'il a fait, et non seulement dans sa liste de competences.
+    #
+    # La distinction n'est pas cosmetique. Une rubrique « Competences » est
+    # declarative : elle coute une ligne a ecrire et n'engage a rien. Un poste
+    # decrit engage une periode, un employeur et une activite. Un curriculum
+    # peut donc satisfaire toutes les exigences d'une offre sans qu'aucune ne
+    # soit adossee a une experience — c'est precisement le profil qu'un
+    # recruteur ecarte d'un coup d'oeil et qu'un moteur fonde sur les mots
+    # retient.
+    #
+    # On ne juge pas ici : on distingue. Ce que le score en fait est decide
+    # dans « scoring.py », et une competence declaree n'est jamais niee.
+    recit = "\n".join(
+        " ".join(filter(None, [
+            poste.get("position"), poste.get("company"),
+            " ".join(poste.get("summary") or []),
+        ]))
+        for poste in experiences
+    )
+    etayees = [c for c in extraire_competences(recit) if c not in noms_langues]
+
     return {
         "basics": extraire_identite(texte, sections.get("entete", "")),
         "work": experiences,
         "education": formations,
         "skills": competences_techniques,
+        "skillsEtayees": etayees,
         "certificates": extraire_certifications(sections.get("certifications", "")),
         "languages": langues,
         # Agregats consommes par le moteur de score
@@ -521,6 +544,11 @@ def vers_profil_scoring(profil_ats):
     """Adapte le profil ATS au format attendu par le moteur de score."""
     return {
         "skills": profil_ats.get("skills", []),
+        # Absente lorsque le profil est saisi a la main : le moteur traite
+        # alors toutes les competences comme etayees, faute de recit ou les
+        # chercher. Un profil saisi n'est pas penalise pour une distinction
+        # que sa forme ne permet pas d'etablir.
+        "skills_etayees": profil_ats.get("skillsEtayees"),
         "experience_years": profil_ats.get("totalExperienceYears", 0),
         "degree": profil_ats.get("highestDegree"),
     }

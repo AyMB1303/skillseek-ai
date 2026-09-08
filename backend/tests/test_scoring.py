@@ -189,3 +189,91 @@ def test_regle_top_ne_remplit_pas_artificiellement():
 
     assert len(resultat["top"]) == 2
     assert len(resultat["ecartees"]) == 1
+
+
+# ----------------------- Pondération par la preuve -----------------------
+#
+# Le défaut visé est celui qu'un jeu de validation trop facile ne révèle pas :
+# un curriculum qui cite toutes les compétences exigées sans qu'aucune
+# n'apparaisse dans le récit de ce qu'il a fait. Le moteur le notait comme un
+# profil pleinement compétent.
+
+class _Offre:
+    """Offre minimale, à la forme attendue par le moteur."""
+
+    def __init__(self, requises, annees=2, diplome="Bac+3"):
+        self.required_skills = requises
+        self.preferred_skills = []
+        self.min_experience_years = annees
+        self.min_degree = diplome
+        self.description = ""
+        self.title = "Poste"
+
+
+def _profil(skills, etayees, annees=5, diplome="Bac+5"):
+    return {
+        "skills": skills,
+        "skills_etayees": etayees,
+        "experience_years": annees,
+        "degree": diplome,
+    }
+
+
+def test_la_preuve_ne_modifie_pas_la_note():
+    """Décision mesurée, et non de principe : la preuve signale, elle ne juge pas.
+
+    Trois pénalités ont été mesurées sur le jeu de validation — crédit de 0,5,
+    de 0,75, puis aucun. À chaque valeur, la baisse du rappel dépassait le gain
+    de précision : les profils réellement adaptés ne décrivent eux-mêmes que
+    62 % de leurs compétences dans le récit de leurs postes, si bien que la
+    pénalité frappait d'abord les bons dossiers. Le signal est réel mais pas
+    décisif, les quatre autres composantes créditant ces profils tout autant.
+
+    Le mécanisme reste donc en place pour *nommer* ce qui n'est pas étayé, et
+    laisse la décision au recruteur. Ce test échoue si quelqu'un rétablit une
+    pénalité sans refaire la mesure qui l'a écartée.
+    """
+    offre = _Offre(["python", "docker"])
+    etaye, _ = calculer_score(_profil(["python", "docker"], ["python", "docker"]), offre)
+    declare, _ = calculer_score(_profil(["python", "docker"], []), offre)
+    assert etaye == declare
+
+
+def test_un_profil_sans_information_d_etayage_n_est_pas_penalise():
+    """Profil saisi à la main : aucun récit où chercher la preuve.
+
+    Le doute ne se paie pas. Sans cette garde, toute saisie manuelle serait
+    notée comme un curriculum entièrement déclaratif.
+    """
+    offre = _Offre(["python", "docker"])
+    sans_info = {
+        "skills": ["python", "docker"], "experience_years": 5, "degree": "Bac+5",
+    }
+    reference, _ = calculer_score(
+        _profil(["python", "docker"], ["python", "docker"]), offre
+    )
+    mesure, _ = calculer_score(sans_info, offre)
+    assert mesure == reference
+
+
+def test_le_detail_nomme_les_competences_non_etayees():
+    """L'écart de points doit être explicable, sinon il est arbitraire."""
+    offre = _Offre(["python", "docker"])
+    _, details = calculer_score(_profil(["python", "docker"], ["python"]), offre)
+    assert details["competences_etayees"] == ["python"]
+    assert details["competences_declarees"] == ["docker"]
+
+
+def test_une_reserve_est_posee_quand_la_preuve_manque_majoritairement():
+    offre = _Offre(["python", "docker", "sql"])
+    _, details = calculer_score(
+        _profil(["python", "docker", "sql"], ["python"]), offre
+    )
+    assert any("sans apparaître dans l'expérience" in r for r in details["reserves"])
+
+
+def test_la_reserve_ne_transforme_pas_en_eliminatoire():
+    """Une compétence citée n'est jamais niée : elle n'écarte pas."""
+    offre = _Offre(["python", "docker", "sql"])
+    _, details = calculer_score(_profil(["python", "docker", "sql"], []), offre)
+    assert details["eliminatoires"] == []

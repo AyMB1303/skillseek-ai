@@ -142,10 +142,53 @@ def test_les_langues_ne_figurent_pas_parmi_les_competences_techniques():
 
 def test_le_profil_est_converti_pour_le_moteur_de_score():
     profil = ats.vers_profil_scoring(ats.analyser_cv(CV_COMPLET))
-    assert set(profil) == {"skills", "experience_years", "degree"}
+    assert set(profil) == {
+        "skills", "skills_etayees", "experience_years", "degree",
+    }
     assert profil["degree"] == "Bac+5"
     assert profil["experience_years"] >= 5
     assert "python" in profil["skills"]
+
+
+# ----------------------- Preuve par l'expérience -----------------------
+
+def test_une_competence_du_recit_est_etayee():
+    """Une compétence décrite dans un poste occupé, et pas seulement listée.
+
+    C'est la distinction sur laquelle repose la pondération par la preuve :
+    une rubrique « Compétences » coûte une ligne à écrire, un poste décrit
+    engage une période et un employeur.
+    """
+    profil = ats.analyser_cv(CV_COMPLET)
+    assert "python" in profil["skillsEtayees"]
+
+
+def test_une_competence_seulement_listee_n_est_pas_etayee():
+    brut = """Salma Idrissi
+salma@mail.ma
+
+EXPÉRIENCE PROFESSIONNELLE
+
+2020 - 2024 : Assistante administrative chez Groupe Amal
+  Saisie des dossiers et classement des pièces.
+
+FORMATION
+
+2020 - Master en informatique
+
+COMPÉTENCES
+
+Python, Docker, Kubernetes
+"""
+    profil = ats.analyser_cv(brut)
+    assert "python" in profil["skills"]
+    assert "python" not in profil["skillsEtayees"]
+
+
+def test_l_etayage_ne_retient_pas_une_langue():
+    """Les langues sont écartées des compétences techniques, ici aussi."""
+    profil = ats.analyser_cv(CV_COMPLET)
+    assert all(c not in profil["skillsEtayees"] for c in ("francais", "anglais"))
 
 
 # ----------------------- Robustesse -----------------------
