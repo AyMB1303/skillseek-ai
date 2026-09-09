@@ -562,7 +562,10 @@ function CorrespondanceCompetences({ details: d, nonAnalysee }) {
     }`;
 
   return (
-    <div className="grid gap-4 md:grid-cols-2">
+    // « data-bloc » et « data-etat » nomment ce que la classe CSS ne dit pas :
+    // ils servent aux tests et au script de capture, qui doivent désigner un
+    // état métier sans dépendre d'une couleur susceptible de changer.
+    <div className="grid gap-4 md:grid-cols-2" data-bloc="correspondance-competences">
       <div>
         <h3 className="text-xs font-semibold text-txt2 mb-2">
           Exigé par l'offre
@@ -574,6 +577,7 @@ function CorrespondanceCompetences({ details: d, nonAnalysee }) {
             <button
               key={r.nom}
               type="button"
+              data-etat={!r.trouvee ? "absente" : r.etayee ? "demontree" : "citee"}
               onMouseEnter={() => r.trouvee && setSurvolee(r.nom)}
               onMouseLeave={() => setSurvolee(null)}
               onFocus={() => r.trouvee && setSurvolee(r.nom)}
