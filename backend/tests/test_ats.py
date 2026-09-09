@@ -228,10 +228,12 @@ def test_le_recit_d_experience_est_lu_en_entier():
     profil = ats.analyser_cv(CV_COMPLET)
     etayees = set(profil["skillsEtayees"])
     # Décrites dans un poste : « API REST avec Flask et PostgreSQL ».
-    assert {"flask", "postgresql"} <= etayees, (
-        f"compétences décrites mais non étayées : "
-        f"{ {'flask', 'postgresql'} - etayees }"
-    )
+    # Le manque est calculé avant le message : un ensemble litteral place dans
+    # une chaine formatee y ouvre une accolade dans une accolade, que Python
+    # accepte mais qu'aucun lecteur ne demele du premier coup.
+    attendues = {"flask", "postgresql"}
+    manquantes = attendues - etayees
+    assert not manquantes, f"compétences décrites mais non étayées : {manquantes}"
     # Seulement listée en fin de curriculum : la distinction doit tenir.
     assert "docker" in profil["skills"] and "docker" not in etayees
 
