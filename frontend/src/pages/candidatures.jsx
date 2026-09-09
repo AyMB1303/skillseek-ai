@@ -604,8 +604,14 @@ function CorrespondanceCompetences({ details: d, nonAnalysee }) {
             <span className="text-succes">✓ {nbEtayees} démontrée{nbEtayees > 1 ? "s" : ""}</span>
             {" — une expérience la décrit. "}
             <span className="text-alerte">~ {nbCitees} citée{nbCitees > 1 ? "s" : ""}</span>
-            {" — présente dans la liste des compétences seulement. Une compétence"}
-            {" citée compte pour trois quarts d'une compétence démontrée."}
+            {" — présente dans la liste des compétences seulement."}
+            {typeof d.credit_declaree === "number" && (
+              <>
+                {" Une compétence citée compte pour "}
+                {Math.round(d.credit_declaree * 100)}
+                {" % d'une compétence démontrée."}
+              </>
+            )}
           </p>
         )}
       </div>

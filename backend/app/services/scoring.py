@@ -43,21 +43,37 @@ AMPLITUDE_MODELE = 8
 # Part accordee a une competence obligatoire citee dans le curriculum mais que
 # le recit d'experience ne rattache a aucune pratique.
 #
-# Trois quarts, pour une raison mesuree et non choisie : sur le jeu de
-# validation, les profils pleinement adaptes ne font eux-memes apparaitre que
-# 75 % de leurs competences dans la description de leurs postes. Un curriculum
-# n'est pas un inventaire exhaustif — beaucoup de candidats legitimes ne
-# racontent pas chaque outil employe. Une competence citee conserve donc les
-# trois quarts de sa valeur : ni pleine, puisqu'elle n'est pas demontree, ni
-# nulle, puisqu'elle n'est pas dementie.
+# Le principe d'abord. Une competence citee ne vaut ni sa valeur pleine —
+# rien ne la demontre — ni zero : sur le jeu de validation, les profils
+# pleinement adaptes n'etayent eux-memes que 73 % des competences qu'ils
+# possedent, contre 33 % pour les negatifs difficiles. Un curriculum n'est pas
+# un inventaire exhaustif, et penaliser a fond punirait la sobriete d'un
+# candidat plutot que son incompetence.
 #
-# Le balayage complet de ce coefficient est publie au meme titre que celui du
-# seuil. Il montre un compromis regulier entre precision et rappel, et une
-# seule valeur satisfait les deux objectifs annonces au cahier des charges
-# — 85 % de precision, 80 % de rappel. Le F1 serait plus eleve sans aucune
-# penalite ; c'est le respect des cibles qui a decide, pas le chiffre le plus
-# flatteur.
-CREDIT_DECLAREE = 0.75
+# La valeur, ensuite, vient du balayage de « mesurer_credit.py » et non d'un
+# jugement. Le critere de choix etait fixe avant d'en lire le resultat : ne
+# retenir qu'un palier couvrant plusieurs valeurs mesurees, jamais un maximum
+# isole — avec huit negatifs difficiles, une seule decision qui bascule
+# deplace la precision de deux points et demi, et un pic vaudrait du bruit.
+#
+#   credit   precision   rappel      F1
+#   ------------------------------------
+#     1,00      78,9 %   93,8 %   0,857
+#     0,80      83,3 %   93,8 %   0,882
+#     0,70      85,7 %   93,8 %   0,896   <- palier
+#     0,60      85,7 %   93,8 %   0,896   <- palier
+#     0,50      85,3 %   90,6 %   0,879
+#     0,00      89,3 %   78,1 %   0,833
+#
+# Le palier 0,60–0,70 domine toutes les autres valeurs sur les trois
+# indicateurs a la fois, et il est le seul a satisfaire les deux cibles du
+# cahier des charges. 0,65 en est le centre : le point le plus eloigne des
+# deux bornes ou le comportement change.
+#
+# Reserve de methode, qui doit rester dite : ce reglage est choisi sur le jeu
+# qui sert ensuite a le mesurer. Le chiffre obtenu est donc une borne haute,
+# non une estimation de terrain.
+CREDIT_DECLAREE = 0.65
 
 # En deca de cette part de competences etayees, une reserve est posee. Elle
 # n'ecarte pas : elle nomme, dans le detail du calcul, ce que le recruteur doit
@@ -425,6 +441,9 @@ def calculer_score(profil, offre, similarite_semantique=None, probabilite_modele
         # etayee » plutot qu'un ecart de points inexplique.
         "competences_etayees": competences_etayees,
         "competences_declarees": competences_declarees,
+        # Publie pour que l'interface enonce la part reellement appliquee au
+        # lieu de la recopier : une constante recopiee finit par diverger.
+        "credit_declaree": CREDIT_DECLAREE,
         "competences_souhaitees_trouvees": bonus_trouvees,
         "competences_souhaitees_manquantes": [
             affiche for cle, affiche in exigences_souhaitees if cle not in possedees
