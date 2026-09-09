@@ -273,18 +273,24 @@ def page():
     # une seule donnée. Publier le modèle d'accès permet de le vérifier de
     # l'extérieur ; le dissimuler ne protégerait rien qu'une énumération de
     # routes ne retrouverait.
-    return """<!DOCTYPE html>
+    # La version de l'afficheur est nommee une fois : deux URL qui la portent
+    # chacune de leur cote finissent par diverger, et une feuille de style
+    # desaccordee de son script ne se voit qu'a l'ecran.
+    # Les deux ressources sont assemblees par concatenation plutot que par
+    # interpolation : le corps de la page contient du JavaScript, donc des
+    # accolades, qu'une chaine formatee obligerait a doubler partout.
+    base = "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.17.14"
+    return ("""<!DOCTYPE html>
 <html lang="fr">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>SkillSeek AI — API</title>
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.17.14/swagger-ui.min.css" />
+    <link rel="stylesheet" href=\"""" + base + """/swagger-ui.min.css" />
   </head>
   <body>
     <div id="swagger"></div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.17.14/swagger-ui-bundle.min.js"></script>
+    <script src=\"""" + base + """/swagger-ui-bundle.min.js"></script>
     <script>
       window.onload = () => SwaggerUIBundle({
         url: "/api/openapi.json",
@@ -294,4 +300,4 @@ def page():
       });
     </script>
   </body>
-</html>"""
+</html>""")
