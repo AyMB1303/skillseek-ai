@@ -1,0 +1,229 @@
+% =====================================================================
+%  SkillSeek AI — Guide de démarrage
+%  Compilation : pdflatex guide.tex
+% =====================================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+% Typographie française si babel-french est disponible (MiKTeX l'installe
+% à la volée) ; sinon on se contente de l'espacement, et le document compile
+% quand même. Un guide de démarrage qui ne compile pas serait une ironie.
+\IfFileExists{french.ldf}{\usepackage[french]{babel}}{\frenchspacing}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{enumitem}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{titlesec}
+\usepackage[colorlinks=true,linkcolor=bleu,urlcolor=bleu]{hyperref}
+
+\definecolor{bleu}{HTML}{1F4E79}
+\definecolor{gris}{HTML}{595959}
+\definecolor{fondcode}{HTML}{F2F4F7}
+
+% Titres en bleu, sobres
+\titleformat{\section}{\normalfont\Large\bfseries\color{bleu}}{\thesection.}{0.6em}{}
+\titleformat{\subsection}{\normalfont\large\bfseries\color{bleu}}{\thesubsection}{0.6em}{}
+\titlespacing*{\section}{0pt}{1.4em}{0.6em}
+
+% Blocs de commandes : fond gris, chasse fixe, pas de coloration inutile
+\lstset{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{fondcode},
+  frame=none,
+  framexleftmargin=8pt,
+  framexrightmargin=8pt,
+  xleftmargin=8pt,
+  aboveskip=10pt,
+  belowskip=10pt,
+  breaklines=true,
+  columns=fullflexible,
+  keepspaces=true,   % sans quoi l'alignement des commentaires est écrasé
+  literate={é}{{\'e}}1 {è}{{\`e}}1 {ê}{{\^e}}1 {à}{{\`a}}1 {ç}{{\c c}}1 {É}{{\'E}}1,
+}
+
+\setlist[itemize]{leftmargin=1.2em,itemsep=2pt,topsep=3pt}
+\renewcommand{\arraystretch}{1.3}
+
+\begin{document}
+
+% ---------------------------------------------------------------- Titre
+\begin{center}
+  {\Huge\bfseries\color{bleu} SkillSeek AI}\\[0.5em]
+  {\Large\color{gris} Guide de démarrage}\\[1.2em]
+  {\small\itshape\color{gris}
+   Plateforme d'aide au recrutement par analyse automatique des CV}\\[2em]
+  {\small Aymen Benrbib \quad$\cdot$\quad Stage d'études — BC Skills
+   \quad$\cdot$\quad ESI Rabat}
+\end{center}
+\vspace{1.5em}
+
+\noindent
+SkillSeek AI analyse les CV déposés sur une offre, en tire un profil
+structuré et attribue une note de correspondance dont elle donne le détail.
+La plateforme classe et explique ; elle ne décide pas. Tout tourne en
+conteneurs Docker : ni Python ni Node à installer.
+
+% ---------------------------------------------------------------- 1
+\section{Prérequis}
+
+\begin{itemize}
+  \item \textbf{Docker Desktop} --- \url{https://docker.com/products/docker-desktop}
+  \item \textbf{Git} --- \url{https://git-scm.com}
+\end{itemize}
+
+\noindent
+Rien d'autre. \textbf{Docker Desktop doit être démarré} avant les commandes
+qui suivent : c'est la cause d'échec la plus fréquente.
+
+% ---------------------------------------------------------------- 2
+\section{Démarrage}
+
+Dans PowerShell (Windows) ou un terminal (macOS, Linux). Une commande à la
+fois : chacune doit se terminer avant la suivante.
+
+\subsection*{Récupérer le code}
+\begin{lstlisting}
+git clone -b livraison-bc-skills https://github.com/AyMB1303/skillseek-ai.git
+cd skillseek-ai
+\end{lstlisting}
+\noindent
+\textcolor{gris}{\small\itshape
+\texttt{livraison-bc-skills} est la branche de livraison : son contenu ne
+bougera pas. Les évolutions ultérieures arriveront sur \texttt{main}.}
+
+\subsection*{Créer le fichier de configuration}
+Le dépôt ne contient aucun mot de passe. Le modèle fourni suffit en local.
+\begin{lstlisting}
+copy .env.example .env     # Windows
+cp .env.example .env       # macOS / Linux
+\end{lstlisting}
+
+\subsection*{Lever la plateforme}
+\begin{lstlisting}
+docker compose up -d --build
+\end{lstlisting}
+La première exécution construit les images : de cinq à quinze minutes. Les
+fois suivantes, quelques secondes.
+
+\subsection*{Préparer la base de données}
+Dans cet ordre : le schéma, les rôles, puis un jeu de démonstration.
+\begin{lstlisting}
+docker compose exec backend flask db upgrade
+docker compose exec backend flask seed
+docker compose exec backend flask demo --reset
+\end{lstlisting}
+
+% ---------------------------------------------------------------- 3
+\section{Vérifier}
+
+\begin{center}
+\begin{tabular}{@{}>{\ttfamily}p{6.2cm}p{8.4cm}@{}}
+\toprule
+\textrm{\textbf{Adresse}} & \textbf{Ce que vous devez voir}\\
+\midrule
+http://localhost:3000 & L'interface, page de connexion\\
+http://localhost:5000/api/health & Une réponse JSON de l'API\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Si les deux répondent, l'installation est terminée.
+
+% ---------------------------------------------------------------- 4
+\section{Comptes de démonstration}
+
+\begin{center}
+\begin{tabular}{@{}p{3.2cm}>{\ttfamily}p{6.2cm}>{\ttfamily}p{3.4cm}@{}}
+\toprule
+\textbf{Rôle} & \textrm{\textbf{Identifiant}} & \textrm{\textbf{Mot de passe}}\\
+\midrule
+Candidat        & y.tazi@example.ma      & Demo@1234\\
+Recruteur       & s.lamrani@bcskills.ma  & Demo@1234\\
+Administrateur  & admin@skillseek.local  & Admin@1234\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% ---------------------------------------------------------------- 5
+\section{Le parcours à regarder}
+
+\textbf{Candidat} --- ouvrez une offre (ses critères sont annoncés avant
+tout dépôt), déposez un CV au format PDF. L'analyse est immédiate.
+
+\medskip
+\noindent
+\textbf{Recruteur} --- dans « Candidatures », ouvrez « Détails » sur un
+dossier. C'est là que se joue l'essentiel :
+
+\begin{itemize}
+  \item le détail du calcul : d'où viennent les points, composante par composante ;
+  \item les réserves et les critères éliminatoires, avec leur motif exact ;
+  \item le profil reconstitué, qui indique aussi ce qui ne figure pas dans le CV ;
+  \item le CV lui-même, affiché à côté du profil, pour vérification directe ;
+  \item l'avis du modèle appris, borné à $\pm 8$ points : il ajuste la note,
+        il ne la décide pas.
+\end{itemize}
+
+% ---------------------------------------------------------------- 6
+\section{Commandes courantes}
+
+\begin{center}
+\begin{tabular}{@{}p{5.2cm}>{\ttfamily\small}p{9.4cm}@{}}
+\toprule
+\textbf{Besoin} & \textrm{\textbf{Commande}}\\
+\midrule
+Arrêter          & docker compose down\\
+Relancer         & docker compose up -d\\
+Voir les journaux& docker compose logs -f backend frontend\\
+Données neuves   & docker compose exec backend flask demo --reset\\
+Lancer les tests & docker compose exec backend pytest -q\\
+Tout effacer     & docker compose down -v\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent
+\textcolor{gris}{\small\itshape
+« docker compose down -v » supprime aussi la base : il faut ensuite reprendre
+la préparation des données.}
+
+% ---------------------------------------------------------------- 7
+\section{En cas de problème}
+
+\begin{center}
+\begin{tabular}{@{}p{5.6cm}p{9.0cm}@{}}
+\toprule
+\textbf{Symptôme} & \textbf{Cause et remède}\\
+\midrule
+\texttt{cannot connect to the Docker daemon}
+ & Docker Desktop n'est pas démarré.\\
+\texttt{port is already allocated}
+ & Un autre programme occupe le port 3000, 5000 ou 5432.\\
+La page 3000 tarde
+ & Le serveur compile à la demande : la première ouverture peut prendre une minute.\\
+\texttt{relation does not exist}
+ & La préparation de la base n'a pas été faite, ou pas dans l'ordre.\\
+Assistant RH sommaire
+ & Le modèle de langue local est facultatif et absent. La plateforme bascule sur une rédaction déterministe : c'est prévu, ce n'est pas une panne.\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% ---------------------------------------------------------------- 8
+\section{Un mot sur la méthode}
+
+\textbf{Le système propose, l'humain tranche.} Aucune décision n'est
+automatique.
+
+\medskip
+\noindent
+\textbf{Ce qui n'a pas pu être mesuré ne s'écrit jamais comme une mesure.}
+Une rubrique absente du CV est annoncée comme telle plutôt que masquée ; une
+expérience illisible place la candidature en réserve au lieu de l'écarter ;
+du texte posé hors du cadre de la page --- invisible à la lecture --- est
+écarté de l'analyse et signalé.
+
+\end{document}
