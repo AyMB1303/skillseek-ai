@@ -3,6 +3,8 @@
  * Gère l'ajout du JWT, le rafraîchissement automatique du token expiré,
  * et la remontée d'erreurs lisibles côté interface.
  */
+import { nomDepuisEntete, typeDuFichier } from "@/lib/telechargement";
+
 const BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 const CLE_ACCESS = "skillseek_access";
@@ -47,26 +49,11 @@ async function rafraichir() {
  *
  * Nécessaire car une balise <a href> n'envoie pas l'en-tête Authorization.
  *
- * Le type est reconstruit explicitement plutôt que laissé à `res.blob()`.
- * Un blob dont le type est vide ou générique n'est pas rendu par le lecteur
- * PDF intégré du navigateur : la visionneuse reste blanche et l'utilisateur
- * n'a d'autre issue que d'ouvrir un onglet. On retient donc le `Content-Type`
- * annoncé par le serveur et, à défaut, celui que dicte l'extension.
+ * Le type est reconstruit explicitement plutôt que laissé à `res.blob()` :
+ * un blob au type vide ou générique n'est pas rendu par le lecteur PDF
+ * intégré du navigateur, et la visionneuse reste blanche. La règle vit dans
+ * `lib/telechargement.js`, où elle est vérifiée.
  */
-const TYPES_PAR_EXTENSION = {
-  pdf: "application/pdf",
-  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  doc: "application/msword",
-};
-
-function nomDepuisEntete(entete) {
-  if (!entete) return "";
-  const utf8 = /filename\*=UTF-8''([^;]+)/i.exec(entete);
-  if (utf8) return decodeURIComponent(utf8[1]);
-  const simple = /filename="?([^";]+)"?/i.exec(entete);
-  return simple ? simple[1] : "";
-}
-
 export async function telechargerFichier(chemin) {
   const token = jetons.lireAccess();
   const res = await fetch(`${BASE}${chemin}`, {
@@ -84,11 +71,7 @@ export async function telechargerFichier(chemin) {
   }
 
   const nom = nomDepuisEntete(res.headers.get("Content-Disposition"));
-  const extension = (nom.split(".").pop() || "").toLowerCase();
-  const annonce = (res.headers.get("Content-Type") || "").split(";")[0].trim();
-  const type =
-    TYPES_PAR_EXTENSION[extension] ||
-    (annonce && annonce !== "application/octet-stream" ? annonce : "application/pdf");
+  const type = typeDuFichier(nom, res.headers.get("Content-Type"));
 
   const donnees = await res.blob();
   return { url: URL.createObjectURL(new Blob([donnees], { type })), type, nom };

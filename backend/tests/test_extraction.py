@@ -159,3 +159,52 @@ def test_un_document_qui_tient_dans_sa_page_ne_perd_rien(tmp_path):
 
     assert resultat.hors_page == 0
     assert "LANGUES" in resultat.texte
+
+
+# ----------------------- Documents illisibles -----------------------
+#
+# Un CV déposé n'est pas toujours un document valide : fichier tronqué à
+# l'envoi, extension mensongère, PDF protégé. L'extraction doit alors le dire
+# plutôt que de lever une exception au milieu de l'analyse — une candidature
+# qui casse la chaîne est une candidature perdue, et le candidat n'y est pour
+# rien.
+
+def test_un_pdf_illisible_est_signale_sans_lever_d_erreur(tmp_path):
+    chemin = tmp_path / "tronque.pdf"
+    chemin.write_bytes(b"%PDF-1.4 ceci n'est pas un document valide")
+
+    resultat = extraction.extraire_texte(str(chemin))
+
+    assert resultat.methode == "echec"
+    assert resultat.reussie is False
+    assert resultat.erreur
+
+
+def test_un_document_word_illisible_est_signale(tmp_path):
+    chemin = tmp_path / "casse.docx"
+    chemin.write_bytes(b"ceci n'est pas un document Word")
+
+    resultat = extraction.extraire_texte(str(chemin))
+
+    assert resultat.methode == "echec"
+    assert "Word" in resultat.erreur
+
+
+def test_un_fichier_absent_est_signale(tmp_path):
+    resultat = extraction.extraire_texte(str(tmp_path / "introuvable.pdf"))
+
+    assert resultat.methode == "echec"
+    assert resultat.reussie is False
+
+
+def test_le_resultat_d_un_echec_reste_exploitable(tmp_path):
+    """L'interface lit `to_dict()` quoi qu'il arrive : il doit être complet."""
+    chemin = tmp_path / "tronque.pdf"
+    chemin.write_bytes(b"%PDF-1.4 invalide")
+
+    donnees = extraction.extraire_texte(str(chemin)).to_dict()
+
+    assert set(donnees) == {
+        "methode", "pages", "caracteres", "reussie", "erreur", "horsPage",
+    }
+    assert donnees["horsPage"] == 0

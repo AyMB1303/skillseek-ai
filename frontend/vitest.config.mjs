@@ -18,7 +18,10 @@ export default defineConfig({
       // Format lcov : c'est celui que SonarCloud sait lire.
       reporter: ["text", "lcov"],
       reportsDirectory: "coverage",
-      include: ["src/lib/regles.js"],
+      // `telechargement.js` rejoint la mesure pour la même raison que
+      // `regles.js` : ce sont des décisions, pas du câblage. Un type de
+      // document mal déduit laisse le CV invisible au recruteur.
+      include: ["src/lib/regles.js", "src/lib/telechargement.js"],
     },
   },
 });
