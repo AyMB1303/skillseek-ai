@@ -37,8 +37,10 @@ from app.services.analyse import analyser_texte  # noqa: E402
 from app.services.ml import prediction  # noqa: E402
 from app.services.scoring import SEUIL_RETENU  # noqa: E402
 
-DOSSIER_DONNEES = Path("/app/data")
-DOSSIER_MODELES = Path("/app/models")
+# Chemins du conteneur par defaut ; surchargeables pour une execution hors
+# conteneur, ou l'arborescence du depot n'est pas montee sur « /app ».
+DOSSIER_DONNEES = Path(os.getenv("SKILLSEEK_DONNEES", "/app/data"))
+DOSSIER_MODELES = Path(os.getenv("SKILLSEEK_MODELES", "/app/models"))
 
 
 def journal(message=""):
@@ -118,8 +120,16 @@ DOMAINES_AUDITES = ["backend", "frontend", "data", "comptable", "devops"]
 
 
 def offre_de(domaine):
-    """Retrouve l'offre correspondant au domaine, y compris pour un croisement."""
+    """Retrouve l'offre correspondant au domaine.
+
+    Le libellé porte parfois une précision entre parenthèses — « backend
+    (difficile) » — qui sert à distinguer les protocoles dans le tableau
+    imprimé, non à désigner une autre offre. Elle est donc retirée avant la
+    recherche, comme l'est le premier terme d'un croisement « X vs Y », où
+    l'offre est celle du second.
+    """
     cle = domaine.split(" vs ")[-1].strip() if " vs " in domaine else domaine
+    cle = cle.split(" (")[0].strip()
     return OFFRES[cle]
 
 
@@ -218,6 +228,36 @@ def mesurer_preselection(cas):
         )
     journal(f"    {'F1':12}{mesures['f1']:>7.3f}")
     journal(f"    {'Exactitude':12}{mesures['exactitude']:>7.1%}")
+
+    difficiles = [r for r in resultats if "(difficile)" in r["domaine"]]
+    if difficiles:
+        faciles = [r for r in resultats if "(difficile)" not in r["domaine"]]
+        m_faciles = indicateurs([r["attendu"] for r in faciles],
+                                [r["predit"] for r in faciles])
+        journal("\n  Ce que chaque protocole mesure")
+        journal(
+            "    Les négatifs d'un autre domaine sont séparés par une compétence\n"
+            "    obligatoire absente. Les négatifs difficiles sont du domaine de\n"
+            "    l'offre, satisfont l'expérience et le diplôme, et emploient le\n"
+            "    vocabulaire attendu : seule la substance du parcours diffère."
+        )
+        neg_faciles = sum(1 for r in faciles if not r["attendu"])
+        neg_tous = sum(1 for r in resultats if not r["attendu"])
+        libelle_a = "Négatifs d'un autre domaine"
+        libelle_b = "+ négatifs difficiles"
+        journal(f"\n    {'Protocole':34}{'Négatifs':>10}{'Précision':>12}{'Rappel':>9}")
+        journal("    " + "-" * 65)
+        journal(f"    {libelle_a:34}{neg_faciles:>10}"
+                f"{m_faciles['precision']:>12.1%}{m_faciles['rappel']:>9.1%}")
+        journal(f"    {libelle_b:34}{neg_tous:>10}"
+                f"{mesures['precision']:>12.1%}{mesures['rappel']:>9.1%}")
+        retenus = [r for r in difficiles if r["predit"]]
+        journal(
+            f"\n    {len(retenus)} des {len(difficiles)} négatifs difficiles ont été retenus à tort."
+        )
+        if retenus:
+            journal("    Le moteur lit les compétences citées et la proximité de")
+            journal("    vocabulaire ; il ne lit pas ce que le candidat a réellement fait.")
 
     return resultats, mesures
 

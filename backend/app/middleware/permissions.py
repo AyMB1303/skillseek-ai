@@ -8,7 +8,7 @@ sans attendre l'expiration du token.
 from functools import wraps
 
 from flask import jsonify
-from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
+from flask_jwt_extended import get_jwt_identity, jwt_required, verify_jwt_in_request
 
 from ..extensions import db
 from ..models.user import User
@@ -52,6 +52,13 @@ def require_permission(*codes: str):
 
             return fn(user, *args, **kwargs)
 
+        # Les codes exigés sont inscrits sur la fonction elle-même. Sans cela
+        # ils resteraient enfermés dans la fermeture, invisibles de
+        # l'extérieur — et la description de l'API devrait les recopier à la
+        # main, avec la dérive que cela suppose. Ici, la documentation lit ce
+        # que le contrôle applique : les deux ne peuvent pas diverger.
+        wrapper.__permissions_requises__ = tuple(codes)
+        wrapper.__authentification_requise__ = True
         return wrapper
 
     return decorator
@@ -68,4 +75,31 @@ def current_user_required(fn):
             return jsonify(error="Compte inexistant ou désactivé."), 401
         return fn(user, *args, **kwargs)
 
+    # Authentification exigée, mais aucune permission particulière.
+    wrapper.__permissions_requises__ = ()
+    wrapper.__authentification_requise__ = True
     return wrapper
+
+
+def jeton_requis(**options):
+    """Exige un jeton valide, sans recharger l'utilisateur ni vérifier de droit.
+
+    Enveloppe le décorateur de la bibliothèque plutôt que de l'employer
+    directement, pour une raison qui n'apparaît qu'ailleurs : le contrat
+    d'API est construit en relevant les marques posées ici. Une route
+    protégée par le décorateur brut n'en porte aucune, et se retrouverait
+    publiée comme ouverte alors qu'elle exige un jeton — une documentation
+    fausse dans le sens le plus gênant.
+
+    Réservé aux trois routes du cycle de vie du jeton : rafraîchissement,
+    révocation, et lecture de l'identité courante. Partout ailleurs, c'est
+    « require_permission » qui s'applique.
+    """
+
+    def decorator(fn):
+        protegee = jwt_required(**options)(fn)
+        protegee.__permissions_requises__ = ()
+        protegee.__authentification_requise__ = True
+        return protegee
+
+    return decorator

@@ -19,7 +19,7 @@ import re
 import unicodedata
 from datetime import date
 
-from .competences import INDEX_VARIANTES, VARIANTES_TRIEES
+from .competences import INDEX_VARIANTES, VARIANTES_TRIEES, canoniser
 
 # --------------------------------------------------------------------------
 # Découpage en sections
@@ -50,6 +50,11 @@ EN_TETES = {
 }
 
 
+# Rubriques qui s'ecrivent couramment « Intitule : contenu » sur une seule
+# ligne. Les autres reclament un en-tete isole.
+SECTIONS_EN_LIGNE = ("langues", "competences", "certifications", "interets")
+
+
 def sans_accents(texte):
     """Retire les accents : les CV les omettent fréquemment.
 
@@ -65,20 +70,38 @@ _sans_accents = sans_accents
 
 
 def _identifier_section(ligne):
-    """Renvoie la section correspondante si la ligne est un en-tête, sinon None."""
+    """Renvoie ``(section, reste)`` si la ligne est un en-tête, sinon ``None``.
+
+    ``reste`` est le contenu qui suit l'intitulé sur la même ligne. De
+    nombreux CV compacts écrivent « Langues : Français (courant), Anglais
+    (courant) » d'un seul tenant : traiter cette ligne comme du texte
+    ordinaire faisait disparaître la section, et l'extraction se rabattait
+    alors sur le document entier.
+    """
     brute = ligne.strip()
-    if not brute or len(brute) > 60:
+    if not brute or len(brute) > 200:
         return None
 
-    # Un en-tete ne se termine pas par une ponctuation de phrase
-    nettoyee = _sans_accents(brute.lower()).strip(" :–—-•\t")
-    nettoyee = re.sub(r"[^a-z' ]", "", nettoyee).strip()
-    if not nettoyee:
-        return None
+    # En-tete seul sur sa ligne : forme la plus courante.
+    if len(brute) <= 60:
+        nettoyee = _sans_accents(brute.lower()).strip(" :–—-•\t")
+        nettoyee = re.sub(r"[^a-z' ]", "", nettoyee).strip()
+        for section, intitules in EN_TETES.items():
+            if nettoyee in intitules:
+                return section, ""
 
-    for section, intitules in EN_TETES.items():
-        if nettoyee in intitules:
-            return section
+    # En-tete suivi de son contenu sur la meme ligne, separes par « : ».
+    # Restreint aux rubriques enumeratives : « Projet : refonte du portail »
+    # ou « Formation : Coursera » sont des lignes de contenu, pas des
+    # en-tetes, et les prendre pour tels interromprait la rubrique en cours.
+    tete, separateur, reste = brute.partition(":")
+    if separateur and len(tete) <= 60:
+        nettoyee = _sans_accents(tete.lower()).strip(" –—-•\t")
+        nettoyee = re.sub(r"[^a-z' ]", "", nettoyee).strip()
+        for section in SECTIONS_EN_LIGNE:
+            if nettoyee in EN_TETES[section]:
+                return section, reste.strip()
+
     return None
 
 
@@ -94,8 +117,10 @@ def decouper_en_sections(texte):
     for ligne in (texte or "").splitlines():
         detectee = _identifier_section(ligne)
         if detectee:
-            courante = detectee
+            courante, reste = detectee
             sections.setdefault(courante, [])
+            if reste:
+                sections[courante].append(reste)
             continue
         sections.setdefault(courante, []).append(ligne)
 
@@ -133,6 +158,11 @@ def extraire_identite(texte, entete=""):
     for ligne in (texte or "").splitlines()[:20]:
         if telephone:
             break
+        # L'adresse electronique est retiree de la ligne avant le decoupage.
+        # Elle voisine souvent le numero sans separateur — « +212 6 37 72 13 28
+        # aymen@exemple.ma » — et le fragment entier etait alors ecarte comme
+        # etant une adresse : le telephone n'etait jamais releve.
+        ligne = re.sub(MOTIF_EMAIL, " ", ligne)
         for fragment in re.split(r"[|•·]|\s{3,}", ligne):
             fragment = fragment.strip()
             if not fragment or "@" in fragment or MOTIF_ANNEE_SEULE.match(fragment):
@@ -292,8 +322,49 @@ def extraire_experiences(section):
     return entrees
 
 
-def annees_experience(experiences):
-    """Durée totale en années, sans compter deux fois les postes simultanés."""
+# « 6 ans d'experience », « experience : 4 ans », « 5+ years of experience ».
+# Ces tournures figurent dans le resume de tete de nombreux curriculums.
+MOTIFS_ANNEES_ANNONCEES = [
+    r"(\d{1,2})\s*\+?\s*(?:ans?|annees?|years?)\s*(?:of\s*)?(?:d[e']\s*)?experience",
+    r"experience\s*(?:professionnelle\s*)?[:\-]?\s*(\d{1,2})\s*\+?\s*(?:ans?|years?)",
+    r"(\d{1,2})\s*\+?\s*(?:ans?|years?)\s*(?:dans|en|d[e'])",
+]
+
+
+def annees_annoncees(texte):
+    """Anciennete que le candidat declare en toutes lettres, si elle existe.
+
+    Repli employe lorsque aucune periode datee n'a pu etre reconstruite. Un
+    curriculum qui ecrit « Ingenieur, 6 ans d'experience » sans dater ses
+    postes produisait jusqu'ici zero annee d'experience — donc, l'exigence
+    d'anciennete etant un critere eliminatoire, une candidature ecartee sur
+    une information que le document contenait pourtant.
+
+    Le defaut est silencieux : rien ne distingue « ce candidat n'a aucune
+    experience » de « je n'ai pas su lire ses dates ». C'est exactement le
+    genre d'ecart que ce projet s'attache a ne pas laisser passer sans le
+    nommer.
+
+    On retient la plus grande valeur trouvee, et jamais plus de 45 ans : au
+    dela, le nombre lu vient d'autre chose que d'une anciennete.
+    """
+    normalise = _sans_accents((texte or "").lower())
+    valeurs = []
+    for motif in MOTIFS_ANNEES_ANNONCEES:
+        valeurs += [int(v) for v in re.findall(motif, normalise)]
+    valeurs = [v for v in valeurs if 0 < v <= 45]
+    return max(valeurs) if valeurs else 0
+
+
+def mois_experience(experiences):
+    """Durée totale en mois, sans compter deux fois les postes simultanés.
+
+    Le detail au mois est conserve parce que l'arrondi a l'annee efface
+    precisement ce qui distingue un debutant d'un candidat sans experience :
+    deux mois de stage et zero mois s'ecrivent tous deux « 0 an ». Le moteur
+    continue de raisonner en annees — c'est l'unite des offres — mais
+    l'interface et les motifs de rejet disposent de la mesure exacte.
+    """
     intervalles = []
     for e in experiences:
         if not e.get("startDate"):
@@ -320,7 +391,12 @@ def annees_experience(experiences):
             total += _duree_en_mois(cd, cf)
             cd, cf = debut, fin
     total += _duree_en_mois(cd, cf)
-    return min(round(total / 12), 45)
+    return min(total, 45 * 12)
+
+
+def annees_experience(experiences):
+    """Durée totale en années entières, telle que la comparent les offres."""
+    return round(mois_experience(experiences) / 12)
 
 
 # --------------------------------------------------------------------------
@@ -432,7 +508,10 @@ LANGUES_CONNUES = {
 
 # Niveaux ramenes au cadre europeen commun de reference (CECRL)
 NIVEAUX_LANGUE = [
-    (r"\b(c2|bilingue|bilingual|langue maternelle|native|natif|maternelle)\b", "C2"),
+    # « maternel » comme « maternelle » : le CV accorde avec la langue citee
+    # (« Arabe (Maternel) »), pas avec le mot « langue ».
+    (r"\b(c2|bilingue|bilingual|native|natif|native speaker|"
+     r"(?:langue\s+)?maternel(?:le)?)\b", "C2"),
     (r"\b(c1|courant|fluent|avance|advanced)\b", "C1"),
     (r"\b(b2|bon niveau|professionnel|professional|intermediaire superieur)\b", "B2"),
     (r"\b(b1|intermediaire|intermediate|moyen)\b", "B1"),
@@ -441,21 +520,65 @@ NIVEAUX_LANGUE = [
 ]
 
 
+# Separateurs entre deux langues d'une meme ligne : « Francais (courant),
+# Anglais (B2) · Arabe ». Le decoupage permet d'attribuer a chaque langue le
+# niveau qui la suit, au lieu d'appliquer a toutes le premier niveau rencontre
+# sur la ligne.
+SEPARATEURS_LANGUE = re.compile(r"[,;|•·/]|\s+[-–—]\s+|\s{3,}")
+
+# Mention explicite d'une rubrique de langues. « langages » — rubrique de
+# langages de programmation — ne doit surtout pas correspondre.
+MENTION_LANGUES = re.compile(r"\blangues?\b|\blanguages?\b|\bmaitrise des langues\b")
+
+
+def _niveau_langue(fragment):
+    normalise = _sans_accents((fragment or "").lower())
+    for motif, niveau in NIVEAUX_LANGUE:
+        if re.search(motif, normalise):
+            return niveau
+    return None
+
+
 def extraire_langues(section, texte_complet=""):
-    """Langues avec leur niveau ramené à l'échelle CECRL."""
-    source = section or texte_complet or ""
+    """Langues avec leur niveau ramené à l'échelle CECRL.
+
+    Deux régimes, et la distinction est délibérée :
+
+    * une rubrique « Langues » a été identifiée — tout ce qu'elle contient
+      est une déclaration de langue, on la lit telle quelle ;
+    * aucune rubrique — on ne parcourt le document entier qu'à la condition
+      que la ligne se présente elle-même comme une déclaration de langues.
+      Sans cette réserve, « Arabe » cité dans le nom d'un employeur ou d'une
+      école suffisait à faire apparaître une langue que le candidat n'a
+      jamais revendiquée. Un profil enrichi de ce que le document ne dit pas
+      n'est pas une commodité : c'est une erreur d'extraction, et elle se
+      paie au moment où le recruteur compare le profil au CV.
+    """
+    avec_rubrique = bool(section and section.strip())
+    source = section if avec_rubrique else (texte_complet or "")
+
     langues = []
     vues = set()
 
     for ligne in source.splitlines():
         normalisee = _sans_accents(ligne.lower())
-        for cle, libelle in LANGUES_CONNUES.items():
-            if re.search(r"\b" + cle + r"\b", normalisee) and libelle not in vues:
-                niveau = next(
-                    (n for motif, n in NIVEAUX_LANGUE if re.search(motif, normalisee)), None
-                )
-                langues.append({"language": libelle, "fluency": niveau})
-                vues.add(libelle)
+        if not avec_rubrique and not MENTION_LANGUES.search(normalisee):
+            continue
+
+        niveau_ligne = _niveau_langue(ligne)
+        for fragment in SEPARATEURS_LANGUE.split(ligne):
+            fragment_normalise = _sans_accents(fragment.lower())
+            for cle, libelle in LANGUES_CONNUES.items():
+                if libelle in vues:
+                    continue
+                if re.search(r"\b" + cle + r"\b", fragment_normalise):
+                    # Le niveau accole a la langue prime ; a defaut, celui de
+                    # la ligne, qui vaut alors pour toutes les langues citees.
+                    langues.append({
+                        "language": libelle,
+                        "fluency": _niveau_langue(fragment) or niveau_ligne,
+                    })
+                    vues.add(libelle)
 
     return langues
 
@@ -503,15 +626,103 @@ def analyser_cv(texte):
     noms_langues = {_sans_accents(li["language"].lower()) for li in langues}
     competences_techniques = [c for c in competences if c not in noms_langues]
 
+    # Competences etayees : celles que le candidat fait apparaitre dans le
+    # recit de ce qu'il a fait, et non seulement dans sa liste de competences.
+    #
+    # La distinction n'est pas cosmetique. Une rubrique « Competences » est
+    # declarative : elle coute une ligne a ecrire et n'engage a rien. Un poste
+    # decrit engage une periode, un employeur et une activite. Un curriculum
+    # peut donc satisfaire toutes les exigences d'une offre sans qu'aucune ne
+    # soit adossee a une experience — c'est precisement le profil qu'un
+    # recruteur ecarte d'un coup d'oeil et qu'un moteur fonde sur les mots
+    # retient.
+    #
+    # On ne juge pas ici : on distingue. Ce que le score en fait est decide
+    # dans « scoring.py », et une competence declaree n'est jamais niee.
+    # `summary` est une chaine une fois l'entree consolidee, une liste de
+    # lignes tant qu'elle se construit. Un « join » applique a une chaine
+    # insere un espace entre chaque *caractere* — « F l a s k » — et aucune
+    # competence n'y est plus reconnaissable. Le defaut ne levait aucune
+    # erreur : il rendait simplement l'etayage nul pour tout le monde, ce qui
+    # ressemblait a un resultat plutot qu'a une panne.
+    def _texte(valeur):
+        if isinstance(valeur, str):
+            return valeur
+        return " ".join(valeur or [])
+
+    etayees = []
+    for poste in experiences:
+        entete = " ".join(filter(None, [poste.get("position"), poste.get("company")]))
+        for phrase in re.split(r"[.;]\s+", _texte(poste.get("summary")) or ""):
+            if not _situee(phrase):
+                continue
+            for c in extraire_competences(entete + " " + phrase):
+                if c not in noms_langues and c not in etayees:
+                    etayees.append(c)
+
+    certifications = extraire_certifications(sections.get("certifications", ""))
+
+    # Ce que le document dit, et ce qu'il ne dit pas.
+    #
+    # Une rubrique vide et une rubrique absente ne sont pas la meme
+    # information, et les confondre est une faute d'analyse. L'interface qui
+    # masque une rubrique vide laisse croire que la question ne s'est pas
+    # posee ; celle qui affiche « aucune » laisse croire que le candidat a
+    # declare n'en avoir aucune. Le profil porte donc, pour chaque rubrique,
+    # ce que l'on sait : la rubrique figurait-elle dans le document, et
+    # combien d'elements en a-t-on tires.
+    #
+    # « presente » se lit : un intitule de rubrique a ete reconnu dans le CV.
+    # « elements » : ce que l'extraction en a retire. Les deux se lisent
+    # ensemble — presente sans element signale une rubrique que le document
+    # annonce mais que l'analyse n'a pas su lire, et c'est precisement le cas
+    # ou le recruteur doit ouvrir le document lui-meme.
+    contenus = {
+        "experience": experiences,
+        "formation": formations,
+        "competences": competences_techniques,
+        "certifications": certifications,
+        "langues": langues,
+    }
+    rubriques = {
+        nom: {
+            "presente": bool(sections.get(nom, "").strip()),
+            "elements": len(elements),
+        }
+        for nom, elements in contenus.items()
+    }
+
+    # L'experience a-t-elle pu etre etablie ?
+    #
+    # Zero an et « nous n'avons pas su lire » se ressemblent une fois ecrits
+    # dans la meme case. Le premier est une mesure, le second un aveu, et le
+    # candidat qui se voit ecarter pour « 0 an d'experience » merite de savoir
+    # lequel des deux lui est oppose.
+    mois_dates = mois_experience(experiences)
+    annees_datees = round(mois_dates / 12)
+    annees_dites = annees_annoncees(texte)
+    experience_determinee = bool(experiences) or annees_dites > 0
+
     return {
         "basics": extraire_identite(texte, sections.get("entete", "")),
         "work": experiences,
         "education": formations,
         "skills": competences_techniques,
-        "certificates": extraire_certifications(sections.get("certifications", "")),
+        "skillsEtayees": etayees,
+        "certificates": certifications,
         "languages": langues,
-        # Agregats consommes par le moteur de score
-        "totalExperienceYears": annees_experience(experiences),
+        "rubriques": rubriques,
+        "experienceDeterminee": experience_determinee,
+        # Agregats consommes par le moteur de score.
+        #
+        # Le repli sur l'anciennete annoncee n'intervient que si aucune
+        # periode datee n'a pu etre reconstruite : une valeur lue dans une
+        # phrase ne doit jamais l'emporter sur des dates effectivement
+        # presentes, qui sont verifiables.
+        "totalExperienceYears": annees_datees or annees_dites,
+        # Mesure exacte, en mois : elle seule permet de dire « deux mois »
+        # plutot que « zero an ». Nulle quand aucune periode datee n'a ete lue.
+        "totalExperienceMonths": mois_dates or (annees_dites * 12),
         "highestDegree": diplome_le_plus_eleve(formations, texte),
         "sectionsDetectees": [k for k, v in sections.items() if v and k != "entete"],
     }
@@ -521,6 +732,127 @@ def vers_profil_scoring(profil_ats):
     """Adapte le profil ATS au format attendu par le moteur de score."""
     return {
         "skills": profil_ats.get("skills", []),
+        # Absente lorsque le profil est saisi a la main : le moteur traite
+        # alors toutes les competences comme etayees, faute de recit ou les
+        # chercher. Un profil saisi n'est pas penalise pour une distinction
+        # que sa forme ne permet pas d'etablir.
+        "skills_etayees": profil_ats.get("skillsEtayees"),
         "experience_years": profil_ats.get("totalExperienceYears", 0),
+        # Faux uniquement lorsque le document ne porte ni periode datee ni
+        # anciennete annoncee. Le moteur s'en sert pour ne pas ecarter un
+        # candidat sur une mesure qui n'a pas eu lieu. Absent du dictionnaire
+        # — profil saisi a la main — vaut « determinee » : le recruteur qui
+        # saisit zero annee le fait sciemment.
+        "experience_determinee": profil_ats.get("experienceDeterminee", True),
+        "experience_months": profil_ats.get("totalExperienceMonths"),
         "degree": profil_ats.get("highestDegree"),
     }
+
+
+# --------------------------------------------------------------------------
+# Pratique ou entourage : ce que la phrase dit du role du candidat
+# --------------------------------------------------------------------------
+#
+# Une premiere version tenait une competence pour etayee des lors que son nom
+# figurait dans un poste occupe. Un jeu de cas ecrit par un tiers a montre la
+# limite : « Validation documentaire des rapports de securite des clusters
+# Kubernetes » creditait Kubernetes autant que « Mise en place d'un cluster
+# Kubernetes ». Le mecanisme voyait le mot, pas ce que la personne en avait
+# fait — et cinq candidatures sur cinq passaient.
+#
+# Les curriculums francais nominalisent l'action : ils ecrivent « Conception
+# de… », « Pilotage de… », rarement « j'ai concu ». Deux lexiques suffisent
+# donc, et ils sont volontairement courts : une liste longue donne l'illusion
+# de la couverture et multiplie les faux positifs.
+#
+# La regle penche du cote du candidat. En l'absence de tout indice — ni
+# pratique ni entourage — la competence reste creditee : on ne retire rien sur
+# un silence. Seule la presence explicite d'un terme d'entourage, sans aucun
+# terme de pratique dans la meme phrase, fait basculer.
+#
+# C'est une heuristique lexicale, avec les limites d'une heuristique : elle
+# reconnait « validation » et « pilotage », elle ne reconnait pas « generation
+# via des plugins d'exportation ». Nommer un role demande de lire la phrase,
+# pas d'y chercher des mots.
+
+TERMES_PRATIQUE = {
+    "conception", "concu", "developpement", "developpe", "mise", "oeuvre",
+    "implementation", "implemente", "realisation", "realise", "deploiement",
+    "deploye", "industrialisation", "automatisation", "automatise",
+    "optimisation", "optimise", "migration", "migre", "refonte",
+    "administration", "administre", "exploitation", "exploite", "maintenance",
+    "integration", "integre", "ecriture", "ecrit", "creation", "cree",
+    "construction", "configuration", "configure", "parametrage",
+    "programmation", "modelisation", "traitement", "extraction", "entrainement",
+    "correction", "corrige", "reprise",
+}
+
+TERMES_ENTOURAGE = {
+    "pilotage", "pilote", "coordination", "coordonne", "animation", "anime",
+    "validation", "valide", "suivi", "supervision", "supervise", "redaction",
+    "redige", "participation", "contribution", "accompagnement", "veille",
+    "presentation", "recueil", "approbation", "approuve", "revue",
+    "sensibilisation", "assistance", "reunion", "reunions", "comite",
+    "comites", "ticket", "tickets", "documentaire",
+}
+
+
+def _situee(phrase):
+    """La phrase décrit-elle une pratique, ou seulement un entourage ?"""
+    mots = set(re.findall(r"[a-z]+", sans_accents(phrase.lower())))
+    if mots & TERMES_PRATIQUE:
+        return True
+    if mots & TERMES_ENTOURAGE:
+        return False
+    return True          # aucun indice : le doute profite au candidat
+
+
+# --------------------------------------------------------------------------
+# Experience adossee aux competences du poste
+# --------------------------------------------------------------------------
+
+def experience_pertinente(profil_ats, competences_requises):
+    """Part de la carriere qui touche reellement aux competences exigees.
+
+    Le moteur comptait l'anciennete brute : huit ans de carriere valaient huit
+    ans, quel qu'en soit le contenu. Un profil du bon domaine mais au parcours
+    hors sujet en tirait donc la totalite des points d'experience, alors que
+    c'est precisement ce que le recruteur regarde en premier.
+
+    Chaque poste occupe est ici pondere par la **part des competences exigees
+    que sa description fait apparaitre**. Un poste ou l'on decrit trois des
+    quatre competences demandees compte pour trois quarts de sa duree ; un
+    poste ou l'on n'en decrit aucune ne compte pas. La mesure separe nettement
+    les deux populations du jeu de validation : 29 % de la carriere retenue
+    pour les profils au vocabulaire sans le parcours, 73 a 78 % pour les
+    autres.
+
+    C'est une *part*, donc elle ne desavantage pas les profils juniors : un
+    candidat a deux ans entierement consacres au sujet garde ses deux ans.
+
+    Retourne (annees_ponderees, part_de_la_carriere).
+    """
+    cles = {
+        (canoniser(c) or (c or "").lower())
+        for c in (competences_requises or [])
+    }
+    if not cles:
+        return profil_ats.get("totalExperienceYears", 0), 1.0
+
+    mois_ponderes = mois_totaux = 0.0
+    for poste in profil_ats.get("work") or []:
+        resume = poste.get("summary")
+        recit = resume if isinstance(resume, str) else " ".join(resume or [])
+        entete = " ".join(filter(None, [poste.get("position"), poste.get("company")]))
+        mois = poste.get("months") or 0
+        mois_totaux += mois
+        # Seules les phrases decrivant une pratique comptent : un poste passe
+        # a valider et a coordonner n'adosse pas la competence a une experience.
+        decrites = set()
+        for phrase in re.split(r"[.;]\s+", recit or ""):
+            if _situee(phrase):
+                decrites |= cles & set(extraire_competences(entete + " " + phrase))
+        mois_ponderes += mois * (len(decrites) / len(cles))
+
+    part = mois_ponderes / mois_totaux if mois_totaux else 1.0
+    return mois_ponderes / 12, part

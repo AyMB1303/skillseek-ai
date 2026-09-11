@@ -23,11 +23,14 @@ SEUIL_TEXTE_EXPLOITABLE = 120
 class ResultatExtraction:
     """Texte extrait et informations sur la méthode employée."""
 
-    def __init__(self, texte, methode, pages=0, erreur=None):
+    def __init__(self, texte, methode, pages=0, erreur=None, hors_page=0):
         self.texte = texte or ""
         self.methode = methode          # "texte_natif" | "ocr" | "echec"
         self.pages = pages
         self.erreur = erreur
+        # Caracteres presents dans le fichier mais poses hors du cadre de la
+        # page : ecartes de l'analyse, signales a l'interface.
+        self.hors_page = hors_page
 
     @property
     def reussie(self):
@@ -40,6 +43,7 @@ class ResultatExtraction:
             "caracteres": len(self.texte),
             "reussie": self.reussie,
             "erreur": self.erreur,
+            "horsPage": self.hors_page,
         }
 
 
@@ -49,14 +53,55 @@ def _extraire_couche_texte(chemin):
         import pdfplumber
     except ImportError:
         logger.warning("pdfplumber absent : extraction directe indisponible.")
-        return "", 0
+        # Trois valeurs, comme le retour nominal. Deux suffisaient avant que
+        # cette fonction ne compte les caractères hors page ; ce retour-là
+        # n'avait pas suivi, et l'appelant qui dépaquette trois noms levait
+        # une ValueError — rattrapée plus haut, donc invisible, mais elle
+        # faisait passer une dépendance absente pour un fichier illisible.
+        return "", 0, 0
 
     morceaux = []
+    caracteres_hors_page = 0
     with pdfplumber.open(chemin) as pdf:
         pages = len(pdf.pages)
         for page in pdf.pages:
+            # 1. Ne retenir que ce qui tombe dans la page.
+            #
+            # La couche texte d'un PDF n'est pas bornee par la page : un
+            # document trop long pour son format garde ses lignes en trop,
+            # simplement posees hors du cadre. Personne ne les voit — ni le
+            # candidat qui a exporte le fichier, ni le recruteur qui le lit.
+            #
+            # Les extraire reviendrait a fonder le profil et le score sur du
+            # texte absent du document tel qu'il se presente. Le recruteur
+            # confronte le profil reconstitue au CV affiche a cote : une
+            # competence ou une langue venue du hors-champ ne s'y retrouve
+            # pas, et c'est l'analyse entiere qui perd son credit. Le meme
+            # hors-champ sert aussi, deliberement, a bourrer un CV de
+            # mots-cles invisibles.
+            #
+            # On s'en tient donc a ce qui est visible, et l'on compte ce qui
+            # a ete laisse de cote : l'information remonte a l'interface.
+            avant = len(page.chars)
+            try:
+                page = page.crop(page.bbox, strict=True)
+                caracteres_hors_page += avant - len(page.chars)
+            except Exception:  # page degeneree : on garde la page entiere
+                pass
+
+            # 2. Supprimer les glyphes superposes.
+            #
+            # Certains generateurs simulent le gras en dessinant deux fois le
+            # meme glyphe, a quelques centiemes de point d'ecart. La couche
+            # texte livre alors chaque lettre en double et le nom « Aymen
+            # Benrbib » se lit « AAyymmeenn BBeennrrbbiibb ».
+            try:
+                page = page.dedupe_chars(tolerance=1)
+            except Exception:  # version de pdfplumber sans dedupe_chars
+                pass
+
             morceaux.append(page.extract_text() or "")
-    return "\n".join(morceaux), pages
+    return "\n".join(morceaux), pages, caracteres_hors_page
 
 
 def _extraire_par_ocr(chemin):
@@ -84,7 +129,62 @@ def nettoyer(texte):
     texte = re.sub(r"\n{3,}", "\n\n", texte)
     # Retire les caracteres de controle residuels
     texte = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f]", "", texte)
+    # Redresse les lettres redoublees laissees par un gras simule
+    texte = corriger_doublement(texte)
     return texte.strip()
+
+
+# --------------------------------------------------------------------------
+# Doublement des caracteres
+# --------------------------------------------------------------------------
+#
+# Meme apres deduplication des glyphes superposes, un document peut livrer un
+# texte ou chaque lettre est repetee : gras simule par double tirage avec un
+# decalage superieur a la tolerance, ou couche texte dupliquee a la generation.
+# Le defaut est silencieux et couteux : le nom lu ne correspond plus a celui du
+# compte et la candidature est signalee comme suspecte alors qu'elle est
+# reguliere.
+#
+# La correction est volontairement prudente. Un mot n'est reduit que si
+# *toutes* ses lettres sont doublees deux a deux, et une ligne n'est reecrite
+# que si la majorite de ses mots presentent ce defaut : « bookkeeper » ou
+# « aa » isoles ne sont jamais touches.
+
+_MOT = re.compile(r"[^\W\d_]{4,}", re.UNICODE)
+
+
+def _mot_double(mot):
+    """Vrai si le mot est exactement une suite de lettres redoublees."""
+    if len(mot) < 4 or len(mot) % 2:
+        return False
+    return all(mot[i] == mot[i + 1] for i in range(0, len(mot), 2))
+
+
+def _reduire(mot):
+    return mot[::2]
+
+
+def corriger_doublement(texte):
+    """Retire le redoublement des caracteres, ligne par ligne."""
+    if not texte:
+        return texte
+
+    lignes = []
+    for ligne in texte.splitlines():
+        mots = _MOT.findall(ligne)
+        if not mots:
+            lignes.append(ligne)
+            continue
+        doubles = [m for m in mots if _mot_double(m)]
+        # Seuil : la moitie des mots eligibles au moins. En deca, le
+        # redoublement est fortuit et la ligne reste inchangee.
+        if len(doubles) * 2 >= len(mots):
+            ligne = _MOT.sub(
+                lambda c: _reduire(c.group()) if _mot_double(c.group()) else c.group(),
+                ligne,
+            )
+        lignes.append(ligne)
+    return "\n".join(lignes)
 
 
 def _extraire_docx(chemin):
@@ -125,11 +225,12 @@ def extraire_texte(chemin):
             )
 
     # 1. Couche texte native
+    hors_page = 0
     try:
-        texte, pages = _extraire_couche_texte(chemin)
+        texte, pages, hors_page = _extraire_couche_texte(chemin)
         texte = nettoyer(texte)
         if len(texte) >= SEUIL_TEXTE_EXPLOITABLE:
-            return ResultatExtraction(texte, "texte_natif", pages)
+            return ResultatExtraction(texte, "texte_natif", pages, hors_page=hors_page)
     except Exception as exc:  # fichier corrompu, protege par mot de passe...
         logger.info("Extraction directe impossible (%s), bascule vers l'OCR.", exc)
         pages = 0

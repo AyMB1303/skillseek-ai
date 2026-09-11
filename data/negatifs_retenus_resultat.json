@@ -1,0 +1,82 @@
+{
+  "date": "2026-09-08 22:52",
+  "code": "inconnue",
+  "total": 5,
+  "ecartees": 0,
+  "detail": [
+    {
+      "domaine": "backend",
+      "score": 72,
+      "retenue": true,
+      "eliminatoires": [],
+      "reserves": [],
+      "etayees": [
+        "python",
+        "postgresql"
+      ],
+      "declarees": [
+        "docker"
+      ]
+    },
+    {
+      "domaine": "frontend",
+      "score": 70,
+      "retenue": true,
+      "eliminatoires": [],
+      "reserves": [
+        "Compétence(s) obligatoire(s) citée(s) sans apparaître dans l'expérience décrite : javascript, css"
+      ],
+      "etayees": [
+        "react"
+      ],
+      "declarees": [
+        "javascript",
+        "css"
+      ]
+    },
+    {
+      "domaine": "data",
+      "score": 75,
+      "retenue": true,
+      "eliminatoires": [],
+      "reserves": [
+        "Compétence(s) obligatoire(s) citée(s) sans apparaître dans l'expérience décrite : python, machine learning"
+      ],
+      "etayees": [
+        "sql"
+      ],
+      "declarees": [
+        "python",
+        "machine learning"
+      ]
+    },
+    {
+      "domaine": "devops",
+      "score": 59,
+      "retenue": true,
+      "eliminatoires": [],
+      "reserves": [
+        "Compétence(s) obligatoire(s) citée(s) sans apparaître dans l'expérience décrite : docker, kubernetes, linux"
+      ],
+      "etayees": [],
+      "declarees": [
+        "docker",
+        "kubernetes",
+        "linux"
+      ]
+    },
+    {
+      "domaine": "java",
+      "score": 86,
+      "retenue": true,
+      "eliminatoires": [],
+      "reserves": [],
+      "etayees": [
+        "java",
+        "spring",
+        "sql"
+      ],
+      "declarees": []
+    }
+  ]
+}

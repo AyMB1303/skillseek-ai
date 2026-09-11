@@ -113,7 +113,11 @@ export { STATUTS };
 
 /* --------------------------- Modale --------------------------- */
 
-export function Modale({ ouverte, onFermer, titre, children, actions }) {
+/* `largeur` accepte une classe de largeur maximale de Tailwind. La valeur par
+   défaut convient à une confirmation ; un tableau de comparaison à trois
+   colonnes y serait illisible, et l'élargir au cas par cas évite d'imposer à
+   toutes les modales la largeur dont une seule a besoin. */
+export function Modale({ ouverte, onFermer, titre, children, actions, largeur = "max-w-lg" }) {
   useEffect(() => {
     if (!ouverte) return;
     const onKey = (e) => e.key === "Escape" && onFermer();
@@ -137,7 +141,7 @@ export function Modale({ ouverte, onFermer, titre, children, actions }) {
         aria-hidden="true"
       />
       <div
-        className="carte w-full max-w-lg animate-pop relative"
+        className={`carte w-full ${largeur} animate-pop relative max-h-[90vh] overflow-y-auto`}
         role="dialog"
         aria-modal="true"
         aria-label={titre}

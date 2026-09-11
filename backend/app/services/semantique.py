@@ -180,8 +180,17 @@ def similarite(texte_cv, texte_offre):
     Renvoie également la méthode employée, afin que l'interface puisse
     indiquer au recruteur sur quelle base le rapprochement a été calculé.
     """
+    # Rien a comparer : l'offre n'a pas de description, ou le texte du CV
+    # n'a pas pu etre lu. On renvoie None, et non zero.
+    #
+    # La difference n'est pas formelle. `calculer_score` traite None comme une
+    # composante indisponible et redistribue ses 25 points sur les competences
+    # obligatoires ; un zero, lui, est une mesure, et coute au candidat un
+    # quart de la note pour une comparaison qui n'a jamais eu lieu. Le contrat
+    # etait deja ecrit dans la docstring de `calculer_score` — il n'etait pas
+    # honore ici.
     if not texte_cv or not texte_offre:
-        return 0.0, "indisponible"
+        return None, "indisponible"
 
     vec_cv = encoder(texte_cv)
     vec_offre = encoder(texte_offre)

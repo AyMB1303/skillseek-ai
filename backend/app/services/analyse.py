@@ -103,6 +103,14 @@ def analyser_candidature(candidature, chemin_cv=None):
     with chrono.etape("similarite_semantique"):
         texte_offre = semantique.texte_offre(offre)
         similarite, methode_sim = semantique.similarite(resultat.texte, texte_offre)
+        # Meme traitement que dans « analyser_texte » : l'experience et la
+        # similarite sont adossees aux competences reellement decrites. Les
+        # deux chemins d'analyse doivent produire la meme note, faute de quoi
+        # une candidature deposee et la meme candidature reanalysee par un
+        # script differeraient sans raison visible.
+        similarite, _ = _experience_et_similarite(
+            profil_ats, profil, offre, similarite
+        )
 
     # 4. Avis du modele appris (None si aucun modele n'est disponible)
     with chrono.etape("modele_appris"):
@@ -130,7 +138,10 @@ def analyser_candidature(candidature, chemin_cv=None):
             "profil_analyse": profil,
             "profil_ats": profil_ats,
             "extraction": resultat.to_dict(),
-            "similarite": {"valeur": round(similarite, 3), "methode": methode_sim},
+            "similarite": {
+                "valeur": None if similarite is None else round(similarite, 3),
+                "methode": methode_sim,
+            },
             "controles": {
                 "nombre": len(anomalies),
                 "severite_maximale": fraude.severite_maximale(anomalies),
@@ -150,6 +161,30 @@ def analyser_candidature(candidature, chemin_cv=None):
     return details
 
 
+# Plancher applique a la proximite semantique lorsque le parcours decrit ne
+# recoupe pas les competences du poste. La similarite mesure « ce document
+# parle-t-il comme l'offre » ; quand aucune des competences exigees n'est
+# adossee a une experience decrite, cette ressemblance vient de la liste
+# declarative et non du travail raconte — elle mesure alors du vocabulaire.
+#
+# Un plancher, et non une annulation : le signal est indirect, il ne doit pas
+# pouvoir supprimer une composante. La valeur est peu sensible — 0,25 et 0,50
+# donnent le meme resultat sur le jeu de validation, ce qui distingue ce
+# reglage d'un parametre choisi au bord du couteau.
+PLANCHER_SEMANTIQUE = 0.5
+
+
+def _experience_et_similarite(profil_ats, profil, offre, similarite):
+    """Adosse l'experience et la similarite aux competences reellement decrites."""
+    annees, part = ats.experience_pertinente(profil_ats, offre.required_skills)
+    profil["experience_pertinente"] = annees
+    if similarite is not None:
+        similarite = similarite * (
+            PLANCHER_SEMANTIQUE + (1 - PLANCHER_SEMANTIQUE) * part
+        )
+    return similarite, part
+
+
 def analyser_texte(texte, offre):
     """Analyse un texte de CV déjà extrait, sans passer par un fichier.
 
@@ -159,6 +194,9 @@ def analyser_texte(texte, offre):
     profil = ats.vers_profil_scoring(profil_ats)
     texte_offre = semantique.texte_offre(offre)
     similarite, methode = semantique.similarite(texte, texte_offre)
+    similarite, part_pertinente = _experience_et_similarite(
+        profil_ats, profil, offre, similarite
+    )
     probabilite = prediction.probabilite(
         texte, texte_offre, profil_ats=profil_ats, offre=offre
     )
@@ -173,7 +211,14 @@ def analyser_texte(texte, offre):
             "statut": "analysee",
             "profil_analyse": profil,
             "profil_ats": profil_ats,
-            "similarite": {"valeur": round(similarite, 3), "methode": methode},
+            "similarite": {
+                "valeur": None if similarite is None else round(similarite, 3),
+                "methode": methode,
+            },
+            "experience_pertinente": {
+                "annees": round(profil["experience_pertinente"], 1),
+                "part": round(part_pertinente, 2),
+            },
         }
     )
     return score, details

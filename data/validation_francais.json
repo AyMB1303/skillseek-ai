@@ -510,5 +510,69 @@
     "domaine": "controle vs data",
     "profil": "a",
     "origine": "croisement de domaines"
+  },
+  {
+    "cv": "RACHID EL MANSOURI\nDéveloppeur backend\nr.elmansouri@example.ma | +212 6 61 22 33 44\n\nEXPÉRIENCE PROFESSIONNELLE\n\nMars 2019 – Présent\nDéveloppeur applicatif chez Transit Maroc\n  Maintenance corrective du progiciel de gestion interne : correction d'anomalies\n  remontées par les utilisateurs, ajustement d'états d'impression.\n  Écriture de scripts Python d'export de données vers des fichiers plats,\n  déclenchés chaque nuit par une tâche planifiée.\n  Rédaction des tickets et suivi auprès de l'éditeur du progiciel.\n\nSeptembre 2017 – Février 2019\nTechnicien support applicatif chez Transit Maroc\n  Assistance aux utilisateurs, reprise de données, extraction de rapports SQL.\n\nFORMATION\n\n2017 - Master en Systèmes d'Information, Université Hassan II\n\nCOMPÉTENCES\n\nPython, SQL, PostgreSQL, Docker, Flask, Git\n\nLANGUES\n\nFrançais, arabe",
+    "offre": "Développeur Backend Python Senior — Casablanca, CDI\n\nNous recherchons un développeur backend expérimenté pour concevoir et maintenir\nnos interfaces de programmation REST. Vous interviendrez sur l'architecture des\nservices, la modélisation des données et les traitements à grande échelle.\n\nProfil recherché :\n- 5 ans d'expérience minimum en développement backend\n- Maîtrise de Python et d'un framework web (Django, Flask ou FastAPI)\n- Solide expérience des bases de données relationnelles, notamment PostgreSQL\n- Pratique de la conteneurisation avec Docker et de l'intégration continue\n- Diplôme Bac+5 en informatique ou équivalent\n\nCompétences appréciées : Kubernetes, architectures distribuées, message brokers.",
+    "label": "No Fit",
+    "domaine": "backend (difficile)",
+    "profil": "e",
+    "origine": "négatif difficile : même domaine, exigences satisfaites sur le papier, expérience réellement hors sujet"
+  },
+  {
+    "cv": "SALMA BENCHEKROUN\nIntégratrice web\ns.benchekroun@example.ma | +212 6 55 44 33 22\n\nEXPÉRIENCE PROFESSIONNELLE\n\nJanvier 2021 – Présent\nIntégratrice web chez Studio Adwa\n  Mise en page de sites vitrines sous WordPress à partir de maquettes fournies.\n  Personnalisation de thèmes, retouche de feuilles de style, adaptation mobile.\n  Installation et paramétrage d'extensions, mise en ligne chez l'hébergeur.\n\nJuin 2019 – Décembre 2020\nAssistante web chez Studio Adwa\n  Saisie de contenus, optimisation des images, suivi des demandes clients.\n\nFORMATION\n\n2019 - Licence en Multimédia, Université Ibn Tofaïl\n\nPROJETS\n\nApplication de gestion de tâches réalisée avec React lors d'un projet de fin\nd'études.\n\nCOMPÉTENCES\n\nJavaScript, React, CSS, HTML, WordPress, Git\n\nLANGUES\n\nFrançais, arabe, anglais",
+    "offre": "Développeur Frontend React — Rabat, CDI, télétravail partiel\n\nAu sein de l'équipe produit, vous concevez et réalisez les interfaces de nos\napplications web. Vous êtes attentif à l'expérience utilisateur, à\nl'accessibilité et aux performances.\n\nProfil recherché :\n- 3 ans d'expérience en développement frontend\n- Maîtrise de JavaScript, React et des feuilles de style CSS\n- Pratique des tests d'interface et de l'intégration continue\n- Diplôme Bac+3 minimum\n\nCompétences appréciées : TypeScript, Next.js, conception d'interfaces.",
+    "label": "No Fit",
+    "domaine": "frontend (difficile)",
+    "profil": "e",
+    "origine": "négatif difficile : même domaine, exigences satisfaites sur le papier, expérience réellement hors sujet"
+  },
+  {
+    "cv": "OUMAIMA ZAHRAOUI\nAnalyste décisionnel\no.zahraoui@example.ma | +212 6 70 11 22 33\n\nEXPÉRIENCE PROFESSIONNELLE\n\nFévrier 2020 – Présent\nAnalyste décisionnel chez Distrilog\n  Production des tableaux de bord commerciaux mensuels sous Excel et Power BI.\n  Rédaction de requêtes SQL d'extraction pour alimenter les rapports.\n  Réconciliation des écarts entre le progiciel de gestion et les états de vente.\n  Formation des équipes régionales à la lecture des tableaux de bord.\n\nJanvier 2019 – Janvier 2020\nChargée de reporting chez Distrilog\n  Consolidation manuelle des remontées d'activité des points de vente.\n\nFORMATION\n\n2018 - Master en Statistiques appliquées à la gestion, INSEA\n\nCOMPÉTENCES\n\nSQL, Python, Excel, Power BI, apprentissage automatique (formation suivie en 2022)\n\nLANGUES\n\nFrançais, arabe, anglais",
+    "offre": "Data Scientist — Casablanca, CDI\n\nVous rejoignez notre pôle données pour concevoir des modèles prédictifs et\nindustrialiser leur mise en production. Vous accompagnez les équipes métier\ndans l'interprétation des résultats.\n\nProfil recherché :\n- 4 ans d'expérience en science des données\n- Maîtrise de Python et des bibliothèques d'apprentissage automatique\n- Solide pratique du SQL et de la manipulation de grands volumes\n- Diplôme Bac+5, idéalement en statistiques ou en informatique\n\nCompétences appréciées : apprentissage profond, traitement du langage, Power BI.",
+    "label": "No Fit",
+    "domaine": "data (difficile)",
+    "profil": "e",
+    "origine": "négatif difficile : même domaine, exigences satisfaites sur le papier, expérience réellement hors sujet"
+  },
+  {
+    "cv": "KHALID OUAZZANI\nAide-comptable\nk.ouazzani@example.ma | +212 6 62 88 77 66\n\nEXPÉRIENCE PROFESSIONNELLE\n\nAvril 2019 – Présent\nAide-comptable chez Groupe Amal\n  Saisie des factures fournisseurs et des pièces de caisse.\n  Rapprochement bancaire mensuel et classement des justificatifs.\n  Préparation des pièces transmises au cabinet comptable externe.\n\nSeptembre 2017 – Mars 2019\nAgent administratif chez Groupe Amal\n  Suivi des règlements clients et relances téléphoniques.\n\nFORMATION\n\n2017 - Licence professionnelle en Comptabilité et Finance, Université Cadi Ayyad\n\nCOMPÉTENCES\n\nComptabilité générale, déclarations fiscales, Excel, Sage, normes comptables\nmarocaines\n\nLANGUES\n\nFrançais, arabe",
+    "offre": "Comptable Général — Marrakech, CDI\n\nVous assurez la tenue de la comptabilité générale, les déclarations fiscales et\nla préparation des états financiers. Vous êtes l'interlocuteur privilégié du\ncommissaire aux comptes.\n\nProfil recherché :\n- 4 ans d'expérience en comptabilité générale\n- Maîtrise des normes comptables marocaines et des déclarations fiscales\n- Pratique d'un logiciel de comptabilité et d'Excel à un niveau avancé\n- Diplôme Bac+3 minimum en comptabilité, finance ou gestion\n\nCompétences appréciées : logiciel Sage, missions d'audit.",
+    "label": "No Fit",
+    "domaine": "comptable (difficile)",
+    "profil": "e",
+    "origine": "négatif difficile : même domaine, exigences satisfaites sur le papier, expérience réellement hors sujet"
+  },
+  {
+    "cv": "MEHDI TOUZANI\nAdministrateur systèmes\nm.touzani@example.ma | +212 6 44 55 66 77\n\nEXPÉRIENCE PROFESSIONNELLE\n\nOctobre 2018 – Présent\nAdministrateur systèmes chez Assurances Al Maghrib\n  Exploitation d'un parc de serveurs Windows : mises à jour, sauvegardes,\n  gestion des comptes de l'annuaire d'entreprise.\n  Supervision des sauvegardes quotidiennes et restauration sur demande.\n  Traitement des incidents de niveau 2 et rédaction des procédures.\n\nFORMATION\n\n2018 - Master en Réseaux et Télécommunications, ENSA\n\nCERTIFICATIONS\n\nCertification Docker suivie en 2023, maquette de laboratoire personnelle avec\nKubernetes.\n\nCOMPÉTENCES\n\nWindows Server, Linux, Docker, Kubernetes, sauvegarde, supervision, scripts\n\nLANGUES\n\nFrançais, arabe",
+    "offre": "Ingénieur DevOps — Casablanca, CDI\n\nVous industrialisez le déploiement de nos applications et garantissez la\ndisponibilité des environnements de production.\n\nProfil recherché :\n- 4 ans d'expérience en exploitation ou en ingénierie de production\n- Maîtrise de Docker, de Kubernetes et des systèmes Linux\n- Automatisation des chaînes de livraison continue\n- Diplôme Bac+5 en informatique ou équivalent\n\nCompétences appréciées : cloud AWS, supervision, scripts Python.",
+    "label": "No Fit",
+    "domaine": "devops (difficile)",
+    "profil": "e",
+    "origine": "négatif difficile : même domaine, exigences satisfaites sur le papier, expérience réellement hors sujet"
+  },
+  {
+    "cv": "AMINE FILALI\nDéveloppeur Java\na.filali@example.ma | +212 6 33 22 11 00\n\nEXPÉRIENCE PROFESSIONNELLE\n\nJuin 2019 – Présent\nDéveloppeur Java chez Sofratec Industrie\n  Maintenance et évolution d'une application de gestion d'atelier en Java Swing,\n  déployée sur les postes de production.\n  Écriture de requêtes SQL et d'états d'impression.\n  Correction d'anomalies signalées par les opérateurs, tests manuels de recette.\n\nFORMATION\n\n2019 - Master en Génie Informatique, Université Mohammed Premier\n\nFORMATION INTERNE\n\nIntroduction au framework Spring, deux jours, 2023.\n\nCOMPÉTENCES\n\nJava, SQL, Oracle, Spring, Git, tests\n\nLANGUES\n\nFrançais, arabe",
+    "offre": "Développeur Java Spring — Rabat, CDI\n\nVous participez à la refonte de nos applications de gestion et à leur\nmigration vers une architecture de services.\n\nProfil recherché :\n- 4 ans d'expérience en développement Java\n- Maîtrise du framework Spring et des bases de données relationnelles\n- Bonne pratique du SQL et des tests automatisés\n- Diplôme Bac+5 en informatique\n\nCompétences appréciées : Docker, méthodes agiles, intégration continue.",
+    "label": "No Fit",
+    "domaine": "java (difficile)",
+    "profil": "e",
+    "origine": "négatif difficile : même domaine, exigences satisfaites sur le papier, expérience réellement hors sujet"
+  },
+  {
+    "cv": "NADIA BERRADA\nDéveloppeuse d'états et de rapports\nn.berrada@example.ma | +212 6 77 88 99 00\n\nEXPÉRIENCE PROFESSIONNELLE\n\nMai 2020 – Présent\nDéveloppeuse d'états chez Pharma Distribution\n  Écriture de requêtes SQL complexes pour les états réglementaires mensuels.\n  Conception de vues et de procédures stockées sur PostgreSQL et Oracle.\n  Mise en forme et diffusion des rapports aux directions métier.\n\nJanvier 2019 – Avril 2020\nAssistante études chez Pharma Distribution\n  Extraction de données et contrôle de cohérence des référentiels.\n\nFORMATION\n\n2018 - Licence en Informatique de Gestion, Université Sidi Mohamed Ben Abdellah\n\nCOMPÉTENCES\n\nSQL, PostgreSQL, Oracle, optimisation de requêtes, Linux\n\nLANGUES\n\nFrançais, arabe",
+    "offre": "Administrateur de Bases de Données — Casablanca, CDI\n\nVous exploitez, sécurisez et optimisez les bases de données de l'entreprise.\n\nProfil recherché :\n- 3 ans d'expérience en administration de bases de données\n- Maîtrise de PostgreSQL et d'Oracle\n- Solide pratique du SQL et de l'optimisation de requêtes\n- Diplôme Bac+3 minimum\n\nCompétences appréciées : systèmes Linux, conteneurisation, supervision.",
+    "label": "No Fit",
+    "domaine": "bdd (difficile)",
+    "profil": "e",
+    "origine": "négatif difficile : même domaine, exigences satisfaites sur le papier, expérience réellement hors sujet"
+  },
+  {
+    "cv": "YASSINE CHAOUKI\nAssistant de gestion\ny.chaouki@example.ma | +212 6 11 99 88 77\n\nEXPÉRIENCE PROFESSIONNELLE\n\nMars 2019 – Présent\nAssistant de gestion chez Atlas Logistique\n  Contrôle et consolidation des notes de frais des équipes commerciales.\n  Suivi des engagements de dépenses et relance des validations manquantes.\n  Préparation des tableaux de bord d'activité transmis à la direction.\n  Mise à jour du progiciel de gestion après validation hiérarchique.\n\nFORMATION\n\n2018 - Master en Management et Contrôle, ENCG Tanger\n\nCOMPÉTENCES\n\nExcel avancé, reporting financier, analyse des écarts, progiciel de gestion,\nPower BI\n\nLANGUES\n\nFrançais, arabe, anglais",
+    "offre": "Contrôleur de Gestion — Tanger, CDI\n\nRattaché à la direction financière, vous produisez les analyses de coûts, le\nbudget et les tableaux de bord de pilotage.\n\nProfil recherché :\n- 4 ans d'expérience en contrôle de gestion\n- Maîtrise d'Excel à un niveau avancé et d'un progiciel de gestion\n- Pratique du reporting financier et de l'analyse des écarts\n- Diplôme Bac+5 en finance, gestion ou école de commerce\n\nCompétences appréciées : Power BI, comptabilité analytique.",
+    "label": "No Fit",
+    "domaine": "controle (difficile)",
+    "profil": "e",
+    "origine": "négatif difficile : même domaine, exigences satisfaites sur le papier, expérience réellement hors sujet"
   }
 ]
