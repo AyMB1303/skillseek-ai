@@ -85,8 +85,10 @@ def _pdf_minimal(chemin, lignes):
     objets = [
         "<< /Type /Catalog /Pages 2 0 R >>",
         "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
-        "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] "
-        "/Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>",
+        # Concaténation explicite : accolée sur deux lignes, elle se lit
+        # comme une virgule oubliée, et les analyseurs le signalent.
+        ("<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] "
+         + "/Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>"),
         f"<< /Length {len(contenu)} >>\nstream\n{contenu}\nendstream",
         "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
     ]

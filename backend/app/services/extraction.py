@@ -53,7 +53,12 @@ def _extraire_couche_texte(chemin):
         import pdfplumber
     except ImportError:
         logger.warning("pdfplumber absent : extraction directe indisponible.")
-        return "", 0
+        # Trois valeurs, comme le retour nominal. Deux suffisaient avant que
+        # cette fonction ne compte les caractères hors page ; ce retour-là
+        # n'avait pas suivi, et l'appelant qui dépaquette trois noms levait
+        # une ValueError — rattrapée plus haut, donc invisible, mais elle
+        # faisait passer une dépendance absente pour un fichier illisible.
+        return "", 0, 0
 
     morceaux = []
     caracteres_hors_page = 0
