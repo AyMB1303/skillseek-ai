@@ -23,11 +23,14 @@ SEUIL_TEXTE_EXPLOITABLE = 120
 class ResultatExtraction:
     """Texte extrait et informations sur la méthode employée."""
 
-    def __init__(self, texte, methode, pages=0, erreur=None):
+    def __init__(self, texte, methode, pages=0, erreur=None, hors_page=0):
         self.texte = texte or ""
         self.methode = methode          # "texte_natif" | "ocr" | "echec"
         self.pages = pages
         self.erreur = erreur
+        # Caracteres presents dans le fichier mais poses hors du cadre de la
+        # page : ecartes de l'analyse, signales a l'interface.
+        self.hors_page = hors_page
 
     @property
     def reussie(self):
@@ -40,6 +43,7 @@ class ResultatExtraction:
             "caracteres": len(self.texte),
             "reussie": self.reussie,
             "erreur": self.erreur,
+            "horsPage": self.hors_page,
         }
 
 
@@ -52,20 +56,47 @@ def _extraire_couche_texte(chemin):
         return "", 0
 
     morceaux = []
+    caracteres_hors_page = 0
     with pdfplumber.open(chemin) as pdf:
         pages = len(pdf.pages)
         for page in pdf.pages:
-            # Certains generateurs de PDF simulent le gras en dessinant deux
-            # fois le meme glyphe, a quelques centiemes de point d'ecart. La
-            # couche texte contient alors chaque caractere en double et le nom
-            # « Aymen Benrbib » se lit « AAyymmeenn BBeennrrbbiibb ».
-            # `dedupe_chars` supprime les glyphes superposes avant extraction.
+            # 1. Ne retenir que ce qui tombe dans la page.
+            #
+            # La couche texte d'un PDF n'est pas bornee par la page : un
+            # document trop long pour son format garde ses lignes en trop,
+            # simplement posees hors du cadre. Personne ne les voit — ni le
+            # candidat qui a exporte le fichier, ni le recruteur qui le lit.
+            #
+            # Les extraire reviendrait a fonder le profil et le score sur du
+            # texte absent du document tel qu'il se presente. Le recruteur
+            # confronte le profil reconstitue au CV affiche a cote : une
+            # competence ou une langue venue du hors-champ ne s'y retrouve
+            # pas, et c'est l'analyse entiere qui perd son credit. Le meme
+            # hors-champ sert aussi, deliberement, a bourrer un CV de
+            # mots-cles invisibles.
+            #
+            # On s'en tient donc a ce qui est visible, et l'on compte ce qui
+            # a ete laisse de cote : l'information remonte a l'interface.
+            avant = len(page.chars)
+            try:
+                page = page.crop(page.bbox, strict=True)
+                caracteres_hors_page += avant - len(page.chars)
+            except Exception:  # page degeneree : on garde la page entiere
+                pass
+
+            # 2. Supprimer les glyphes superposes.
+            #
+            # Certains generateurs simulent le gras en dessinant deux fois le
+            # meme glyphe, a quelques centiemes de point d'ecart. La couche
+            # texte livre alors chaque lettre en double et le nom « Aymen
+            # Benrbib » se lit « AAyymmeenn BBeennrrbbiibb ».
             try:
                 page = page.dedupe_chars(tolerance=1)
             except Exception:  # version de pdfplumber sans dedupe_chars
                 pass
+
             morceaux.append(page.extract_text() or "")
-    return "\n".join(morceaux), pages
+    return "\n".join(morceaux), pages, caracteres_hors_page
 
 
 def _extraire_par_ocr(chemin):
@@ -189,11 +220,12 @@ def extraire_texte(chemin):
             )
 
     # 1. Couche texte native
+    hors_page = 0
     try:
-        texte, pages = _extraire_couche_texte(chemin)
+        texte, pages, hors_page = _extraire_couche_texte(chemin)
         texte = nettoyer(texte)
         if len(texte) >= SEUIL_TEXTE_EXPLOITABLE:
-            return ResultatExtraction(texte, "texte_natif", pages)
+            return ResultatExtraction(texte, "texte_natif", pages, hors_page=hors_page)
     except Exception as exc:  # fichier corrompu, protege par mot de passe...
         logger.info("Extraction directe impossible (%s), bascule vers l'OCR.", exc)
         pages = 0
