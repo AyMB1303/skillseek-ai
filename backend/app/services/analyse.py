@@ -138,7 +138,10 @@ def analyser_candidature(candidature, chemin_cv=None):
             "profil_analyse": profil,
             "profil_ats": profil_ats,
             "extraction": resultat.to_dict(),
-            "similarite": {"valeur": round(similarite, 3), "methode": methode_sim},
+            "similarite": {
+                "valeur": None if similarite is None else round(similarite, 3),
+                "methode": methode_sim,
+            },
             "controles": {
                 "nombre": len(anomalies),
                 "severite_maximale": fraude.severite_maximale(anomalies),
@@ -208,7 +211,10 @@ def analyser_texte(texte, offre):
             "statut": "analysee",
             "profil_analyse": profil,
             "profil_ats": profil_ats,
-            "similarite": {"valeur": round(similarite, 3), "methode": methode},
+            "similarite": {
+                "valeur": None if similarite is None else round(similarite, 3),
+                "methode": methode,
+            },
             "experience_pertinente": {
                 "annees": round(profil["experience_pertinente"], 1),
                 "part": round(part_pertinente, 2),

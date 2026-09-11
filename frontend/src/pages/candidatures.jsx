@@ -1519,11 +1519,98 @@ const formatDate = (iso) => {
 };
 
 /**
+ * Ce qu'il faut écrire dans la case « Expérience ».
+ *
+ * « 0 an(s) » recouvrait trois situations que rien ne distinguait : un
+ * débutant, un CV dont les dates n'ont pas pu être lues, et un stage de deux
+ * mois. La première est un fait, la deuxième un aveu, la troisième un
+ * arrondi — et c'est sur cette case que se décide une élimination pour
+ * expérience insuffisante. Chacune se dit maintenant pour ce qu'elle est.
+ */
+function libelleExperience(profil) {
+  if (profil.experienceDeterminee === false) return "Non déterminée";
+  const annees = profil.totalExperienceYears;
+  if (!annees) {
+    // Des postes datés existent, mais leur durée cumulée n'atteint pas
+    // l'année : la durée exacte est vraie, « zéro an » ne l'est pas. Le
+    // moteur de score emploie le même libellé dans ses motifs de rejet.
+    const mois = profil.totalExperienceMonths;
+    if (mois > 0) return mois > 1 ? `${mois} mois` : "1 mois";
+    return "0 an(s)";
+  }
+  return `${annees} an(s)`;
+}
+
+/**
+ * Une rubrique du profil, y compris lorsqu'elle est vide.
+ *
+ * Masquer une rubrique sans contenu paraissait discret ; c'est en réalité la
+ * pire des trois réponses possibles. Le recruteur qui ne voit pas « Langues »
+ * ne sait pas si le candidat n'en a déclaré aucune, si le document n'en parle
+ * pas, ou si l'analyse a échoué — et il n'a aucun moyen de faire la
+ * différence. Or ces trois situations appellent trois gestes distincts :
+ * passer, demander au candidat, ou ouvrir le document.
+ *
+ * Trois états, donc, et chacun se dit :
+ *   — des éléments ont été extraits : on les affiche ;
+ *   — la rubrique ne figure pas dans le document : on l'écrit ;
+ *   — la rubrique y figure mais rien n'en a été tiré : on le signale, car
+ *     c'est le seul cas où l'analyse est en défaut et où le recruteur doit
+ *     aller lire le CV lui-même.
+ */
+function Rubrique({ titre, etat, children }) {
+  const elements = etat?.elements ?? 0;
+  const presente = etat?.presente ?? false;
+
+  return (
+    <div>
+      <p className="text-[11px] text-txt2 font-medium mb-1.5">{titre}</p>
+      {elements > 0 ? (
+        children
+      ) : presente ? (
+        <p className="text-[11.5px] text-alerte">
+          Rubrique présente dans le CV, mais aucun élément n'a pu en être lu —
+          ouvrez le document pour vérifier.
+        </p>
+      ) : (
+        <p className="text-[11.5px] text-txt2 italic opacity-80">
+          Non mentionné dans le CV
+        </p>
+      )}
+    </div>
+  );
+}
+
+/**
  * Profil structuré issu du parsing ATS : identité, parcours, formations,
  * certifications et langues, tels que reconstitués depuis le CV.
  */
 function ProfilAts({ profil, extraction, similarite }) {
   const b = profil.basics || {};
+  // Les profils analysés avant cette version ne portent pas « rubriques ».
+  // On les reconstitue depuis ce qui a été extrait : la rubrique est alors
+  // tenue pour présente dès qu'elle contient quelque chose, ce qui n'invente
+  // rien et évite d'annoncer « non mentionné » sur un profil qui, lui, n'en
+  // sait rien.
+  const rubriques = profil.rubriques || {
+    experience: { presente: profil.work?.length > 0, elements: profil.work?.length || 0 },
+    formation: {
+      presente: profil.education?.length > 0,
+      elements: profil.education?.length || 0,
+    },
+    competences: {
+      presente: profil.skills?.length > 0,
+      elements: profil.skills?.length || 0,
+    },
+    certifications: {
+      presente: profil.certificates?.length > 0,
+      elements: profil.certificates?.length || 0,
+    },
+    langues: {
+      presente: profil.languages?.length > 0,
+      elements: profil.languages?.length || 0,
+    },
+  };
 
   return (
     <section className="rounded-xl2 border border-bordure bg-surface2/50 overflow-hidden">
@@ -1561,17 +1648,18 @@ function ProfilAts({ profil, extraction, similarite }) {
 
         {/* Synthèse */}
         <div className="grid grid-cols-3 gap-2 text-center">
-          <Indicateur valeur={`${profil.totalExperienceYears} an(s)`} libelle="Expérience" />
-          <Indicateur valeur={profil.highestDegree || "—"} libelle="Diplôme" />
+          <Indicateur valeur={libelleExperience(profil)} libelle="Expérience" />
+          <Indicateur
+            valeur={profil.highestDegree || "Non mentionné"}
+            libelle="Diplôme"
+          />
           <Indicateur valeur={profil.skills?.length || 0} libelle="Compétences" />
         </div>
 
         {/* Parcours professionnel */}
-        {profil.work?.length > 0 && (
-          <div>
-            <p className="text-[11px] text-txt2 font-medium mb-2">Parcours professionnel</p>
-            <ol className="space-y-2.5">
-              {profil.work.map((poste, i) => (
+        <Rubrique titre="Parcours professionnel" etat={rubriques.experience}>
+          <ol className="space-y-2.5">
+              {profil.work?.map((poste, i) => (
                 <li key={i} className="flex gap-2.5">
                   <span className="w-1 rounded-full bg-accent/40 shrink-0 mt-1 mb-1" />
                   <div className="min-w-0">
@@ -1586,78 +1674,92 @@ function ProfilAts({ profil, extraction, similarite }) {
                   </div>
                 </li>
               ))}
-            </ol>
-          </div>
-        )}
+          </ol>
+        </Rubrique>
 
         {/* Formation */}
-        {profil.education?.length > 0 && (
-          <div>
-            <p className="text-[11px] text-txt2 font-medium mb-1.5">Formation</p>
-            <ul className="space-y-1">
-              {profil.education.map((f, i) => (
+        <Rubrique titre="Formation" etat={rubriques.formation}>
+          <ul className="space-y-1">
+              {profil.education?.map((f, i) => (
                 <li key={i} className="text-[12px] flex gap-2">
                   {f.level && <span className="chip bg-accent/10 text-accent text-[10px] shrink-0">{f.level}</span>}
                   <span className="text-txt2 truncate">{f.studyType}</span>
                 </li>
               ))}
-            </ul>
-          </div>
-        )}
+          </ul>
+        </Rubrique>
 
         {/* Certifications */}
-        {profil.certificates?.length > 0 && (
-          <div>
-            <p className="text-[11px] text-txt2 font-medium mb-1.5">Certifications</p>
-            <ul className="space-y-1">
-              {profil.certificates.map((c, i) => (
+        <Rubrique titre="Certifications" etat={rubriques.certifications}>
+          <ul className="space-y-1">
+              {profil.certificates?.map((c, i) => (
                 <li key={i} className="text-[12px] text-txt2">
                   {c.name}
                   {c.date && <span className="text-[11px]"> ({c.date})</span>}
                 </li>
               ))}
-            </ul>
-          </div>
-        )}
+          </ul>
+        </Rubrique>
 
         {/* Langues */}
-        {profil.languages?.length > 0 && (
-          <div>
-            <p className="text-[11px] text-txt2 font-medium mb-1.5">Langues</p>
-            <div className="flex flex-wrap gap-1.5">
-              {profil.languages.map((li) => (
+        <Rubrique titre="Langues" etat={rubriques.langues}>
+          <div className="flex flex-wrap gap-1.5">
+              {profil.languages?.map((li) => (
                 <span key={li.language} className="chip bg-bordure/40 text-txt2 text-[10px]">
                   {li.language}
                   {li.fluency && <span className="text-cyan ml-1">{li.fluency}</span>}
                 </span>
               ))}
-            </div>
           </div>
-        )}
+        </Rubrique>
 
         {/* Compétences détectées */}
-        {profil.skills?.length > 0 && (
-          <div>
-            <p className="text-[11px] text-txt2 font-medium mb-1.5">
-              Compétences détectées ({profil.skills.length})
-            </p>
-            <div className="flex flex-wrap gap-1.5">
-              {profil.skills.slice(0, 14).map((s) => (
+        <Rubrique
+          titre={`Compétences détectées${
+            profil.skills?.length ? ` (${profil.skills.length})` : ""
+          }`}
+          etat={rubriques.competences}
+        >
+          <div className="flex flex-wrap gap-1.5">
+              {profil.skills?.slice(0, 14).map((s) => (
                 <span key={s} className="chip bg-cyan/10 text-cyan text-[10px]">{s}</span>
               ))}
-              {profil.skills.length > 14 && (
+              {profil.skills?.length > 14 && (
                 <span className="chip bg-bordure/40 text-txt2 text-[10px]">
                   +{profil.skills.length - 14}
                 </span>
               )}
-            </div>
           </div>
+        </Rubrique>
+
+        {/* Texte présent dans le fichier mais posé hors du cadre de la page :
+            invisible à l'écran comme à l'impression, donc écarté de l'analyse.
+            Le dire est le seul moyen pour le recruteur de comprendre pourquoi
+            le profil ne reprend pas tout ce que contient le fichier — et le
+            hors-champ est aussi la cachette classique des mots-clés ajoutés
+            pour tromper un automate. */}
+        {extraction?.horsPage > 0 && (
+          <p className="text-[11px] text-alerte border-t border-bordure pt-2.5">
+            {extraction.horsPage} caractères du fichier se trouvent hors du
+            cadre de la page : ils n'apparaissent ni à l'écran ni à
+            l'impression, et n'ont donc pas été retenus dans le profil.
+          </p>
         )}
 
         {similarite && (
           <p className="text-[11px] text-txt2 border-t border-bordure pt-2.5">
-            Proximité sémantique avec l'offre : {Math.round(similarite.valeur * 100)} %
-            <span className="opacity-70"> ({LIBELLE_SIMILARITE[similarite.methode] || similarite.methode})</span>
+            {similarite.valeur === null || similarite.valeur === undefined ? (
+              <>
+                Proximité sémantique non calculée — l'offre ne comporte pas de
+                description à comparer au CV. Les points de cette composante
+                sont reportés sur les compétences obligatoires.
+              </>
+            ) : (
+              <>
+                Proximité sémantique avec l'offre : {Math.round(similarite.valeur * 100)} %
+                <span className="opacity-70"> ({LIBELLE_SIMILARITE[similarite.methode] || similarite.methode})</span>
+              </>
+            )}
           </p>
         )}
       </div>
@@ -1718,10 +1820,13 @@ function ProfilDetecte({ profil, extraction, similarite }) {
 
       <p className="text-[11px] text-txt2 leading-snug border-t border-bordure pt-2.5">
         {extraction && (LIBELLE_EXTRACTION[extraction.methode] || "")}
-        {similarite && (
-          <> · Proximité avec l'offre : {Math.round(similarite.valeur * 100)} %
-            ({LIBELLE_SIMILARITE[similarite.methode] || similarite.methode})</>
-        )}
+        {similarite &&
+          (similarite.valeur === null || similarite.valeur === undefined ? (
+            <> · Proximité avec l'offre non calculée</>
+          ) : (
+            <> · Proximité avec l'offre : {Math.round(similarite.valeur * 100)} %
+              ({LIBELLE_SIMILARITE[similarite.methode] || similarite.methode})</>
+          ))}
       </p>
     </section>
   );
@@ -1741,67 +1846,107 @@ function ProfilDetecte({ profil, extraction, similarite }) {
 function BoutonCV({ candidatureId }) {
   const [chargement, setChargement] = useState(false);
   const [erreur, setErreur] = useState("");
-  const [url, setUrl] = useState(null);
+  const [fichier, setFichier] = useState(null);   // { url, type, nom }
   const [ouvert, setOuvert] = useState(false);
 
   // L'URL d'objet occupe la mémoire du navigateur tant qu'elle n'est pas
   // révoquée : la libérer au démontage évite une fuite au fil des ouvertures.
   useEffect(() => {
     return () => {
-      if (url) URL.revokeObjectURL(url);
+      if (fichier?.url) URL.revokeObjectURL(fichier.url);
     };
-  }, [url]);
+  }, [fichier]);
 
-  const basculer = async () => {
-    if (ouvert) return setOuvert(false);
-    if (url) return setOuvert(true);
+  // Le CV se déplie dès l'ouverture du panneau : le recruteur doit voir le
+  // document et le profil reconstitué côte à côte sans action préalable.
+  // C'est la confrontation des deux qui rend le score vérifiable.
+  useEffect(() => {
+    let annule = false;
+    (async () => {
+      setChargement(true);
+      setErreur("");
+      try {
+        const recu = await telechargerFichier(`/applications/${candidatureId}/cv`);
+        if (annule) return URL.revokeObjectURL(recu.url);
+        setFichier(recu);
+        setOuvert(true);
+      } catch (e) {
+        if (!annule) setErreur(e.message);
+      } finally {
+        if (!annule) setChargement(false);
+      }
+    })();
+    return () => {
+      annule = true;
+    };
+  }, [candidatureId]);
 
-    setChargement(true);
-    setErreur("");
-    try {
-      setUrl(await telechargerFichier(`/applications/${candidatureId}/cv`));
-      setOuvert(true);
-    } catch (e) {
-      setErreur(e.message);
-    } finally {
-      setChargement(false);
-    }
-  };
+  const estPdf = fichier?.type === "application/pdf";
 
   return (
     <div className="space-y-2">
       <div className="flex gap-2">
-        <button onClick={basculer} disabled={chargement} className="btn-secondaire flex-1">
+        <button
+          onClick={() => setOuvert((o) => !o)}
+          disabled={chargement || !fichier}
+          className="btn-secondaire flex-1"
+        >
           {chargement ? "Chargement…" : ouvert ? "Masquer le CV" : "Afficher le CV"}
         </button>
-        {url && (
-          <a
-            href={url}
-            target="_blank"
-            rel="noreferrer"
-            className="btn-fantome shrink-0"
-            title="Ouvrir dans un onglet séparé"
-          >
-            ↗
-          </a>
+        {fichier && (
+          <>
+            <a
+              href={fichier.url}
+              target="_blank"
+              rel="noreferrer"
+              className="btn-fantome shrink-0"
+              title="Ouvrir dans un onglet séparé"
+            >
+              ↗
+            </a>
+            <a
+              href={fichier.url}
+              download={fichier.nom || "CV.pdf"}
+              className="btn-fantome shrink-0"
+              title="Télécharger le document"
+            >
+              ⤓
+            </a>
+          </>
         )}
       </div>
 
       {erreur && <p className="text-xs text-erreur">{erreur}</p>}
 
-      {ouvert && url && (
+      {ouvert && fichier && (
         <div className="rounded-[10px] border border-bordure overflow-hidden bg-fond">
-          <object data={url} type="application/pdf" className="w-full h-[520px]">
-            {/* Repli affiché lorsque le navigateur refuse d'intégrer le PDF */}
+          {estPdf ? (
+            // <iframe> plutôt que <object> : le lecteur PDF intégré de
+            // Chrome n'affiche pas une URL blob dans un <object> et se
+            // rabat silencieusement sur le contenu de repli — c'est ce qui
+            // obligeait à ouvrir un second onglet pour lire le CV.
+            <iframe
+              src={fichier.url}
+              title="Curriculum vitæ du candidat"
+              className="w-full h-[620px] border-0"
+            />
+          ) : (
+            // Un .docx ne s'affiche dans aucun navigateur : on le dit, au
+            // lieu de laisser un cadre vide.
             <div className="p-5 text-center space-y-2">
               <p className="text-[13px] text-txt2">
-                Votre navigateur n'affiche pas ce document dans la page.
+                Ce document est au format Word : il ne peut pas être affiché
+                dans la page.
               </p>
-              <a href={url} target="_blank" rel="noreferrer" className="btn-secondaire inline-flex">
-                Ouvrir dans un onglet
+              <a
+                href={fichier.url}
+                download={fichier.nom || "CV.docx"}
+                className="btn-secondaire inline-flex"
+              >
+                Télécharger le document
               </a>
             </div>
-          </object>
+          )}
         </div>
       )}
     </div>

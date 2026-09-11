@@ -189,6 +189,9 @@ def qualifier(profil, offre):
     manquantes = [affiche for cle, affiche in exigences if cle not in possedees]
 
     experience = profil.get("experience_years", 0) or 0
+    # Absent du profil vaut « determinee » : un profil saisi a la main porte
+    # une valeur voulue par le recruteur, pas une lecture manquee.
+    determinee = profil.get("experience_determinee", True)
     requise = offre.min_experience_years or 0
     diplome = profil.get("degree")
     diplome_requis = getattr(offre, "min_degree", None)
@@ -200,6 +203,7 @@ def qualifier(profil, offre):
         "niveaux_manquants": 0,
         "diplome_conforme": True,
         "diplome_par_equivalence": False,
+        "experience_determinee": determinee,
     }
 
     # --- Competences indispensables : seul veritable critere bloquant ---
@@ -209,18 +213,35 @@ def qualifier(profil, offre):
         )
 
     # --- Experience : reserve dans la marge, disqualification au-dela ---
-    if requise and experience < requise:
+    #
+    # Rien n'est oppose au candidat sur une mesure qui n'a pas eu lieu. Quand
+    # le document ne porte ni periode datee ni anciennete annoncee, l'ecart a
+    # l'exigence n'est pas mesurable : ecrire « Experience 0 an(s), tres en
+    # deca des 4 attendus » reviendrait a presenter une lacune de lecture
+    # comme un fait etabli sur la personne. La candidature passe donc en
+    # reserve, ou elle appelle une verification humaine — c'est exactement le
+    # partage que la plateforme revendique : elle propose, l'humain tranche.
+    if requise and not determinee:
+        reserves.append(
+            f"Expérience non déterminée — le document ne comporte ni période "
+            f"datée ni ancienneté annoncée, alors que l'offre en demande "
+            f"{requise}. À vérifier auprès du candidat."
+        )
+        mesures["annees_manquantes"] = 0
+        mesures["experience_determinee"] = False
+    elif requise and experience < requise:
+        acquise = libelle_experience(profil)
         if experience < requise * TOLERANCE_EXPERIENCE:
             eliminatoires.append(
-                f"Expérience {experience} an(s), très en deçà des "
+                f"Expérience {acquise}, très en deçà des "
                 f"{requise} an(s) attendus"
             )
         else:
             reserves.append(
-                f"Expérience {experience} an(s) pour {requise} attendus — "
+                f"Expérience {acquise} pour {requise} attendus — "
                 f"écart d'un an ou deux, jugé rattrapable"
                 if requise - experience <= 2
-                else f"Expérience {experience} an(s) pour {requise} attendus"
+                else f"Expérience {acquise} pour {requise} attendus"
             )
 
     # --- Diplome : equivalence par l'experience, puis reserve, puis rejet ---
@@ -230,7 +251,7 @@ def qualifier(profil, offre):
             mesures["niveaux_manquants"] = ecart
             # Deux annees d'experience au-dela du requis par niveau manquant
             besoin = requise + EXPERIENCE_EQUIVALENTE * ecart
-            if experience >= besoin:
+            if determinee and experience >= besoin:
                 mesures["diplome_par_equivalence"] = True
                 reserves.append(
                     f"Diplôme {diplome or 'non renseigné'} pour {diplome_requis} "
@@ -259,6 +280,20 @@ def _penalite(mesures):
         + mesures["annees_manquantes"] * PENALITE_ANNEE
         + mesures["niveaux_manquants"] * PENALITE_NIVEAU
     )
+
+
+def libelle_experience(profil):
+    """Ce que vaut l'expérience du candidat, écrit sans arrondi trompeur.
+
+    « 0 an(s) » opposé à un candidat qui a fait deux mois de stage est une
+    demi-vérité, et c'est la phrase qui motive son élimination : elle doit
+    dire ce que le document dit.
+    """
+    annees = profil.get("experience_years", 0) or 0
+    mois = profil.get("experience_months")
+    if annees == 0 and mois:
+        return f"{mois} mois" if mois > 1 else "1 mois"
+    return f"{annees} an(s)"
 
 
 def calculer_score(profil, offre, similarite_semantique=None, probabilite_modele=None):

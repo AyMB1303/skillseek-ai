@@ -138,3 +138,19 @@ gitleaks.sarif
 # d'acces porte un certificat qui ouvre le cluster en administrateur.
 deploiement/ansible/inventaire.ini
 deploiement/ansible/acces-cluster.yaml
+
+# --------------------------------------------------------------------------
+# Démonstration vidéo
+# --------------------------------------------------------------------------
+#
+# Le script d'enregistrement est versionné : il documente le scénario et
+# permet de rejouer la démonstration. Ce sur quoi il travaille ne l'est pas.
+#
+# Le CV utilisé est celui d'une personne réelle — nom, téléphone, adresse
+# électronique, photographie. Le dépôt étant public, le verser reviendrait à
+# publier des données personnelles que son propriétaire a confiées pour un
+# essai, pas pour une diffusion. Chacun fournit le sien, à l'emplacement que
+# le script attend.
+demo/*.pdf
+demo/*.docx
+demo/video/

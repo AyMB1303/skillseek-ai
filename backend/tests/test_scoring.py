@@ -8,6 +8,7 @@ from app.services.scoring import (
     SEUIL_RETENU,
     appliquer_regle_top,
     calculer_score,
+    qualifier,
 )
 
 
@@ -395,3 +396,79 @@ def test_un_manque_de_plus_d_un_tiers_reste_eliminatoire():
     profil = _profil(["python"], ["python"], annees=3, diplome="Bac+5")
     _, details = calculer_score(profil, offre, similarite_semantique=0.6)
     assert details["eliminatoires"]
+
+
+# ----------------------- Une mesure qui n'a pas eu lieu -----------------------
+#
+# Un CV dont l'expérience n'a pas pu être lue ne doit pas être écarté « pour
+# 0 an d'expérience » : la plateforme opposerait alors au candidat une lacune
+# de lecture présentée comme un fait établi sur lui. La candidature passe en
+# réserve — elle appelle une vérification humaine, elle n'est pas tranchée.
+
+def test_une_experience_non_determinee_n_ecarte_pas_la_candidature():
+    offre = OffreFictive(["python"], exp=4)
+    profil = {
+        "skills": ["python"],
+        "experience_years": 0,
+        "experience_determinee": False,
+        "degree": "Bac+5",
+    }
+    eliminatoires, reserves, mesures = qualifier(profil, offre)
+
+    assert eliminatoires == []
+    assert any("non déterminée" in r for r in reserves)
+    assert mesures["experience_determinee"] is False
+    assert mesures["annees_manquantes"] == 0
+
+
+def test_une_experience_mesuree_a_zero_reste_eliminatoire():
+    """Zéro an réellement lu dans le document garde sa conséquence."""
+    offre = OffreFictive(["python"], exp=4)
+    profil = {
+        "skills": ["python"],
+        "experience_years": 0,
+        "experience_determinee": True,
+        "degree": "Bac+5",
+    }
+    eliminatoires, _reserves, _mesures = qualifier(profil, offre)
+
+    assert any("0 an(s)" in e for e in eliminatoires)
+
+
+def test_un_profil_sans_mention_d_experience_est_tenu_pour_determine():
+    """Saisie manuelle : une valeur fournie par le recruteur est voulue."""
+    offre = OffreFictive(["python"], exp=4)
+    profil = {"skills": ["python"], "experience_years": 0, "degree": "Bac+5"}
+    eliminatoires, _reserves, _mesures = qualifier(profil, offre)
+
+    assert any("0 an(s)" in e for e in eliminatoires)
+
+
+def test_une_experience_non_determinee_n_ouvre_pas_l_equivalence_de_diplome():
+    """On ne peut pas compenser un diplôme par une expérience non mesurée."""
+    offre = OffreFictive(["python"], exp=2, degree="Bac+5")
+    profil = {
+        "skills": ["python"],
+        "experience_years": 0,
+        "experience_determinee": False,
+        "degree": "Bac+3",
+    }
+    _elim, _res, mesures = qualifier(profil, offre)
+
+    assert mesures["diplome_par_equivalence"] is False
+
+
+def test_le_motif_de_rejet_dit_la_duree_reelle_et_non_zero_an():
+    """« 0 an(s) » opposé à deux mois de stage est une demi-vérité."""
+    offre = OffreFictive(["python"], exp=4)
+    profil = {
+        "skills": ["python"],
+        "experience_years": 0,
+        "experience_months": 2,
+        "experience_determinee": True,
+        "degree": "Bac+5",
+    }
+    eliminatoires, _reserves, _mesures = qualifier(profil, offre)
+
+    assert any("2 mois" in e for e in eliminatoires)
+    assert not any("0 an(s)" in e for e in eliminatoires)

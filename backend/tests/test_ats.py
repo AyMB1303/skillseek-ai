@@ -51,7 +51,19 @@ def test_l_entete_contient_les_coordonnees():
 
 def test_une_ligne_ordinaire_n_est_pas_prise_pour_un_en_tete():
     assert ats._identifier_section("J'ai acquis une solide expérience en gestion") is None
-    assert ats._identifier_section("EXPÉRIENCE PROFESSIONNELLE") == "experience"
+    assert ats._identifier_section("EXPÉRIENCE PROFESSIONNELLE") == ("experience", "")
+
+
+def test_un_en_tete_suivi_de_son_contenu_ouvre_bien_la_rubrique():
+    """« Langues : Français (courant) » sur une seule ligne, CV compact."""
+    section, reste = ats._identifier_section("Langues : Français (courant), Anglais (B2)")
+    assert section == "langues"
+    assert reste == "Français (courant), Anglais (B2)"
+
+
+def test_une_rubrique_narrative_ne_s_ouvre_pas_en_ligne():
+    """« Projet : … » décrit un projet, il n'ouvre pas la rubrique Projets."""
+    assert ats._identifier_section("Projet : refonte du portail client") is None
 
 
 # ----------------------- Identité -----------------------
@@ -132,6 +144,52 @@ def test_les_niveaux_de_langue_suivent_le_cadre_europeen():
     assert langues["Arabe"] == "C2"         # langue maternelle
 
 
+def test_aucune_langue_n_est_inventee_faute_de_rubrique():
+    """Un CV sans rubrique « Langues » ne doit en déclarer aucune.
+
+    Le repli sur le document entier faisait apparaître des langues citées
+    incidemment — dans un nom d'employeur ou d'école — que le candidat n'a
+    jamais revendiquées, et que le recruteur ne retrouvait pas dans le CV.
+    """
+    cv = (
+        "Aymen Benrbib\n"
+        "Ingénieur en Systèmes d'Information\n\n"
+        "EXPÉRIENCE PROFESSIONNELLE\n"
+        "Stagiaire chez Banque Arabe pour le Développement — 2024\n\n"
+        "COMPÉTENCES TECHNIQUES\n"
+        "Langages : Python, SQL, Java, JavaScript / TypeScript, PHP\n"
+    )
+    assert ats.analyser_cv(cv)["languages"] == []
+
+
+def test_chaque_langue_recoit_son_propre_niveau_sur_une_ligne_unique():
+    """Une rubrique tenant en une ligne ne doit pas niveler les langues."""
+    cv = "LANGUES : Français (courant), Anglais (B2), Arabe (langue maternelle)\n"
+    langues = {li["language"]: li["fluency"] for li in ats.analyser_cv(cv)["languages"]}
+    assert langues == {"Français": "C1", "Anglais": "B2", "Arabe": "C2"}
+
+
+def test_le_telephone_est_releve_meme_colle_a_l_adresse_electronique():
+    """« +212 6 37 72 13 28 aymen@exemple.ma » : un seul espace les sépare."""
+    identite = ats.extraire_identite(
+        "Aymen Benrbib\n+212 6 37 72 13 28 aymen@exemple.ma\nRabat, Maroc\n"
+    )
+    assert identite["phone"] == "+212 6 37 72 13 28"
+    assert identite["email"] == "aymen@exemple.ma"
+
+
+def test_le_masculin_maternel_vaut_le_feminin_maternelle():
+    """« Arabe (Maternel) » : le CV accorde avec la langue, pas avec « langue »."""
+    cv = "LANGUES\nArabe (Maternel) · Français (Courant) · Anglais (Courant)\n"
+    langues = {li["language"]: li["fluency"] for li in ats.analyser_cv(cv)["languages"]}
+    assert langues == {"Arabe": "C2", "Français": "C1", "Anglais": "C1"}
+
+
+def test_une_rubrique_de_langages_de_programmation_n_est_pas_une_rubrique_de_langues():
+    cv = "COMPÉTENCES\nLangages : Python, Java, Scala\n"
+    assert ats.analyser_cv(cv)["languages"] == []
+
+
 def test_les_langues_ne_figurent_pas_parmi_les_competences_techniques():
     profil = ats.analyser_cv(CV_COMPLET)
     assert "francais" not in profil["skills"]
@@ -143,11 +201,64 @@ def test_les_langues_ne_figurent_pas_parmi_les_competences_techniques():
 def test_le_profil_est_converti_pour_le_moteur_de_score():
     profil = ats.vers_profil_scoring(ats.analyser_cv(CV_COMPLET))
     assert set(profil) == {
-        "skills", "skills_etayees", "experience_years", "degree",
+        "skills", "skills_etayees", "experience_years",
+        "experience_determinee", "experience_months", "degree",
     }
     assert profil["degree"] == "Bac+5"
     assert profil["experience_years"] >= 5
+    assert profil["experience_determinee"] is True
     assert "python" in profil["skills"]
+
+
+# ----------------------- Ce que le document ne dit pas -----------------------
+#
+# Une rubrique vide et une rubrique absente portent deux informations
+# differentes. Les confondre laisse le recruteur devant un profil muet, sans
+# moyen de savoir si le candidat n'a rien declare ou si l'analyse n'a rien su
+# lire — et c'est precisement la ou son jugement doit pouvoir s'exercer.
+
+def test_les_rubriques_absentes_du_document_sont_signalees():
+    cv = (
+        "Aymen Benrbib\n"
+        "aymen@exemple.ma\n\n"
+        "FORMATION\n"
+        "Diplôme d'Ingénieur — École des Sciences de l'Information, Rabat, 2024\n"
+    )
+    rubriques = ats.analyser_cv(cv)["rubriques"]
+    assert rubriques["formation"]["presente"] is True
+    assert rubriques["langues"]["presente"] is False
+    assert rubriques["certifications"]["presente"] is False
+
+
+def test_une_rubrique_annoncee_mais_illisible_se_distingue_d_une_rubrique_absente():
+    """Présente sans élément : le document l'annonce, l'analyse n'a rien tiré."""
+    cv = "CERTIFICATIONS\n—\n"
+    rubriques = ats.analyser_cv(cv)["rubriques"]
+    assert rubriques["certifications"]["presente"] is True
+    assert rubriques["certifications"]["elements"] == 0
+
+
+def test_un_stage_de_deux_mois_ne_s_ecrit_pas_zero_an():
+    """L'arrondi à l'année efface ce qui distingue un débutant d'un néant."""
+    cv = (
+        "Aymen Benrbib\n\n"
+        "EXPÉRIENCE PROFESSIONNELLE\n"
+        "Stagiaire Développeur Fullstack Juillet 2025 – Août 2025\n"
+        "Groupe OCP · Safi, Maroc\n"
+    )
+    profil = ats.analyser_cv(cv)
+    assert profil["totalExperienceYears"] == 0
+    assert profil["totalExperienceMonths"] >= 1
+    assert profil["experienceDeterminee"] is True
+
+
+def test_une_experience_illisible_ne_se_confond_pas_avec_une_absence_d_experience():
+    """Zéro an est une mesure ; « non déterminée » est un aveu de lecture."""
+    sans_rien = ats.analyser_cv("Aymen Benrbib\naymen@exemple.ma\n")
+    assert sans_rien["experienceDeterminee"] is False
+
+    avec_dates = ats.analyser_cv(CV_COMPLET)
+    assert avec_dates["experienceDeterminee"] is True
 
 
 # ----------------------- Preuve par l'expérience -----------------------

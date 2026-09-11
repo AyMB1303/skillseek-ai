@@ -23,6 +23,11 @@ def create_app(env: str = "development") -> Flask:
         app,
         resources={r"/api/*": {"origins": app.config["ORIGINES_AUTORISEES"]}},
         supports_credentials=True,
+        # Sans declaration explicite, une reponse d'origine croisee n'expose
+        # au script que les en-tetes dits « simples ». Le nom et le type
+        # reels du CV, indispensables pour l'afficher dans la page plutot que
+        # de le telecharger, resteraient invisibles cote client.
+        expose_headers=["Content-Disposition", "Content-Type", "X-Request-ID"],
     )
 
     # --- Modèles (importés pour qu'Alembic les voie) ---
