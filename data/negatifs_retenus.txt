@@ -1,0 +1,202 @@
+> JEU RETENU À L'ÉCART — cinq candidatures écrites par Aymen, mesurées une seule fois.
+>
+> POURQUOI CE FICHIER EXISTE
+>
+> Les huit « négatifs difficiles » du jeu de validation ont été écrits par
+> l'assistant qui a ensuite modifié le moteur pour en attraper deux. C'est
+> évaluer sur des données ayant servi à guider le développement : le chiffre
+> obtenu est optimiste, et un jury a raison de s'en méfier.
+>
+> Ce fichier corrige cela. Tu écris les cas, personne ne touche au moteur
+> ensuite, et on mesure UNE SEULE FOIS. Quel que soit le résultat, il est
+> publiable — c'est même sa seule valeur.
+>
+> CE QU'EST UN « NÉGATIF DIFFICILE »
+>
+> Un candidat qu'un recruteur écarte d'un coup d'œil, mais qui coche tout
+> sur le papier :
+>
+>   - il est du MÊME domaine que l'offre ;
+>   - il a l'expérience et le diplôme demandés ;
+>   - son curriculum emploie les mots-clés attendus ;
+>   - mais ce qu'il a RÉELLEMENT fait ne correspond pas au poste.
+>
+> Exemples de mécanismes, à ne pas recopier — trouve les tiens :
+> quelqu'un qui a subi une technologie au lieu de la pratiquer ; qui l'a vue
+> en formation et jamais en production ; qui a le titre sans les
+> responsabilités ; qui vient d'un secteur où le même mot désigne autre chose.
+>
+> N'ESSAIE PAS DE PIÉGER LE MOTEUR.
+>
+> C'est important. N'écris pas ce qui, selon toi, va le tromper : écris des
+> candidats réalistes que tu refuserais. Si tu vises le moteur, tu mesures
+> ton intuition sur lui, pas sa performance.
+>
+> COMMENT REMPLIR
+>
+> Une candidature par bloc. La ligne « ## » donne le domaine de l'offre,
+> parmi : backend, frontend, data, comptable, devops, java, bdd, controle.
+> Le reste est le texte du curriculum, comme s'il sortait d'un PDF.
+> Garde les rubriques habituelles — expérience datée, formation, compétences —
+> sinon tu mesures l'extraction plutôt que le score.
+>
+> QUAND C'EST PRÊT
+>
+>   docker compose exec backend python mesurer_retenus.py
+>
+> Les lignes commençant par « > » sont ignorées : tu peux laisser ce mode
+> d'emploi en place.
+
+## backend
+
+YASSINE EL MANSOURI
+Ingénieur Backend Python
+yassine.elmansouri@example.ma | +212 6 45 78 21 36
+
+EXPÉRIENCE PROFESSIONNELLE
+
+Septembre 2021 – Présent
+Ingénieur Logiciel chez Atlas Digital Services
+Développement de fonctionnalités métier en Python au sein d’une application interne de gestion.
+Participation principalement à l’évolution de scripts de traitement et à la correction d’incidents sur une plateforme existante.
+
+Janvier 2019 – Août 2021
+Développeur Logiciel chez Maghreb Solutions
+Développement de modules de reporting et d’outils d’automatisation en Python.
+Utilisation quotidienne de requêtes SQL pour extraire des données depuis la base PostgreSQL de l’entreprise.
+
+FORMATION
+
+2018 - Diplôme d’Ingénieur en Informatique, École Nationale des Sciences Appliquées
+
+COMPÉTENCES
+
+Python, Django, Flask, FastAPI, PostgreSQL, SQL, Docker, GitLab CI, Kubernetes, REST API, Redis
+
+LANGUES
+
+Français, arabe, anglais
+
+## frontend
+
+AMINA BERRADA
+Développeuse Frontend React (Spécialité UX/UI)
+amina.berrada@example.ma | +212 6 55 44 33 22
+
+EXPÉRIENCE PROFESSIONNELLE
+
+Janvier 2021 – Présent
+Designer UX et Prototypage React chez e-Com Agency
+Conception des parcours utilisateurs sur Figma. Génération de feuilles de style CSS et de composants React statiques via des plugins d'exportation pour la seule validation visuelle des clients. Envoi des maquettes sur le serveur d'intégration continue.
+
+Septembre 2019 – Décembre 2020
+Chargée de Recherche Utilisateur chez Digital Media
+Animation d'ateliers de conception et rédaction des spécifications fonctionnelles. Conduite des campagnes de tests d'interface (A/B testing) et recueil des retours directement auprès d'un panel de consommateurs.
+
+FORMATION
+
+2019 - Licence Professionnelle Design Numérique, Université Hassan II
+
+COMPÉTENCES
+
+JavaScript, React, CSS, Tests d'interface, Intégration continue
+
+LANGUES
+
+Français, arabe , espagnole
+
+COMPÉTENCES
+
+JavaScript, React, CSS, HTML, TypeScript, Next.js, Jest, Cypress, GitLab CI, Responsive Design, UI Design
+
+LANGUES
+
+Français, arabe, anglais
+
+## data
+
+HAMZA ALAOUI
+Data Analyst Senior
+hamza.alaoui@example.ma | +212 6 61 48 93 27
+
+EXPÉRIENCE PROFESSIONNELLE
+
+Mars 2021 – Présent
+Data Analyst chez Finance Analytics Maroc
+Analyse des indicateurs commerciaux et financiers à partir de données issues des systèmes de l’entreprise.
+Préparation de jeux de données SQL et réalisation de tableaux de bord destinés aux équipes métier.
+
+Septembre 2019 – Février 2021
+Analyste BI chez Conseil Data Solutions
+Conception de rapports décisionnels et développement de requêtes SQL pour différents clients.
+Participation à la définition des indicateurs et à la validation des résultats avec les responsables métier.
+
+FORMATION
+
+2019 - Master en Data Science et Intelligence Artificielle, Université Hassan II
+
+COMPÉTENCES
+
+Python, Pandas, NumPy, Scikit-learn, SQL, Machine Learning, Deep Learning, NLP, Power BI, TensorFlow, Matplotlib
+
+LANGUES
+
+Français, arabe, anglais
+
+## devops
+
+MEHDI CHRAIBI
+Ingénieur DevOps
+mehdi.chraibi@example.ma | +212 6 77 66 55 44
+
+EXPÉRIENCE PROFESSIONNELLE
+
+Novembre 2019 – Présent
+Coordinateur DevOps chez TechCloud
+Pilotage des comités de mise en production entre les développeurs et l'infogérant. Validation documentaire des rapports de sécurité des clusters Kubernetes et suivi des tickets d'incidents sur les environnements Linux.
+
+Octobre 2017 – Octobre 2019
+Gestionnaire des Déploiements chez SoftFactory
+Animation des réunions de gestion des changements (ITIL) pour approuver le passage en production. Création de tickets JIRA pour demander le déclenchement des chaînes de livraison continue.
+
+FORMATION
+
+2017 - Master en Ingénierie des Systèmes, FST Settat
+
+COMPÉTENCES
+
+Docker, Kubernetes, Systèmes Linux, Livraison continue, Cloud AWS
+
+LANGUES
+
+Français, arabe
+
+## java
+
+MOHAMED AMINE CHRAIBI
+Développeur Java Senior
+mohamed.chraibi@example.ma | +212 6 72 41 65 93
+
+EXPÉRIENCE PROFESSIONNELLE
+
+Janvier 2021 – Présent
+Consultant Java chez Enterprise Solutions Maroc
+Participation à plusieurs projets de développement d’applications de gestion avec Java et Spring.
+Intervention principalement sur les tests d’intégration, l’analyse des anomalies et la maintenance corrective des services développés par l’équipe.
+
+Juillet 2018 – Décembre 2020
+Ingénieur Logiciel chez SoftTech Rabat
+Développement de modules Java pour une application de gestion documentaire.
+Contribution ponctuelle à l’écriture de requêtes SQL et à la préparation des jeux de tests avant livraison.
+
+FORMATION
+
+2018 - Diplôme d’Ingénieur en Génie Informatique, École Mohammadia d’Ingénieurs
+
+COMPÉTENCES
+
+Java, Spring, Spring Boot, SQL, PostgreSQL, JUnit, Mockito, Docker, Git, Jenkins, Agile, Microservices
+
+LANGUES
+
+Français, arabe, anglai

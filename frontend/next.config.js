@@ -34,9 +34,16 @@ const politiqueContenu = [
   "img-src 'self' data: blob:",
   "font-src 'self' data:",
   `connect-src 'self' ${origineApi}${developpement ? " ws: wss:" : ""}`.trim(),
-  // Aucune ressource externe n'est incorporee, et la plateforme ne doit
-  // jamais s'afficher dans le cadre d'un autre site.
-  "frame-src 'none'",
+  // Le CV du candidat est telecharge avec le jeton d'authentification, puis
+  // affiche dans un cadre depuis une URL `blob:` — c'est-a-dire depuis la
+  // memoire du navigateur, jamais depuis un tiers. `frame-src 'none'` le
+  // refusait : le recruteur voyait « This content is blocked » a la place du
+  // document, et ne pouvait plus confronter le profil extrait au CV reel.
+  // L'autorisation est donc limitee a `blob:` et a l'origine elle-meme ;
+  // aucune ressource externe ne devient incorporable pour autant.
+  "frame-src 'self' blob:",
+  // La plateforme, elle, ne doit jamais s'afficher dans le cadre d'un autre
+  // site : cette direction-la reste fermee.
   "frame-ancestors 'none'",
   "object-src 'none'",
   // Empeche la reecriture de l'adresse de base, qui detournerait tous les

@@ -3,6 +3,8 @@
  * Gère l'ajout du JWT, le rafraîchissement automatique du token expiré,
  * et la remontée d'erreurs lisibles côté interface.
  */
+import { nomDepuisEntete, typeDuFichier } from "@/lib/telechargement";
+
 const BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 const CLE_ACCESS = "skillseek_access";
@@ -43,8 +45,14 @@ async function rafraichir() {
 }
 
 /**
- * Télécharge un fichier protégé et renvoie une URL locale (blob).
+ * Télécharge un fichier protégé et renvoie `{ url, type, nom }`.
+ *
  * Nécessaire car une balise <a href> n'envoie pas l'en-tête Authorization.
+ *
+ * Le type est reconstruit explicitement plutôt que laissé à `res.blob()` :
+ * un blob au type vide ou générique n'est pas rendu par le lecteur PDF
+ * intégré du navigateur, et la visionneuse reste blanche. La règle vit dans
+ * `lib/telechargement.js`, où elle est vérifiée.
  */
 export async function telechargerFichier(chemin) {
   const token = jetons.lireAccess();
@@ -61,7 +69,12 @@ export async function telechargerFichier(chemin) {
     }
     throw new ErreurApi(message, res.status);
   }
-  return URL.createObjectURL(await res.blob());
+
+  const nom = nomDepuisEntete(res.headers.get("Content-Disposition"));
+  const type = typeDuFichier(nom, res.headers.get("Content-Type"));
+
+  const donnees = await res.blob();
+  return { url: URL.createObjectURL(new Blob([donnees], { type })), type, nom };
 }
 
 export async function appel(chemin, { method = "GET", body, formData, reessai = true } = {}) {

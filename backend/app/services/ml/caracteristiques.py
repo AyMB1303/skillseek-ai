@@ -29,7 +29,7 @@ import numpy as np
 
 from .. import ats, semantique
 from ..competences import canoniser
-from ..scoring import NIVEAUX_DIPLOME
+from ..scoring import ANNEES_DIPLOME
 
 # L'ordre doit rester stable entre l'entrainement et la prediction, sous peine
 # de nourrir le modele avec des colonnes decalees.
@@ -60,7 +60,15 @@ NOMS = [
 
 
 def _niveau_diplome(libelle):
-    return NIVEAUX_DIPLOME.get((libelle or "").lower(), -1)
+    """Diplome exprime en annees d'etudes, pour le modele appris.
+
+    Volontairement l'echelle en annees, et non celle des rangs employee par
+    les regles : le modele en production a ete entraine sur ces valeurs, et en
+    changer l'unite deplacerait silencieusement toutes ses predictions sans
+    qu'aucun test n'echoue. Les deux echelles repondent d'ailleurs a deux
+    questions differentes — voir leur definition dans « scoring.py ».
+    """
+    return ANNEES_DIPLOME.get((libelle or "").lower(), -1)
 
 
 MOTIFS_EXPERIENCE = [
@@ -121,17 +129,28 @@ def construire(texte_cv, texte_offre, profil_ats=None, exigences=None):
     union = competences_cv | competences_offre
 
     # --- Proximite de sens ---
-    similarite, _ = semantique.similarite(texte_cv, texte_offre)
+    #
+    # `semantique.similarite` renvoie None quand la comparaison n'a pas pu
+    # avoir lieu. Le vecteur de caracteristiques, lui, doit rester numerique :
+    # le modele a ete entraine avec un zero a cette place, et lui presenter
+    # autre chose aujourd'hui invaliderait la correspondance entre les
+    # caracteristiques d'entrainement et celles de prediction. La conversion
+    # est donc ecrite ici, une fois, plutot que subie ailleurs.
+    def _valeur(couple):
+        valeur, _methode = couple
+        return 0.0 if valeur is None else valeur
+
+    similarite = _valeur(semantique.similarite(texte_cv, texte_offre))
 
     texte_comp_cv = " ".join(sorted(competences_cv)) or "aucune"
     texte_comp_offre = " ".join(sorted(competences_offre)) or "aucune"
-    similarite_comp, _ = semantique.similarite(texte_comp_cv, texte_comp_offre)
+    similarite_comp = _valeur(semantique.similarite(texte_comp_cv, texte_comp_offre))
 
     # Comparaison des metiers exerces avec l'intitule du poste : un candidat
     # peut partager du vocabulaire sans avoir jamais occupe ce type de poste.
-    similarite_titres, _ = semantique.similarite(
+    similarite_titres = _valeur(semantique.similarite(
         _intitules_profil(profil) or "aucun poste", besoin.get("intitule") or "poste"
-    )
+    ))
 
     # --- Adequation ---
     experience_cv = profil.get("totalExperienceYears", 0) or 0

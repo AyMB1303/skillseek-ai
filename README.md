@@ -66,9 +66,68 @@ Un modèle d'apprentissage supervisé ajuste ensuite la note de **±8 points au
 maximum**. Il ne peut jamais rattraper une candidature écartée par une règle
 explicite, et son absence n'empêche aucune analyse d'aboutir.
 
+**Une compétence écrite ne vaut pas une compétence exercée.** Un curriculum
+énonce ses compétences à deux endroits qui n'ont pas la même valeur de preuve :
+une rubrique déclarative, où il suffit d'écrire le mot, et le récit des postes
+occupés, où la compétence apparaît en train d'être pratiquée. Une compétence
+*démontrée* compte pleinement ; une compétence seulement *citée* compte pour
+**65 %**. L'écran affiche les deux états distinctement — un écart de points
+sans cause lisible est exactement ce qu'on reproche aux dispositifs opaques.
+
+Ce coefficient n'est pas choisi au jugé : `backend/mesurer_credit.py` le
+balaie et publie le tableau complet.
+
 **Règle de présélection.** En dessous de 50, la candidature est écartée du
 classement — jamais supprimée, et toujours repêchable. Parmi celles au-dessus,
-les dix meilleures forment la présélection.
+les dix meilleures forment la présélection. Le seuil de 50 **maximise le F1**
+sur le jeu de validation, critère fixé avant d'en lire les résultats.
+
+## Ce que le moteur vaut, mesuré
+
+Un outil qui se dit justifiable doit publier ses chiffres. `mesurer_indicateurs.py`
+applique le dispositif complet — lecture du document, cinq composantes,
+ajustement, règle RG-01 — à **72 appariements curriculum–offre** couvrant huit
+domaines, et confronte chaque décision à l'issue attendue.
+
+Le jeu se lit selon **deux protocoles**, et l'écart entre eux est le résultat
+qui compte :
+
+| Protocole | Négatifs | Précision | Rappel | F1 |
+|---|---|---|---|---|
+| Profils d'un autre domaine | 32 | 100 % | 93,8 % | 0,968 |
+| + huit négatifs *difficiles* | 40 | **85,7 %** | **93,8 %** | **0,896** |
+
+Une précision parfaite mesure rarement la qualité d'un moteur : elle mesure la
+facilité de l'épreuve. Le second protocole est donc plus dur que ce que le
+cahier des charges demandait — un négatif difficile est un profil **du domaine
+de l'offre**, qui satisfait l'expérience et le diplôme et emploie tout le
+vocabulaire attendu, mais dont le parcours réel ne correspond pas au poste.
+**Cinq sur huit passent encore.** C'est l'angle mort du dispositif, il est
+structurel pour toute lecture fondée sur le texte du curriculum, et c'est
+précisément pourquoi le détail du calcul est affiché et la décision laissée à
+un humain.
+
+**Audit de biais par perturbation contrôlée.** Un même curriculum est présenté
+plusieurs fois à la même offre, un seul attribut changeant d'une version à
+l'autre ; le contenu professionnel reste identique, donc tout écart lui est
+imputable.
+
+| Attribut | Écart maximal | Écart moyen |
+|---|---|---|
+| Genre du prénom | 1 pt | 0,6 |
+| Origine apparente du nom | 2 pt | 1,2 |
+| Âge déclaré | 1 pt | 0,2 |
+| Réputation de l'établissement | 1 pt | 0,2 |
+
+Deux points sur cent au pire, très en deçà du seuil : aucune de ces variations
+ne fait basculer une décision. L'écart vient de la composante sémantique, qui
+encode le document entier, identité comprise — raison supplémentaire de l'avoir
+plafonnée à 25 points.
+
+> Ces chiffres sont mesurés sur un jeu construit, dont huit cas ont guidé le
+> développement. C'est une **borne haute**, pas une estimation de terrain :
+> les confronter à de vrais dossiers écartés par un recruteur reste la
+> vérification qui manque.
 
 ## Deux propriétés que le code garantit
 
@@ -83,6 +142,16 @@ point de vue de l'attaquant** échouent si elle est omise.
 sensible. Retirer un droit prend effet immédiatement, sans attendre
 l'expiration des sessions ouvertes. Le rôle administrateur ne bénéficie
 d'aucun contournement.
+
+**Le modèle d'accès se relève au lieu de se recopier.** Chaque garde inscrit
+sur sa route la permission qu'elle exige, et le contrat OpenAPI publié par
+l'application — `/api/openapi.json`, lisible sur `/api/docs` — relève ces
+marques dans le code au lieu d'en tenir une liste à la main. Sur 66 routes, 59
+demandent un jeton ; les 7 ouvertes sont l'inscription, la connexion, deux
+sondes d'état, la page d'indicateurs et le contrat lui-même, dont aucune ne
+livre de donnée. **Un test échoue si une route s'ajoute à cette liste** —
+l'oubli le plus silencieux qui soit, une route sans garde fonctionnant
+parfaitement.
 
 ---
 
@@ -119,7 +188,17 @@ en rechargement à chaud et le backend en mode debug. Rien d'autre à lancer.
 cd backend
 pip install -r requirements.txt
 flake8 app tests
-pytest -q
+pytest -q                     # 281 tests, dont 11 de cloisonnement
+```
+
+### Reproduire les mesures
+
+Les chiffres publiés plus haut se refont en deux commandes, la pile étant
+démarrée. Elles n'écrivent rien dans la base :
+
+```bash
+docker compose exec backend python mesurer_indicateurs.py   # précision, rappel, biais
+docker compose exec backend python mesurer_credit.py        # balayage du crédit
 ```
 
 ---
@@ -129,6 +208,7 @@ pytest -q
 ```
 backend/app/
   blueprints/     61 routes HTTP — reçoivent, délèguent, répondent
+                  (66 au total avec les sondes d'état et le contrat d'API)
   services/       le raisonnement métier, sans dépendance à HTTP
   models/         une classe par table (SQLAlchemy)
   middleware/     contrôle des permissions
@@ -160,11 +240,13 @@ Trivy · Bandit · Semgrep · CodeQL · Gitleaks · OWASP ZAP
 
 ### Chaîne d'intégration continue
 
-Sept travaux à chaque poussée : analyse statique et tests du service
-applicatif, analyse statique et construction de l'interface, audit des
-dépendances des deux écosystèmes, analyse du dépôt (Trivy), **analyse de
-sûreté du code** (Bandit et Semgrep), construction et publication des images
-avec leur inventaire logiciel, et démarrage de la pile complète.
+Dix travaux à chaque poussée : analyse statique et tests du service applicatif,
+analyse statique et construction de l'interface, audit des dépendances des deux
+écosystèmes, **validation de l'infrastructure** (Terraform) et des **manifestes
+Kubernetes**, **recherche de secrets dans tout l'historique Git** (Gitleaks),
+analyse du dépôt (Trivy), **analyse de sûreté du code** (Bandit et Semgrep),
+construction et publication des images avec leur inventaire logiciel et leur
+signature, et démarrage de la pile complète.
 
 Les images sont étiquetées par l'empreinte du commit qui les a produites :
 chaque état du code correspond à un artefact déployable et identifiable.
@@ -247,15 +329,20 @@ L'infrastructure étant décrite, une commande la reconstruit à l'identique.
 Le périmètre fonctionnel est **complet**. Ce qui manque figure ici sans être
 déguisé en perspective :
 
-- **Pas de tests de bout en bout** en navigateur. Les parcours des trois profils
-  sont vérifiés manuellement et documentés par un script d'enregistrement.
+- **Pas de tests de bout en bout** en navigateur. 281 tests automatisés couvrent
+  le raisonnement métier, pas l'enchaînement des écrans. Les parcours des trois
+  profils sont parcourus par un script Playwright qui **filme** la plateforme
+  et vérifie que chaque écran s'ouvre — c'est une démonstration reproductible,
+  pas une suite de tests : rien n'y échoue sur une assertion.
 - **Pas de métrologie centralisée** — le chronométrage est conservé avec chaque
   analyse, mais il n'existe ni collecte ni système d'alerte. Sans trafic réel,
   l'intérêt en resterait théorique.
-- **Audit de biais de portée limitée** — au plus deux points de variation
-  mesurés, imputables à la similarité sémantique qui encode le document entier,
-  identité comprise. Négligeable, mais réel : la formule « sans biais » serait
-  fausse.
+- **Le moteur lit le vocabulaire plus que la substance.** Cinq négatifs
+  difficiles sur huit sont encore retenus. La distinction entre compétence
+  démontrée et compétence citée réduit l'écart sans le fermer ; la lever
+  demanderait de lire le récit des postes, pas de régler un paramètre.
+- **Audit de biais de portée limitée** — deux points de variation au pire.
+  Négligeable, mais réel : la formule « sans biais » serait fausse.
 - **Le cluster n'a pas été éprouvé dans la durée.** La topologie, le
   cloisonnement réseau, la persistance et l'auto-réparation ont été vérifiés sur
   le cluster Azure, mais la fenêtre d'exécution s'est comptée en heures, sur le

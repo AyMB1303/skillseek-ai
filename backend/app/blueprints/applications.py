@@ -205,9 +205,19 @@ def analyser(current_user, app_id):
     profil_fourni = any(k in data for k in ("skills", "experience_years", "degree"))
 
     if profil_fourni:
+        # Un champ laisse vide n'est pas une valeur : le recruteur qui ne
+        # renseigne que les competences et le diplome n'a pas declare que le
+        # candidat avait zero annee d'experience. Le champ absent est donc
+        # signale comme non determine, au lieu de devenir un zero qui pourrait
+        # ensuite ecarter la candidature — le diplome, deux lignes plus bas,
+        # respectait deja cette distinction.
+        annees_saisies = data.get("experience_years")
         profil = {
             "skills": [s.strip().lower() for s in data.get("skills", []) if s.strip()],
-            "experience_years": int(data.get("experience_years") or 0),
+            "experience_years": (
+                int(annees_saisies) if annees_saisies not in (None, "") else 0
+            ),
+            "experience_determinee": annees_saisies not in (None, ""),
             "degree": data.get("degree") or None,
         }
         score, details = calculer_score(profil, candidature.offer)
@@ -301,11 +311,21 @@ def telecharger_cv(current_user, app_id):
     # en-tete HTTP puis sur un systeme de fichiers.
     extension = os.path.splitext(chemin)[1].lower()
     nom = secure_filename(candidature.candidate.full_name if candidature.candidate else "")
-    return send_file(
+    reponse = send_file(
         chemin,
         mimetype=TYPES_MIME.get(extension, "application/octet-stream"),
         download_name=f"CV-{nom or f'candidature-{candidature.id}'}{extension}",
+        as_attachment=False,
     )
+    # Le recruteur consulte le CV dans la page, a cote du profil extrait ;
+    # « inline » est donc pose explicitement plutot que laisse au defaut de la
+    # bibliotheque, qui a change d'une version a l'autre. Le telechargement
+    # reste offert par l'interface, qui force alors l'enregistrement.
+    disposition = reponse.headers.get("Content-Disposition", "")
+    if disposition.lower().startswith("attachment"):
+        disposition = "inline" + disposition[len("attachment"):]
+    reponse.headers["Content-Disposition"] = disposition or "inline"
+    return reponse
 
 
 def _serialiser(c):

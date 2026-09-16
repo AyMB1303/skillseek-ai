@@ -23,6 +23,11 @@ def create_app(env: str = "development") -> Flask:
         app,
         resources={r"/api/*": {"origins": app.config["ORIGINES_AUTORISEES"]}},
         supports_credentials=True,
+        # Sans declaration explicite, une reponse d'origine croisee n'expose
+        # au script que les en-tetes dits « simples ». Le nom et le type
+        # reels du CV, indispensables pour l'afficher dans la page plutot que
+        # de le telecharger, resteraient invisibles cote client.
+        expose_headers=["Content-Disposition", "Content-Type", "X-Request-ID"],
     )
 
     # --- Modèles (importés pour qu'Alembic les voie) ---
@@ -52,6 +57,12 @@ def create_app(env: str = "development") -> Flask:
     app.register_blueprint(signalements_bp, url_prefix="/api/signalements")
     app.register_blueprint(evaluations_bp, url_prefix="/api/evaluations")
     app.register_blueprint(journal_bp, url_prefix="/api/journal")
+
+    # --- Contrat de l'API ---
+    # Enregistré en dernier : le document est construit à partir de la table
+    # de routage, qui doit donc être complète au moment où il est demandé.
+    from .openapi import openapi_bp
+    app.register_blueprint(openapi_bp, url_prefix="/api")
 
     # --- Supervision ---
     # Branchée après les traces : elle réutilise le chronomètre posé par
