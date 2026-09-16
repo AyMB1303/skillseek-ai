@@ -86,8 +86,14 @@ def _extraire_couche_texte(chemin):
             try:
                 page = page.crop(page.bbox, strict=True)
                 caracteres_hors_page += avant - len(page.chars)
-            except Exception:  # page degeneree : on garde la page entiere
-                pass
+            except Exception as erreur:
+                # Page degeneree : on la garde entiere plutot que de perdre son
+                # contenu. L'incident est trace — un « pass » muet ferait passer
+                # un decoupage rate pour un document sans hors-champ, et c'est
+                # precisement la confusion que ce code existe pour eviter.
+                logger.debug(
+                    "Page non decoupee a son cadre (%s) : conservee entiere.", erreur
+                )
 
             # 2. Supprimer les glyphes superposes.
             #
@@ -97,8 +103,13 @@ def _extraire_couche_texte(chemin):
             # Benrbib » se lit « AAyymmeenn BBeennrrbbiibb ».
             try:
                 page = page.dedupe_chars(tolerance=1)
-            except Exception:  # version de pdfplumber sans dedupe_chars
-                pass
+            except Exception as erreur:
+                # Version de pdfplumber sans `dedupe_chars` : on poursuit avec
+                # la page telle quelle. Les lettres redoublees seront alors
+                # redressees plus loin, au niveau du texte.
+                logger.debug(
+                    "Glyphes superposes non dedupliques (%s).", erreur
+                )
 
             morceaux.append(page.extract_text() or "")
     return "\n".join(morceaux), pages, caracteres_hors_page

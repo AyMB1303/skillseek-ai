@@ -56,8 +56,17 @@ TYPES = {
 # Intitulés lisibles pour les groupes de routes. La clé est le nom du
 # blueprint ; une route dont le blueprint n'y figure pas garde son nom brut,
 # ce qui la rend visible plutôt que de la ranger silencieusement ailleurs.
+#
+# La première entrée porte une marque `NOSONAR`. L'analyseur de secrets
+# (python:S6418) y voit une chaîne associée à une clé nommée « auth » et la
+# signale comme identifiant écrit en dur. Il n'y en a aucun : « auth » est le
+# nom d'un blueprint Flask, et « Authentification » le titre affiché dans la
+# documentation OpenAPI. La marque éteint la règle sur cette ligne seulement,
+# et nulle part ailleurs — l'analyse continue de chercher de vrais secrets
+# dans le reste du dépôt, ce que la chaîne d'intégration vérifie par ailleurs
+# avec Gitleaks sur tout l'historique.
 GROUPES = {
-    "auth": "Authentification",
+    "auth": "Authentification",  # NOSONAR python:S6418 — libellé, pas un secret
     "users": "Utilisateurs et droits",
     "offers": "Offres d'emploi",
     "applications": "Candidatures et analyse",
