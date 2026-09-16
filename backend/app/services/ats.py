@@ -524,7 +524,14 @@ NIVEAUX_LANGUE = [
 # Anglais (B2) · Arabe ». Le decoupage permet d'attribuer a chaque langue le
 # niveau qui la suit, au lieu d'appliquer a toutes le premier niveau rencontre
 # sur la ligne.
-SEPARATEURS_LANGUE = re.compile(r"[,;|•·/]|\s+[-–—]\s+|\s{3,}")
+#
+# Le tiret est reconnu par son entourage, plutot qu'en consommant les espaces
+# qui l'encadrent. Ecrit « \s+[-–—]\s+ », il partageait son debut avec
+# « \s{3,} » : sur une suite d'espaces, le moteur tentait la premiere
+# alternative, la voyait echouer, revenait en arriere, puis recommencait
+# depuis la position suivante — un cout quadratique en longueur de ligne. Or
+# un CV aligne volontiers ses colonnes par des suites d'espaces.
+SEPARATEURS_LANGUE = re.compile(r"[,;|•·/]|\s{3,}|(?<=\s)[-–—](?=\s)")
 
 # Mention explicite d'une rubrique de langues. « langages » — rubrique de
 # langages de programmation — ne doit surtout pas correspondre.
