@@ -407,11 +407,22 @@ jobs:
         # Cherche les dépendances vulnérables ET les secrets écrits en dur.
         # Le second point compte autant que le premier : une clé oubliée dans
         # un fichier de configuration est la faille la plus banale qui soit.
+        #
+        # `config` a été retiré de cette liste, et le retrait ne perd aucun
+        # constat. Deux travaux plus haut analysent déjà la configuration,
+        # chacun sur son périmètre : `deploiement` pour le HCL, `k8s` pour les
+        # manifestes. Ce balayage-ci part de la racine du dépôt, donc il
+        # retrouvait les mêmes fichiers et publiait les mêmes défauts sous un
+        # second chemin — `k8s/base/backend.yaml` en regard de
+        # `base/backend.yaml`. Chaque constat d'infrastructure comptait double
+        # dans l'onglet « Security », ce qui gonfle le décompte sans rien
+        # apprendre et, pire, laisse croire qu'une correction n'a pas pris
+        # quand une seule des deux entrées se ferme.
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           scan-type: fs
           scan-ref: .
-          scanners: vuln,secret,config
+          scanners: vuln,secret
           format: sarif
           output: trivy-depot.sarif
           severity: CRITICAL,HIGH
