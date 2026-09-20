@@ -1,11 +1,32 @@
-Flask==3.0.3
+# Quatre epingles relevees le 16/09/2026 pour des avis de securite publies
+# contre les versions precedentes, et non pour suivre l'amont :
+#
+#   Flask       3.0.3 -> 3.1.3  CVE-2026-27205 : la session lue sans etre
+#                               modifiee n'ajoutait pas l'en-tete `Vary:
+#                               Cookie`, qu'un cache intermediaire peut
+#                               prendre pour une autorisation de servir la
+#                               meme page a un autre utilisateur.
+#   Flask-Cors  4.0.1 -> 6.0.5  Quatre avis, dont l'autorisation implicite du
+#                               reseau prive et une comparaison de chemin
+#                               insensible a la casse. La 6.0.5 est retenue
+#                               plutot que la 6.0.0 exigee par l'avis : la
+#                               6.0.4 avait casse le rattachement aux
+#                               Blueprints, la 6.0.5 le retablit.
+#   dotenv      1.0.1 -> 1.2.3  CVE-2026-28684.
+#   pytest      8.2.2 -> 9.0.3  CVE-2025-71176.
+#
+# Aucun appel n'a change : `CORS.init_app` accepte toujours `resources`,
+# `supports_credentials` et `expose_headers`. Les ruptures annoncees en 6.0.0
+# portent sur l'ordre de specificite entre motifs de chemin ; il n'y en a
+# qu'un seul ici, `/api/*`.
+Flask==3.1.3
 Flask-SQLAlchemy==3.1.1
 Flask-Migrate==4.0.7
 Flask-JWT-Extended==4.6.0
 Flask-Bcrypt==1.0.1
-Flask-Cors==4.0.1
+Flask-Cors==6.0.5
 psycopg2-binary==2.9.10
-python-dotenv==1.0.1
+python-dotenv==1.2.3
 email-validator==2.2.0
 
 # numpy doit rester en 1.x : spaCy et thinc sont compiles contre cette
@@ -30,6 +51,6 @@ pandas==2.2.2
 joblib==1.4.2
 
 # --- Qualite et tests ---
-pytest==8.2.2
+pytest==9.0.3
 flake8==7.1.0
 prometheus-client==0.21.1
