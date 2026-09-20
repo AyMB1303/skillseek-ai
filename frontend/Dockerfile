@@ -6,8 +6,18 @@
 # derniere etape devient l'image finale — ni les sources, ni les outils de
 # construction, ni le cache npm n'y figurent.
 
+# Node 22 (LTS) et non 20. Le choix n'est pas une course a la nouveaute :
+# l'image `node:20-alpine` embarque un npm dont les dependances internes
+# — node-tar, minimatch, glob, ip-address, pacote, sigstore — cumulaient a
+# elles seules une quinzaine d'avis, plus deux sur OpenSSL. Aucune de ces
+# bibliotheques n'est appelee par le code de l'interface ; elles sont
+# presentes parce que l'image de base les apporte, et l'analyse de l'image
+# les compte. Relever la base les remplace toutes d'un coup, la ou les
+# epingler une par une est impossible : elles ne figurent dans aucun de nos
+# fichiers de dependances.
+
 # --- 1. Dependances -----------------------------------------------------
-FROM node:20-alpine AS dependances
+FROM node:22-alpine AS dependances
 WORKDIR /app
 
 # `npm ci` plutot que `npm install` : l'installation suit exactement le fichier
@@ -17,7 +27,7 @@ COPY package.json package-lock.json* ./
 RUN npm ci
 
 # --- 2. Construction ----------------------------------------------------
-FROM node:20-alpine AS constructeur
+FROM node:22-alpine AS constructeur
 WORKDIR /app
 
 # L'adresse de l'API est inscrite dans le bundle navigateur au moment de la
@@ -42,7 +52,7 @@ COPY . .
 RUN npm run build
 
 # --- 3. Execution -------------------------------------------------------
-FROM node:20-alpine AS execution
+FROM node:22-alpine AS execution
 WORKDIR /app
 
 ENV NODE_ENV=production

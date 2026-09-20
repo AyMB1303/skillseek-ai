@@ -6,7 +6,16 @@ WORKDIR /app
 #  - libpq-dev / gcc : compilation du connecteur PostgreSQL
 #  - tesseract-ocr (+ langues fra/eng) : reconnaissance optique des CV scannes
 #  - poppler-utils : conversion PDF -> image, requise par pdf2image
-RUN apt-get update && apt-get install -y --no-install-recommends \
+#
+# `upgrade` precede `install`, et ce n'est pas une precaution de style.
+# L'image `python:3.12-slim` est reconstruite moins souvent que Debian ne
+# publie ses correctifs : entre deux publications, elle transporte des paquets
+# dont la faille est corrigee en amont depuis des semaines. L'analyse de
+# l'image les releve — perl, glib, openssl — et les classe en critique, alors
+# qu'aucun n'est le fait de ce depot. Cette ligne applique l'etat courant des
+# correctifs Debian au moment de la construction, ce que la seule mise a jour
+# de l'etiquette de base ne garantit pas.
+RUN apt-get update && apt-get -y upgrade && apt-get install -y --no-install-recommends \
     libpq-dev gcc \
     tesseract-ocr tesseract-ocr-fra tesseract-ocr-eng \
     poppler-utils \
@@ -16,8 +25,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # La version par defaut embarque les bibliotheques CUDA (environ 800 Mo)
 # inutiles sans carte graphique : cette variante allege l'image et raccourcit
 # nettement la construction.
+#
+# 2.6.0 et non 2.3.1 : CVE-2025-32434, corrigee en 2.6.0. `torch.load`
+# executait le contenu d'un fichier de poids comme du code, et c'est
+# exactement la fonction qu'appelle le chargement d'un modele telecharge.
+# La 2.6.0 inverse le defaut de `weights_only`, ce qui est aussi la raison
+# pour laquelle les deux verifications de fin de fichier comptent ici : si
+# ce changement genait le chargement du modele de plongements, la
+# construction echouerait a cette etape plutot qu'au premier appel en
+# production.
 RUN pip install --no-cache-dir \
-    torch==2.3.1 --index-url https://download.pytorch.org/whl/cpu
+    torch==2.6.0 --index-url https://download.pytorch.org/whl/cpu
 
 # numpy est fige en 1.x AVANT le reste des dependances : spaCy et thinc sont
 # compiles contre cette version, et numpy 2 provoque une erreur
