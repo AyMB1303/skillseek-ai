@@ -88,7 +88,7 @@ ce qui lui est affirmé.
 
 ## Vérification
 
-15 tests couvrent : autonomie des documents, présence des motifs d'écartement,
+15 tests pour ce périmètre couvrent : autonomie des documents, présence des motifs d'écartement,
 pertinence de la recherche, reconstruction de l'index après modification,
 exactitude des grandeurs chiffrées, cohérence des tableaux, citation des sources,
 disponibilité permanente d'un fournisseur, et contrôle des permissions.

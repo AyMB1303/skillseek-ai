@@ -83,7 +83,7 @@ Une candidature n'est **jamais perdue** à cause d'un échec d'analyse.
 
 ## Vérification
 
-**55 tests automatisés**, dont 30 pour ce sprint :
+**30 tests ajoutés par ce sprint** :
 
 *Parsing ATS (16)* — identification des sections, coordonnées, reconstitution
 de chaque poste avec entreprise et dates, durée par poste, non-addition des

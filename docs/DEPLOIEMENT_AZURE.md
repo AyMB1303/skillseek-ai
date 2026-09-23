@@ -1,5 +1,8 @@
 # Déploiement sur Azure — session de validation
 
+> Ce document décrit la mise en ligne éphémère par conteneurs ACI. Elle est
+> distincte du cluster k3s rattaché par Azure Arc, décrit dans le rapport.
+
 Mettre SkillSeek AI en ligne le temps d'une session, prouver que la chaîne va
 du commit au service en fonctionnement, prendre les captures qui l'attestent,
 puis libérer les ressources.
