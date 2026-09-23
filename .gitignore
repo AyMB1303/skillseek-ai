@@ -154,3 +154,6 @@ deploiement/ansible/acces-cluster.yaml
 demo/*.pdf
 demo/*.docx
 demo/video/
+
+# Livrables de travail, hors depot
+docs/*.docx
