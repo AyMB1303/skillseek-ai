@@ -290,7 +290,7 @@ jobs:
         # précédentes valident la forme ; celle-ci valide l'admission —
         # quotas de nommage, cohérence des sélecteurs, champs immuables,
         # règles de validation propres à la version du serveur.
-        uses: helm/kind-action@0025e74a8c7512023d06dc019c617aa3cf561fde # v1.10.0
+        uses: helm/kind-action@06c1ae10762d3b9c1644e7fe69596ae519e015a2 # v1.15.0
         with:
           cluster_name: skillseek-validation
           node_image: kindest/node:v1.31.2
